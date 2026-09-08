@@ -2,10 +2,25 @@
 
 ## 배포
 
-1. `main` 브랜치에 변경을 반영합니다.
-2. GitHub Actions의 `Validate site`가 성공하는지 확인합니다.
-3. 저장소 `Settings → Pages`에서 `main`과 `/(root)`가 선택되어 있는지 확인합니다.
-4. Pages에 표시된 주소에서 홈과 최신 게시물을 확인합니다.
+### 최초 설정
+
+1. 저장소 `Settings → Pages`에서 Source를 `GitHub Actions`로 선택합니다.
+2. `Settings → Actions → General`에서 워크플로 실행이 허용되어 있는지 확인합니다.
+3. 작업 브랜치를 푸시하고 Pull Request에서 `Build Jekyll` 검사가 성공하는지 확인합니다.
+
+### 자동 배포
+
+1. Pull Request를 `main`에 병합합니다.
+2. `Validate site`가 소스 빌드를 다시 검증합니다.
+3. `Deploy site`의 build 작업이 Pages 산출물을 생성합니다.
+4. build 성공 후 deploy 작업이 `github-pages` 환경에 배포합니다.
+5. Actions 실행 요약의 배포 URL에서 홈과 최신 게시물을 확인합니다.
+
+### 수동 재배포
+
+1. 저장소의 `Actions → Deploy site`로 이동합니다.
+2. `Run workflow`에서 `main`을 선택합니다.
+3. 실행 후 `Deploy GitHub Pages` 작업과 배포 URL을 확인합니다.
 
 ## 정상 판단 기준
 
@@ -25,6 +40,12 @@
 - 최근 게시물의 front matter와 Liquid 문법을 우선 확인합니다.
 - 수정 커밋 후 자동 검증과 Pages 배포가 끝날 때까지 기다립니다.
 
+### 배포 작업이 시작되지 않음
+
+- 변경이 `main` 브랜치에 반영됐는지 확인합니다.
+- Pages의 Source가 `GitHub Actions`인지 확인합니다.
+- Actions 실행 권한과 `github-pages` 환경의 승인 규칙을 확인합니다.
+
 ### 디자인 없이 텍스트만 표시됨
 
 - 배포 주소에 저장소 하위 경로가 있는지 확인합니다.
@@ -35,3 +56,6 @@
 - 해당 파일을 삭제하는 새 커밋을 만듭니다.
 - 비밀값이 포함됐다면 파일 삭제만으로 끝내지 말고 해당 값을 즉시 폐기·재발급합니다.
 
+## 브랜치 보호 권장 설정
+
+`main` 규칙에 Pull Request와 `Build Jekyll` 상태 검사 통과를 요구합니다. 강제 푸시는 차단하고, 긴급 복구도 `git revert`를 이용해 이력으로 남깁니다.

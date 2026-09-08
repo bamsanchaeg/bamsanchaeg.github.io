@@ -7,6 +7,7 @@
 | 검증 | 대상 | 실행 시점 |
 |---|---|---|
 | 엄격한 Jekyll 빌드 | YAML front matter, Liquid, 생성 과정 | 모든 push와 pull request |
+| Pages 산출물 빌드 | GitHub Pages 호환성과 업로드 대상 | `main` push와 수동 배포 |
 
 ```shell
 bundle exec jekyll build --strict_front_matter
@@ -23,3 +24,8 @@ bundle exec jekyll build --strict_front_matter
 
 댓글이나 입력 폼 같은 동작이 추가되면 자동화된 브라우저 테스트 도입을 다시 검토합니다.
 
+## CI/CD 품질 게이트
+
+- Pull Request의 `Build Jekyll`이 실패하면 병합하지 않습니다.
+- Pages 배포는 산출물 빌드가 성공한 경우에만 실행됩니다.
+- 배포 실패 시 같은 커밋의 재실행보다 실패 원인을 수정한 새 커밋을 우선합니다.

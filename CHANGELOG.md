@@ -7,6 +7,9 @@
 ### Added
 
 - 프로젝트 문서 체계와 자동 빌드 검증
+- Pull Request와 `main` 푸시를 검증하는 CI 워크플로
+- `main` 변경을 GitHub Pages에 게시하는 CD 워크플로
+- 수동 재배포와 배포 실패 대응 절차
 
 ### Changed
 

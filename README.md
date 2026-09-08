@@ -50,14 +50,14 @@ tags: [JavaScript, 기초]
 여기에 Markdown으로 학습 내용을 작성합니다.
 ```
 
-커밋하면 GitHub Pages가 사이트를 다시 빌드합니다.
+작업 브랜치에서 Pull Request를 만들면 CI가 사이트를 검증하고, `main`에 병합하면 CD가 GitHub Pages에 배포합니다.
 
 ## GitHub Pages 배포
 
 1. 새 공개 저장소를 만들고 이 프로젝트의 파일을 최상위에 올립니다.
 2. GitHub 사용자 사이트 저장소 이름을 `bamsanchaeg.github.io`로 지정합니다.
-3. `Settings → Pages → Deploy from a branch`를 선택합니다.
-4. `main` 브랜치와 `/(root)`를 선택하고 저장합니다.
+3. `Settings → Pages`에서 배포 소스를 `GitHub Actions`로 선택합니다.
+4. `main`에 푸시하거나 Actions의 `Deploy site`를 수동 실행합니다.
 
 현재 프로젝트의 공개 주소 설정:
 
@@ -91,6 +91,18 @@ baseurl: ""
 - [변경 이력](CHANGELOG.md)
 - [로드맵](ROADMAP.md)
 - [보안 정책](SECURITY.md)
+
+## CI/CD 흐름
+
+```text
+작업 브랜치 → Pull Request → Validate site → main 병합 → Deploy site → GitHub Pages
+```
+
+- `validate.yml`: Pull Request와 `main` 푸시에서 엄격한 Jekyll 빌드를 실행합니다.
+- `deploy.yml`: `main` 푸시에서 사이트를 빌드하고 Pages 산출물을 배포합니다.
+- 두 워크플로 모두 Actions 화면에서 수동 실행할 수 있습니다.
+
+운영 및 실패 복구 절차는 [GitHub Pages 운영 문서](docs/operations/runbook.md)를 참고하세요.
 
 ## 라이선스
 

@@ -1,15 +1,17 @@
 name: Validate site
 
 on:
+  pull_request:
   push:
     branches: [main]
-  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   build:
+    name: Build Jekyll
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
