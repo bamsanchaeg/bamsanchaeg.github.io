@@ -1,8 +1,8 @@
-title: "STUDY.LOG"
-description: "천천히, 오래 남기는 개인 공부 기록"
+title: "Bamsanchaeg"
+description: "밤산책"
 lang: ko-KR
 timezone: Asia/Seoul
-url: ""
+url: "https://bamsanchaeg.github.io"
 baseurl: ""
 permalink: /log/:year/:month/:day/:title/
 future: false

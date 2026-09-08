@@ -1,6 +1,6 @@
-# STUDY.LOG
+# Bamsanchaeg
 
-> Markdown으로 학습 기록을 쌓고, 2000년대 개인 홈페이지와 텍스트 게시판 감성으로 보여주는 개인 스터디 아카이브입니다.
+> Markdown으로 학습 기록을 쌓고, 2000년대 개인 홈페이지와 텍스트 게시판 감성으로 보여주는 `밤산책` 개인 아카이브입니다.
 
 ## 상태
 
@@ -55,21 +55,14 @@ tags: [JavaScript, 기초]
 ## GitHub Pages 배포
 
 1. 새 공개 저장소를 만들고 이 프로젝트의 파일을 최상위에 올립니다.
-2. 프로젝트 저장소라면 `_config.yml`의 `url`과 `baseurl`을 저장소에 맞게 수정합니다.
+2. GitHub 사용자 사이트 저장소 이름을 `bamsanchaeg.github.io`로 지정합니다.
 3. `Settings → Pages → Deploy from a branch`를 선택합니다.
 4. `main` 브랜치와 `/(root)`를 선택하고 저장합니다.
 
-저장소가 `study-log`인 경우:
+현재 프로젝트의 공개 주소 설정:
 
 ```yaml
-url: "https://GITHUB-ID.github.io"
-baseurl: "/study-log"
-```
-
-저장소가 `GITHUB-ID.github.io`인 경우:
-
-```yaml
-url: "https://GITHUB-ID.github.io"
+url: "https://bamsanchaeg.github.io"
 baseurl: ""
 ```
 
@@ -102,4 +95,3 @@ baseurl: ""
 ## 라이선스
 
 개인 프로젝트 초안입니다. 공개 배포 전에 사용할 라이선스를 결정하고 `LICENSE` 파일을 추가하세요.
-
