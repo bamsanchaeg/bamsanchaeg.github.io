@@ -3,27 +3,24 @@ layout: default
 title: ARCHIVE
 permalink: /archive/
 ---
-<section class="archive panel">
-  <div class="panel-heading">
-    <div>
-      <p class="eyebrow">ALL RECORDS</p>
-      <h1>전체 글 목록</h1>
-    </div>
-    <span>{{ site.posts | size }} posts</span>
-  </div>
-  <div class="board-head archive-head" aria-hidden="true">
-    <span>DATE</span><span>SUBJECT</span><span>TAG</span>
-  </div>
-  <ol class="archive-list">
-    {% for post in site.posts %}
-      <li>
-        <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%Y.%m.%d" }}</time>
-        <a href="{{ post.url | relative_url }}">
-          <span>[{{ post.category | default: '기록' }}]</span> {{ post.title }}
-        </a>
-        <span class="archive-tag">{% if post.tags.first %}#{{ post.tags.first }}{% else %}-{% endif %}</span>
-      </li>
-    {% endfor %}
-  </ol>
+
+<section class="page-intro">
+  <p class="section-label">Archive</p>
+  <h1>모든 기록</h1>
+  <p>{{ site.posts | size }}개의 글</p>
 </section>
+
+<ol class="archive-list">
+  {% for post in site.posts %}
+    <li>
+      <a href="{{ post.url | relative_url }}">
+        <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%Y.%m.%d" }}</time>
+        <strong>{{ post.title }}</strong>
+        <span>{{ post.category | default: '기록' }}</span>
+      </a>
+    </li>
+  {% else %}
+    <li class="empty">아직 기록이 없습니다.</li>
+  {% endfor %}
+</ol>
 
