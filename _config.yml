@@ -1,0 +1,30 @@
+title: "STUDY.LOG"
+description: "천천히, 오래 남기는 개인 공부 기록"
+lang: ko-KR
+timezone: Asia/Seoul
+url: ""
+baseurl: ""
+permalink: /log/:year/:month/:day/:title/
+future: false
+
+plugins:
+  - jekyll-feed
+
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+
+exclude:
+  - .github
+  - CHANGELOG.md
+  - CONTRIBUTING.md
+  - README.md
+  - PROJECT.md
+  - ROADMAP.md
+  - SECURITY.md
+  - Gemfile
+  - Gemfile.lock
+  - docs

@@ -1,0 +1,27 @@
+---
+layout: default
+---
+<article class="post-view">
+  <header class="post-header">
+    <p class="window-title">■ STUDY NOTE</p>
+    <div class="post-heading">
+      <div>
+        <p class="post-category">{{ page.category | default: "기록" }}</p>
+        <h1>{{ page.title }}</h1>
+      </div>
+      <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%Y.%m.%d" }}</time>
+    </div>
+  </header>
+
+  <div class="post-body">{{ content }}</div>
+
+  <footer class="post-footer">
+    {% if page.tags %}
+      <div class="tag-list" aria-label="태그">
+        {% for tag in page.tags %}<span>#{{ tag }}</span>{% endfor %}
+      </div>
+    {% endif %}
+    <a class="text-button" href="{{ '/archive/' | relative_url }}">← 목록으로</a>
+  </footer>
+</article>
+

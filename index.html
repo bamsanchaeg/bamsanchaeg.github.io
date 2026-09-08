@@ -1,0 +1,64 @@
+---
+layout: default
+title: HOME
+---
+<div class="home-grid">
+  <aside class="profile-card panel">
+    <p class="window-title">■ PROFILE</p>
+    <div class="pixel-avatar" aria-hidden="true">
+      <span>STUDY</span>
+      <strong>MODE</strong>
+    </div>
+    <h1>오늘도 한 칸 전진</h1>
+    <p class="status"><span aria-hidden="true">●</span> 지금은 공부 중</p>
+    <dl class="mini-profile">
+      <div><dt>관심사</dt><dd>Web · Design · Code</dd></div>
+      <div><dt>목표</dt><dd>배운 것을 내 언어로 기록하기</dd></div>
+    </dl>
+    <a class="text-button full" href="{{ '/about/' | relative_url }}">프로필 보기</a>
+  </aside>
+
+  <section class="board panel" aria-labelledby="recent-title">
+    <div class="panel-heading">
+      <div>
+        <p class="eyebrow">RECENT UPDATE</p>
+        <h2 id="recent-title">최근 스터디 기록</h2>
+      </div>
+      <a href="{{ '/archive/' | relative_url }}">전체보기 +</a>
+    </div>
+    <div class="board-head" aria-hidden="true">
+      <span>NO.</span><span>SUBJECT</span><span>DATE</span>
+    </div>
+    <ol class="post-list">
+      {% for post in site.posts limit: 8 %}
+        <li>
+          <span class="post-no">{{ forloop.rindex | prepend: '0' | slice: -2, 2 }}</span>
+          <a href="{{ post.url | relative_url }}">
+            <span class="category">[{{ post.category | default: '기록' }}]</span>
+            <strong>{{ post.title }}</strong>
+            {% if forloop.first %}<span class="new-badge">NEW</span>{% endif %}
+          </a>
+          <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%m.%d" }}</time>
+        </li>
+      {% else %}
+        <li class="empty">아직 작성된 기록이 없습니다.</li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  <section class="memo panel">
+    <p class="window-title">■ TODAY'S MEMO</p>
+    <blockquote>완벽하게 이해한 뒤 기록하려 하지 말 것. 기록하면서 이해할 것.</blockquote>
+    <p class="memo-date">Last update · {{ site.time | date: "%Y.%m.%d" }}</p>
+  </section>
+
+  <section class="links panel">
+    <p class="window-title">■ QUICK MENU</p>
+    <div class="quick-links">
+      <a href="{{ '/archive/' | relative_url }}"><span>01</span>모든 글</a>
+      <a href="https://github.com/" rel="noopener"><span>02</span>GitHub</a>
+      <a href="{{ '/about/' | relative_url }}"><span>03</span>소개</a>
+    </div>
+  </section>
+</div>
+

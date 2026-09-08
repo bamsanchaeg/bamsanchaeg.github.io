@@ -1,0 +1,20 @@
+<header class="site-header">
+  <div class="utility-bar">
+    <span>PERSONAL STUDY ARCHIVE</span>
+    <span id="clock" aria-label="현재 시간"></span>
+  </div>
+  <div class="brand-row">
+    <a class="brand" href="{{ '/' | relative_url }}" aria-label="홈으로">
+      <span class="brand-mark" aria-hidden="true">▣</span>
+      <span>{{ site.title }}</span>
+    </a>
+    <p>{{ site.description }}</p>
+  </div>
+  <nav class="main-nav" aria-label="주요 메뉴">
+    <a href="{{ '/' | relative_url }}">HOME</a>
+    <a href="{{ '/archive/' | relative_url }}">ARCHIVE</a>
+    <a href="{{ '/about/' | relative_url }}">PROFILE</a>
+    <a href="{{ '/feed.xml' | relative_url }}">RSS</a>
+  </nav>
+</header>
+

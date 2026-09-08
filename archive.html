@@ -1,0 +1,29 @@
+---
+layout: default
+title: ARCHIVE
+permalink: /archive/
+---
+<section class="archive panel">
+  <div class="panel-heading">
+    <div>
+      <p class="eyebrow">ALL RECORDS</p>
+      <h1>전체 글 목록</h1>
+    </div>
+    <span>{{ site.posts | size }} posts</span>
+  </div>
+  <div class="board-head archive-head" aria-hidden="true">
+    <span>DATE</span><span>SUBJECT</span><span>TAG</span>
+  </div>
+  <ol class="archive-list">
+    {% for post in site.posts %}
+      <li>
+        <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%Y.%m.%d" }}</time>
+        <a href="{{ post.url | relative_url }}">
+          <span>[{{ post.category | default: '기록' }}]</span> {{ post.title }}
+        </a>
+        <span class="archive-tag">{% if post.tags.first %}#{{ post.tags.first }}{% else %}-{% endif %}</span>
+      </li>
+    {% endfor %}
+  </ol>
+</section>
+
