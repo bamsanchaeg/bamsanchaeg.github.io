@@ -245,27 +245,76 @@
   }
   const baseRef = mk(W); drawFigure(baseRef.getContext('2d'));
 
-  /* ---------- 그레이스케일 축소 ---------- */
+  /* =====================================================================
+   *  픽셀화 단계의 원리
+   *
+   *  480×480 캔버스(사진 또는 내 그림)를 N×N(기본 48×48) 격자로 줄이는 과정.
+   *  "픽셀화"란 결국 여러 픽셀을 한 칸으로 합치는 일이고, 여기서는 세 가지 결과물을 만든다.
+   *
+   *    ① toneGrid  사진 → 8단계 명암 격자      (화면에 보여주는 도트)
+   *    ② edgeGrid  사진 → 윤곽선 격자 (0/1)     (채점 기준)
+   *    ③ inkGrid   내 그림 → 선 격자 (0/1)      (채점 대상)
+   *
+   *  세 함수 모두 gray()로 시작한다. gray()가 "축소 + 흑백화"를 맡고,
+   *  각 함수는 그 결과를 어떻게 이진화/양자화할지만 다르다.
+   * ===================================================================== */
+
+  /* gray(src, M): 어떤 캔버스든 M×M 밝기 배열(0~255)로 바꾼다.
+   *
+   *  · 축소 방법: drawImage로 두 번에 나눠 줄인다 (480 → 256 → M).
+   *    한 번에 480→48로 줄이면 브라우저가 픽셀 대부분을 그냥 건너뛰어(샘플링) 선이 끊긴다.
+   *    imageSmoothingQuality='high'와 2단계 축소를 쓰면 여러 픽셀의 평균이 한 칸에 담긴다.
+   *    → 선이 굵을수록, 칸 안에 밝은 픽셀이 많을수록 그 칸의 값이 높아진다.
+   *  · 흑백화: 인간 눈의 감도에 맞춘 가중 평균  Y = 0.299R + 0.587G + 0.114B  (ITU-R BT.601)
+   *    녹색이 가장 밝게, 파랑이 가장 어둡게 느껴지는 걸 반영한 표준 공식.
+   *  · 결과: 길이 M*M의 Float32Array. 인덱스 i = y*M + x (왼쪽 위부터 행 단위로).
+   */
   function gray(src, M){
     const mid = mk(256), m = mid.getContext('2d'); m.fillStyle='#000'; m.fillRect(0,0,256,256);
-    m.imageSmoothingEnabled=true; m.imageSmoothingQuality='high'; m.drawImage(src,0,0,256,256);
+    m.imageSmoothingEnabled=true; m.imageSmoothingQuality='high'; m.drawImage(src,0,0,256,256);   // 1단계 축소
     const o = mk(M), c = o.getContext('2d'); c.fillStyle='#000'; c.fillRect(0,0,M,M);
-    c.imageSmoothingEnabled=true; c.imageSmoothingQuality='high'; c.drawImage(mid,0,0,M,M);
-    const d=c.getImageData(0,0,M,M).data, g=new Float32Array(M*M);
-    for(let i=0;i<M*M;i++) g[i]=(d[i*4]*299+d[i*4+1]*587+d[i*4+2]*114)/1000;
+    c.imageSmoothingEnabled=true; c.imageSmoothingQuality='high'; c.drawImage(mid,0,0,M,M);       // 2단계 축소
+    const d=c.getImageData(0,0,M,M).data, g=new Float32Array(M*M);                                // d: [R,G,B,A, R,G,B,A, ...]
+    for(let i=0;i<M*M;i++) g[i]=(d[i*4]*299+d[i*4+1]*587+d[i*4+2]*114)/1000;                    // BT.601 가중 밝기
     return g;
   }
-  /* 내 그림: 선이 있는 칸 = 1 */
+
+  /* ③ inkGrid(src, N): 내 그림(검은 무대 + 흰 분필)을 "선이 있는 칸 = 1"로 이진화.
+   *
+   *  임계값 60: 한 칸(480/48 = 10px 폭)에 분필이 1/4쯤만 걸쳐도 평균 밝기가 60을 넘는다.
+   *  → 선이 칸 경계를 지나가도 끊기지 않고, 흐릿한 지우개 자국은 0으로 떨어진다.
+   */
   function inkGrid(src, N){
     const g=gray(src, N), out=new Uint8Array(N*N);
     for(let i=0;i<N*N;i++) out[i]= g[i]>=60 ? 1 : 0;
     return out;
   }
-  /* 사진: 2N 해상도에서 소벨 엣지 → 상위 비율만 남기고 → N으로 풀링 */
+
+  /* ② edgeGrid(src, N): 사진에서 윤곽선만 뽑아 N×N 격자(0/1)로 만든다. 채점의 기준.
+   *
+   *  사진에는 "선"이 없다. 밝기가 급격히 바뀌는 곳(인물과 검은 배경의 경계 등)을 선으로 간주한다.
+   *
+   *  1) 2N×2N으로 축소 — N에서 바로 하면 한 칸이 너무 커서 경계가 뭉개진다. 두 배 해상도에서 찾고 나중에 합친다.
+   *  2) 3×3 평균 블러 — 사진의 자잘한 노이즈(필름 입자, JPEG 잡티)가 가짜 경계로 잡히는 걸 막는다.
+   *  3) 소벨(Sobel) 필터 — 각 픽셀에서 가로 방향 밝기 변화 gx, 세로 방향 변화 gy를 구한다.
+   *         gx 커널          gy 커널
+   *        -1  0 +1         -1 -2 -1
+   *        -2  0 +2          0  0  0
+   *        -1  0 +1         +1 +2 +1
+   *     변화량 크기 = √(gx² + gy²). 값이 클수록 "경계다움"이 강하다.
+   *  4) 임계값 — 절대값이 아니라 **상위 몇 %만 남기는 백분위 방식**을 쓴다.
+   *     어두운 사진이든 밝은 사진이든 항상 비슷한 양의 선이 나오게 하려는 것.
+   *     sens(윤곽 민감도 슬라이더 0~1)에 따라 상위 4%(듬성) ~ 18%(촘촘) 사이를 남긴다.
+   *     Math.max(30, …)은 거의 단색인 사진에서 노이즈까지 선으로 잡히는 걸 막는 하한.
+   *  5) 2×2 풀링 — 2N 격자의 네 칸 중 하나라도 경계면 N 격자의 그 칸을 1로 (max pooling).
+   *     y>>1, x>>1 은 2로 나눈 몫. 결과적으로 선이 1~2칸 굵기로 나온다.
+   */
   let sens = 0.5;
   function edgeGrid(src, N){
     const M=N*2, g=gray(src, M), b=new Float32Array(M*M);
+    // 2) 3×3 평균 블러
     for(let y=0;y<M;y++) for(let x=0;x<M;x++){ let s=0,n=0; for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){ const yy=y+dy,xx=x+dx; if(yy>=0&&yy<M&&xx>=0&&xx<M){ s+=g[yy*M+xx]; n++; } } b[y*M+x]=s/n; }
+    // 3) 소벨 필터
     const mag=new Float32Array(M*M);
     for(let y=1;y<M-1;y++) for(let x=1;x<M-1;x++){
       const p=(yy,xx)=>b[yy*M+xx];
@@ -273,23 +322,36 @@
       const gy = -p(y-1,x-1)-2*p(y-1,x)-p(y-1,x+1) + p(y+1,x-1)+2*p(y+1,x)+p(y+1,x+1);
       mag[y*M+x]=Math.hypot(gx,gy);
     }
+    // 4) 백분위 임계값
     const pct = 0.96 - sens*0.14, sorted=Array.from(mag).sort((a,b)=>a-b), thr=Math.max(30, sorted[Math.floor(sorted.length*pct)]);
+    // 5) 2×2 max pooling
     const out=new Uint8Array(N*N);
     for(let y=0;y<M;y++) for(let x=0;x<M;x++) if(mag[y*M+x]>=thr) out[(y>>1)*N+(x>>1)]=1;
     return out;
   }
-  /* 사진: N×N, 8단계 명암 (표시용) */
+
+  /* ① toneGrid(src, N): 사진을 N×N, 8단계 명암으로 양자화. 화면에 보여주는 도트 그림.
+   *
+   *  밝기 0~255를 32씩 끊어 0~7 단계로 (256 / 8 = 32). floor(g/32)가 그 몫.
+   *  단계가 적을수록 "옛날 도트게임" 느낌이 강해지고, 많을수록 사진에 가까워진다.
+   *  8단계는 인물의 명암(피부·옷·그늘)이 구분되면서도 도트 느낌이 남는 지점.
+   *  채점에는 쓰지 않는다 — 채점은 ②의 윤곽선으로만 한다.
+   */
   function toneGrid(src, N){
     const g=gray(src, N), out=new Uint8Array(N*N);
     for(let i=0;i<N*N;i++) out[i]=Math.min(LEVELS-1, Math.floor(g[i]/32));
     return out;
   }
-  function paintTones(canvas, g, N){
+
+  /* 격자 → 화면. 캔버스 자체를 N×N 크기로 만들고 CSS(image-rendering: pixelated)로 확대한다.
+   * 그래서 한 칸 = 캔버스의 1px이고, 브라우저가 보간 없이 네모난 도트로 키워 준다.
+   */
+  function paintTones(canvas, g, N){                       // 8단계 → LVRGB 팔레트(검정~분필색 8색)
     canvas.width=canvas.height=N; const c=canvas.getContext('2d'), im=c.createImageData(N,N);
     for(let i=0;i<N*N;i++){ const p=LVRGB[g[i]]; im.data[i*4]=p[0]; im.data[i*4+1]=p[1]; im.data[i*4+2]=p[2]; im.data[i*4+3]=255; }
     c.putImageData(im,0,0);
   }
-  function paintGrid(canvas, g, N, color){
+  function paintGrid(canvas, g, N, color){                 // 0/1 → 검정 바탕에 분필색 점
     canvas.width=canvas.height=N; const c=canvas.getContext('2d'); c.fillStyle='#000'; c.fillRect(0,0,N,N); c.fillStyle=color||CHALK;
     for(let i=0;i<N*N;i++) if(g[i]) c.fillRect(i%N, Math.floor(i/N), 1, 1);
   }
@@ -397,7 +459,15 @@
   }
   $('start').onclick = startRound;
 
-  /* ---------- 비교 ---------- */
+  /* ---------- 비교 ----------
+   *  두 격자(내 선 U, 기준 윤곽 REF, 모두 0/1)를 칸 단위로 맞춰 본다.
+   *  · dilate: 격자의 1을 상하좌우·대각 한 칸씩 부풀린다 → "한 칸 오차는 봐준다"의 구현.
+   *  · 정밀도 P = 내 선 중 기준(부풀린) 위에 놓인 비율  → 엉뚱한 곳에 그리면 떨어진다
+   *  · 재현율 R = 기준 윤곽 중 내 선(부풀린)이 덮은 비율 → 덜 그리면 떨어진다
+   *  · 윤곽 점수 = 2PR/(P+R) (조화평균, F1). 둘 중 하나만 높아선 안 된다.
+   *  · 배치 점수 = 8×8 구역별 선 개수 벡터의 코사인 유사도. 전체적인 위치 분포를 본다.
+   *  · 총점 = (0.8·윤곽 + 0.2·배치)^1.25 × 100. 지수 1.25가 중간 점수를 눌러 변별력을 키운다.
+   */
   function dilate(g){ const R=1, o=new Uint8Array(N*N); for(let y=0;y<N;y++) for(let x=0;x<N;x++){ if(!g[y*N+x]) continue; for(let dy=-R;dy<=R;dy++) for(let dx=-R;dx<=R;dx++){ const yy=y+dy,xx=x+dx; if(yy>=0&&yy<N&&xx>=0&&xx<N) o[yy*N+xx]=1; } } return o; }
   function density(g){ const G=8, cell=N/G, h=new Float64Array(G*G); for(let i=0;i<N*N;i++) if(g[i]) h[Math.floor((i/N|0)/cell)*G+Math.floor((i%N)/cell)]++; return h; }
   function cosine(a,b){ let d=0,na=0,nb=0; for(let i=0;i<a.length;i++){ d+=a[i]*b[i]; na+=a[i]*a[i]; nb+=b[i]*b[i]; } return (na&&nb)? d/Math.sqrt(na*nb) : 0; }
