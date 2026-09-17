@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>마일스 데이비스 도트 낙서</title>
+<title>재즈 아티스트 도트 낙서</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
@@ -112,8 +112,8 @@
 
 <div class="wrap">
   <header>
-    <h1><small id="h-sub">Miles Davis · 48 × 48 · 8 tones</small>마일스 데이비스 도트 낙서</h1>
-    <p class="tag">45초 안에 분필로 마일스의 실루엣을 그려 보세요! 그리는 동안 내 그림이 도트로 바뀌고, 점수도 실시간으로 올라갑니다.</p>
+    <h1><small id="h-sub">48 × 48 · 8 tones</small><span id="h-artist">마일스 데이비스</span> 도트 낙서</h1>
+    <p class="tag">45초 안에 분필로 <span class="artist-name">마일스 데이비스</span>의 실루엣을 그려 보세요! 그리는 동안 내 그림이 도트로 바뀌고, 점수도 실시간으로 올라갑니다.</p>
   </header>
 
   <div class="grid">
@@ -122,11 +122,15 @@
       <div class="sheet"><canvas id="ref" width="32" height="32" aria-label="기준 도트 이미지"></canvas></div>
       <div class="tools">
         <label class="filebtn"><span>다른 사진으로 도전하기</span><input id="file" type="file" accept="image/*"></label>
-        <button id="ref-reset" class="quiet" hidden>원래 사진으로 돌아가기</button>
+        <button id="ref-reset" class="quiet" hidden>마일스 데이비스로 돌아가기</button>
+      </div>
+      <div class="row">
+        <label style="flex:1">아티스트 <input id="artist" type="text" maxlength="24" placeholder="아티스트 이름" aria-label="아티스트 이름" style="flex:1"></label>
       </div>
       <div class="row">
         <label>화면 맞춤 <select id="fit"><option value="contain">전체 보이기</option><option value="cover">꽉 채우기</option></select></label>
         <label>도트 크기 <select id="res"><option value="32">32 · 여유롭게</option><option value="48" selected>48 · 보통</option><option value="64">64 · 도전!</option></select></label>
+        <label>윤곽 민감도 <input id="sens" type="range" min="0" max="100" value="50"></label>
         <label><input id="show-edge" type="checkbox"> 채점용 윤곽 보기</label>
         <label><input id="show-src" type="checkbox"> 원본 사진 보기</label>
       </div>
@@ -182,9 +186,9 @@
     </section>
 
     <section class="panel">
-      <div class="label"><span>명예의 전당</span><span>이 브라우저</span></div>
+      <div class="label"><span>명예의 전당</span><span id="board-note">마일스 데이비스</span></div>
       <ol class="board" id="board"></ol>
-      <div class="board-foot"><span>상위 10명 · 기록은 이 기기에만 저장돼요</span><button id="reset" class="quiet">기록 지우기</button></div>
+      <div class="board-foot"><span>사진마다 따로 · 상위 10명 · 이 기기에만 저장돼요</span><button id="reset" class="quiet">기록 지우기</button></div>
     </section>
   </div>
 
@@ -193,7 +197,7 @@
 
 <script>
 (function(){
-  const W = 480, DEFAULT_REF = 'ref.jpg', CHALK = '#F2F4F7';
+  const W = 480, DEFAULT_REF = 'ref.jpg', DEFAULT_ARTIST = '마일스 데이비스', CHALK = '#F2F4F7';
   const LEVELS = 8, TOP = [242,244,247];
   const LVRGB = Array.from({length:LEVELS}, (_,i) => TOP.map(v=>Math.round(v*i/(LEVELS-1))));
   const $ = id => document.getElementById(id);
@@ -258,6 +262,7 @@
     return out;
   }
   /* 사진: 2N 해상도에서 소벨 엣지 → 상위 비율만 남기고 → N으로 풀링 */
+  let sens = 0.5;
   function edgeGrid(src, N){
     const M=N*2, g=gray(src, M), b=new Float32Array(M*M);
     for(let y=0;y<M;y++) for(let x=0;x<M;x++){ let s=0,n=0; for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){ const yy=y+dy,xx=x+dx; if(yy>=0&&yy<M&&xx>=0&&xx<M){ s+=g[yy*M+xx]; n++; } } b[y*M+x]=s/n; }
@@ -268,7 +273,7 @@
       const gy = -p(y-1,x-1)-2*p(y-1,x)-p(y-1,x+1) + p(y+1,x-1)+2*p(y+1,x)+p(y+1,x+1);
       mag[y*M+x]=Math.hypot(gx,gy);
     }
-    const sorted=Array.from(mag).sort((a,b)=>a-b), thr=Math.max(40, sorted[Math.floor(sorted.length*0.90)]);
+    const pct = 0.96 - sens*0.14, sorted=Array.from(mag).sort((a,b)=>a-b), thr=Math.max(30, sorted[Math.floor(sorted.length*pct)]);
     const out=new Uint8Array(N*N);
     for(let y=0;y<M;y++) for(let x=0;x<M;x++) if(mag[y*M+x]>=thr) out[(y>>1)*N+(x>>1)]=1;
     return out;
@@ -291,7 +296,8 @@
 
   /* ---------- 기준 관리: 업로드 > ref.jpg > 선 드로잉 ---------- */
   const refC = $('ref'), refSrc = mk(W), RKEY='miles-dot-ref-v1';
-  let N = 48, fit = 'contain', refImg = null, refKind = 'silhouette', REF = null;
+  let N = 48, fit = 'contain', refImg = null, refKind = 'silhouette', REF = null, artist = DEFAULT_ARTIST, refHash = '';
+  const AKEY='miles-dot-artist-v1';
   function buildRefSrc(){
     const c = refSrc.getContext('2d'); c.fillStyle='#000'; c.fillRect(0,0,W,W);
     if(!refImg){ c.drawImage(baseRef,0,0); return; }
@@ -308,10 +314,23 @@
     else { refC.className=''; paintTones(refC, toneGrid(refSrc, N), N); }
     $('ref-note').textContent = {upload:'불러온 사진', file:DEFAULT_REF, silhouette:'기본 그림'}[refKind];
     $('ref-reset').hidden = refKind !== 'upload';
+    refHash = hashGrid(refImg ? toneGrid(refSrc, 32) : REF);
+    renderBoard();
     $('pv-note').textContent = N+' × '+N;
-    $('h-sub').textContent = 'Miles Davis · '+N+' × '+N+' · '+LEVELS+' tones';
+    $('h-sub').textContent = N+' × '+N+' · '+LEVELS+' tones';
     update();
   }
+  function hashGrid(g){ let h=2166136261; for(let i=0;i<g.length;i++){ h^=g[i]; h=Math.imul(h,16777619)>>>0; } return h.toString(16); }
+  function applyArtist(name, persist){
+    artist = (name||'').trim() || DEFAULT_ARTIST;
+    $('h-artist').textContent = artist; document.title = artist+' 도트 낙서';
+    document.querySelectorAll('.artist-name').forEach(el => el.textContent = artist);
+    $('board-note').textContent = artist;
+    if($('artist').value !== artist && document.activeElement !== $('artist')) $('artist').value = artist;
+    if(persist){ try{ localStorage.setItem(AKEY, artist); }catch(e){} }
+    if(cur && state!=='idle') $('verdict').textContent = verdict(cur.total);
+  }
+  $('artist').addEventListener('input', e => applyArtist(e.target.value, true));
   function loadDefault(cb){
     const im=new Image(); im.onload=()=>{ refImg=im; refKind='file'; cb(); }; im.onerror=()=>{ refImg=null; refKind='silhouette'; cb(); }; im.src=DEFAULT_REF;
   }
@@ -319,9 +338,12 @@
     const f=e.target.files[0]; if(!f) return;
     const rd=new FileReader(); rd.onload=()=>{ const im=new Image(); im.onload=()=>{ refImg=im; refKind='upload'; rebuildRef();
       try{ const t=mk(256), c=t.getContext('2d'); const s=Math.min(256/im.width,256/im.height); c.fillStyle='#000'; c.fillRect(0,0,256,256); c.drawImage(im,(256-im.width*s)/2,(256-im.height*s)/2,im.width*s,im.height*s); localStorage.setItem(RKEY, t.toDataURL('image/jpeg',.85)); }catch(err){}
+      const nm = f.name.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ').trim();   // 파일명을 이름 후보로
+      applyArtist(nm, true); $('artist').focus(); $('artist').select();
     }; im.src=rd.result; }; rd.readAsDataURL(f); e.target.value='';
   });
-  $('ref-reset').onclick = () => { try{ localStorage.removeItem(RKEY); }catch(e){} loadDefault(rebuildRef); };
+  $('ref-reset').onclick = () => { try{ localStorage.removeItem(RKEY); localStorage.removeItem(AKEY); }catch(e){} $('artist').blur(); $('artist').value=DEFAULT_ARTIST; applyArtist(DEFAULT_ARTIST, false); loadDefault(rebuildRef); };
+  $('sens').oninput = e => { sens = e.target.value/100; rebuildRef(); };
   $('fit').onchange = e => { fit=e.target.value; rebuildRef(); };
   $('res').onchange = e => { N=+e.target.value; rebuildRef(); };
   $('show-src').onchange = rebuildRef; $('show-edge').onchange = rebuildRef;
@@ -390,9 +412,9 @@
     return {shape, layout, total:Math.round(100*Math.pow(0.8*shape+0.2*layout, 1.25)), mark};
   }
   function verdict(t){
-    if(t>=85) return '대단해요! 마일스 본인도 깜짝 놀라겠는걸요!';
+    if(t>=85) return '대단해요! '+artist+' 본인도 깜짝 놀라겠는걸요!';
     if(t>=70) return '훌륭해요! 무대 조명이 당신을 비추고 있어요.';
-    if(t>=55) return '좋아요! 트럼펫 소리가 들리기 시작했어요.';
+    if(t>=55) return '좋아요! 연주 소리가 들리기 시작했어요.';
     if(t>=40) return '괜찮아요! 형태가 잡히고 있어요. 조금만 더!';
     if(t>=25) return '포기하지 마세요! 실루엣이 보일락 말락 해요.';
     return '무대가 비어 있어요. 분필을 들어 볼까요?';
@@ -403,18 +425,19 @@
     cur=compare(U);
     const dc=$('diff'); dc.width=dc.height=N; const d=dc.getContext('2d'); d.clearRect(0,0,N,N);
     if($('show-diff').checked){ for(let i=0;i<N*N;i++){ if(!cur.mark[i]) continue; d.fillStyle = cur.mark[i]===1 ? 'rgba(224,96,58,.8)' : 'rgba(201,164,92,.7)'; d.fillRect(i%N, Math.floor(i/N), 1, 1); } }
-    $('total').textContent=cur.total;
-    $('f-shape').style.width=Math.round(cur.shape*100)+'%'; $('v-shape').textContent=Math.round(cur.shape*100);
-    $('f-tone').style.width=Math.round(cur.layout*100)+'%'; $('v-tone').textContent=Math.round(cur.layout*100);
-    $('verdict').textContent=verdict(cur.total);
+    const idle = state==='idle';
+    $('total').textContent = idle ? '—' : cur.total;
+    $('f-shape').style.width=(idle?0:Math.round(cur.shape*100))+'%'; $('v-shape').textContent= idle ? '—' : Math.round(cur.shape*100);
+    $('f-tone').style.width=(idle?0:Math.round(cur.layout*100))+'%'; $('v-tone').textContent= idle ? '—' : Math.round(cur.layout*100);
+    $('verdict').textContent = idle ? '시작하면 점수가 실시간으로 나와요.' : verdict(cur.total);
     $('submit').disabled = state!=='done' || cur.total===0 || lastId!==null;
   }
   $('show-diff').onchange = update;
 
   /* ---------- 순위 ---------- */
-  const KEY='miles-dot-board-v4';
-  function load(){ try{ return JSON.parse(localStorage.getItem(KEY))||[]; }catch(e){ return []; } }
-  function save(b){ try{ localStorage.setItem(KEY, JSON.stringify(b)); }catch(e){} }
+  const KEY = () => 'miles-dot-board-v5:'+refHash;
+  function load(){ try{ return JSON.parse(localStorage.getItem(KEY()))||[]; }catch(e){ return []; } }
+  function save(b){ try{ localStorage.setItem(KEY(), JSON.stringify(b)); }catch(e){} }
   function thumb(){ return $('pv').toDataURL('image/png'); }
   function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
   let lastId=null;
@@ -425,7 +448,7 @@
       li.innerHTML=`<span class="rk">${i+1}</span><img alt="" src="${e.thumb}"><span class="nm">${esc(e.name)}<small>${e.n}×${e.n}${e.sample?' · 예시':''}</small></span><span class="sc">${e.score}</span>`; ol.appendChild(li); });
   }
   $('submit').onclick = () => { if(!cur) return; const e={id:Date.now()+''+Math.random(), name:$('name').value.trim()||'이름 없는 연주자', score:cur.total, n:N, thumb:thumb(), ts:Date.now()}; lastId=e.id; const b=load(); b.push(e); save(b); renderBoard(); $('submit').disabled=true; };
-  $('reset').onclick = () => { if(confirm('명예의 전당 기록을 모두 지울까요? 되돌릴 수 없어요!')){ save([]); lastId=null; renderBoard(); } };
+  $('reset').onclick = () => { if(confirm(artist+' 명예의 전당 기록을 모두 지울까요? 되돌릴 수 없어요!')){ save([]); lastId=null; renderBoard(); } };
 
   /* 예시 낙서: 같은 인물을 살짝 어긋나게, 흔들리는 선으로 */
   function sampleDoodle(){ const o=mk(W); drawFigure(o.getContext('2d'), {jitter:3, seed:5, dx:-9, dy:6, s:0.985, width:6}); return o; }
@@ -435,9 +458,10 @@
     blank(); isSample=true; ctx.drawImage(sampleDoodle(),0,0); $('corner').textContent='지금 보이는 건 예시 낙서예요.'; setGate('idle');
     $('timer').textContent=fmt(LIMIT);
     let stored=null; try{ stored=localStorage.getItem(RKEY); }catch(e){}
-    const go = () => { rebuildRef(); if(!load().length && cur){ save([{id:'sample', name:'예시', score:cur.total, n:N, thumb:thumb(), ts:Date.now(), sample:true}]); } renderBoard(); };
-    if(stored){ const im=new Image(); im.onload=()=>{ refImg=im; refKind='upload'; go(); }; im.onerror=()=>loadDefault(go); im.src=stored; }
-    else loadDefault(go);
+    let savedName=null; try{ savedName=localStorage.getItem(AKEY); }catch(e){}
+    const go = () => { rebuildRef(); };
+    if(stored){ applyArtist(savedName||'', false); const im=new Image(); im.onload=()=>{ refImg=im; refKind='upload'; go(); }; im.onerror=()=>{ applyArtist(DEFAULT_ARTIST,false); loadDefault(go); }; im.src=stored; }
+    else { applyArtist(DEFAULT_ARTIST, false); loadDefault(go); }
   }
   start();
 })();
