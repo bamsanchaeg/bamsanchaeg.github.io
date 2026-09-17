@@ -96,7 +96,16 @@
   .board-foot{display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--faint)}
   .board-foot button{font-size:12px; padding:4px 9px}
   footer.note{color:var(--faint); font-size:12px; border-top:1px solid var(--line); padding-top:14px; max-width:72ch}
-  @media (prefers-reduced-motion: reduce){ .bar .f{transition:none} button{transition:none} }
+  .gate{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:24px; text-align:center; background:rgba(0,0,0,.62); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px)}
+  .gate h2{font-size:18px; font-weight:600; margin:0; letter-spacing:-.01em}
+  .gate p{color:var(--muted); margin:0; font-size:13px; max-width:30ch}
+  .gate .big{font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:56px; font-weight:500; line-height:1; letter-spacing:-.04em; color:var(--brass-ink)}
+  .gate button.primary{margin-top:6px}
+  .timebar{height:4px; background:var(--track); border-radius:99px; overflow:hidden}
+  .timebar i{display:block; height:100%; width:100%; background:var(--brass); transition:width .1s linear}
+  .timebar.urgent i{background:var(--hot)}
+  #timer.urgent{color:var(--hot)}
+  @media (prefers-reduced-motion: reduce){ .bar .f{transition:none} .timebar i{transition:none} button{transition:none} }
 </style>
 </head>
 <body>
@@ -104,164 +113,185 @@
 <div class="wrap">
   <header>
     <h1><small id="h-sub">Miles Davis · 48 × 48 · 8 tones</small>마일스 데이비스 도트 낙서</h1>
-    <p class="tag">검은 무대에 분필로 그립니다. 그리는 동안 도트로 바뀌고, 기준 사진의 도트와 칸 단위로 비교해 점수가 갱신됩니다.</p>
+    <p class="tag">45초 안에 분필로 마일스의 실루엣을 그려 보세요! 그리는 동안 내 그림이 도트로 바뀌고, 점수도 실시간으로 올라갑니다.</p>
   </header>
 
   <div class="grid">
     <section class="panel">
-      <div class="label"><span>기준</span><span id="ref-note">ref.jpg</span></div>
+      <div class="label"><span>따라 그릴 그림</span><span id="ref-note">ref.jpg</span></div>
       <div class="sheet"><canvas id="ref" width="32" height="32" aria-label="기준 도트 이미지"></canvas></div>
       <div class="tools">
-        <label class="filebtn"><span>다른 사진 불러오기</span><input id="file" type="file" accept="image/*"></label>
-        <button id="ref-reset" class="quiet" hidden>기본 사진으로</button>
+        <label class="filebtn"><span>다른 사진으로 도전하기</span><input id="file" type="file" accept="image/*"></label>
+        <button id="ref-reset" class="quiet" hidden>원래 사진으로 돌아가기</button>
       </div>
       <div class="row">
-        <label>맞춤 <select id="fit"><option value="contain">전체 보이기</option><option value="cover">꽉 채우기</option></select></label>
-        <label>해상도 <select id="res"><option value="32">32</option><option value="48" selected>48</option><option value="64">64</option></select></label>
-        <label><input id="show-src" type="checkbox"> 원본</label>
+        <label>화면 맞춤 <select id="fit"><option value="contain">전체 보이기</option><option value="cover">꽉 채우기</option></select></label>
+        <label>도트 크기 <select id="res"><option value="32">32 · 여유롭게</option><option value="48" selected>48 · 보통</option><option value="64">64 · 도전!</option></select></label>
+        <label><input id="show-edge" type="checkbox"> 채점용 윤곽 보기</label>
+        <label><input id="show-src" type="checkbox"> 원본 사진 보기</label>
       </div>
     </section>
 
     <section class="panel draw">
-      <div class="label"><span>그리기</span><span>480 × 480</span></div>
-      <div class="sheet draw"><canvas id="draw" class="smooth" width="480" height="480" aria-label="그림판"></canvas><div class="note" id="corner">예시입니다. 새 무대를 누르고 직접 그려보세요.</div></div>
+      <div class="label"><span>무대</span><span id="timer">45.0초</span></div>
+      <div class="sheet draw"><canvas id="draw" class="smooth" width="480" height="480" aria-label="그림판"></canvas><div class="note" id="corner"></div>
+        <div class="gate" id="gate">
+          <h2 id="gate-title">무대에 오를 준비가 되었나요?</h2>
+          <div class="big" id="gate-big" hidden>0</div>
+          <p id="gate-text">제한 시간은 45초! 시작하면 예시 낙서가 지워지고 빈 무대가 나와요.</p>
+          <button id="start" class="primary">시작하기</button>
+        </div>
+      </div>
+      <div class="timebar" id="timebar"><i></i></div>
       <div class="tools">
-        <button class="tone" data-lv="7" aria-pressed="true"><i class="swatch" style="background:#F2F4F7"></i>밝게</button>
-        <button class="tone" data-lv="5" aria-pressed="false"><i class="swatch" style="background:#A3AAB5"></i>중간</button>
-        <button class="tone" data-lv="3" aria-pressed="false"><i class="swatch" style="background:#6E7480"></i>어둡게</button>
+        <button class="tone" data-lv="1" aria-pressed="true"><i class="swatch" style="background:#F2F4F7"></i>분필</button>
         <button class="tone" data-lv="0" aria-pressed="false"><i class="swatch" style="background:#000"></i>지우개</button>
-        <label class="size">굵기 <input id="size" type="range" min="4" max="40" value="14"></label>
+        <label class="size">굵기 <input id="size" type="range" min="3" max="24" value="7"></label>
         <span class="sep"></span>
-        <button id="undo" class="quiet">되돌리기</button>
-        <button id="clear" class="quiet">새 무대</button>
+        <button id="undo" class="quiet" disabled>되돌리기</button>
+        <button id="clear" class="quiet" disabled>새 무대</button>
       </div>
     </section>
 
     <section class="panel">
-      <div class="label"><span>미리보기</span><span id="pv-note">48 × 48</span></div>
+      <div class="label"><span>내 도트</span><span id="pv-note">48 × 48</span></div>
       <div class="sheet"><canvas id="pv" width="32" height="32" aria-label="내 그림의 도트 미리보기"></canvas><canvas id="diff" class="overlay" width="32" height="32" aria-hidden="true"></canvas></div>
       <div class="row">
-        <label><input id="show-diff" type="checkbox" checked> 차이 표시</label>
-        <span class="legend"><span><i style="background:#E0603A"></i>과하게 칠함</span><span><i style="background:#C9A45C"></i>덜 칠함</span></span>
+        <label><input id="show-diff" type="checkbox" checked> 힌트 보기</label>
+        <span class="legend"><span><i style="background:#E0603A"></i>여긴 없어도 돼요</span><span><i style="background:#C9A45C"></i>여길 그려 보세요</span></span>
       </div>
     </section>
   </div>
 
   <div class="grid lower">
     <section class="panel">
-      <div class="label"><span>점수</span><span>실시간</span></div>
+      <div class="label"><span>결과</span><span>실시간</span></div>
       <div class="score">
         <div class="total"><span id="total">—</span><sub>/ 100</sub></div>
         <div class="bars">
-          <div class="bar"><span class="n">실루엣</span><div class="t"><div class="f" id="f-shape"></div></div><span class="v" id="v-shape">—</span></div>
-          <div class="bar"><span class="n">명암</span><div class="t"><div class="f" id="f-tone"></div></div><span class="v" id="v-tone">—</span></div>
+          <div class="bar"><span class="n">윤곽</span><div class="t"><div class="f" id="f-shape"></div></div><span class="v" id="v-shape">—</span></div>
+          <div class="bar"><span class="n">배치</span><div class="t"><div class="f" id="f-tone"></div></div><span class="v" id="v-tone">—</span></div>
         </div>
         <div class="verdict" id="verdict"></div>
-        <p class="hint">실루엣은 밝은 칸의 위치 일치(한 칸 오차 허용), 명암은 칠해진 칸의 8단계 밝기 차이입니다. 각 50%.</p>
+        <p class="hint">윤곽 — 내 선이 기준 윤곽선 위에 얼마나 정확히 놓였는지 봐요. 허용 오차는 딱 한 칸! (기준 윤곽선은 「채점용 윤곽 보기」로 확인할 수 있어요) · 배치 — 8×8 구역별로 선이 비슷하게 퍼져 있는지 봐요 · 윤곽 80% + 배치 20%</p>
       </div>
       <div class="submit">
-        <input id="name" type="text" maxlength="14" placeholder="닉네임" aria-label="닉네임">
-        <button id="submit" class="primary" disabled>순위에 올리기</button>
+        <input id="name" type="text" maxlength="14" placeholder="닉네임을 입력해 주세요" aria-label="닉네임">
+        <button id="submit" class="primary" disabled>기록 남기기</button>
       </div>
     </section>
 
     <section class="panel">
-      <div class="label"><span>순위</span><span>이 브라우저</span></div>
+      <div class="label"><span>명예의 전당</span><span>이 브라우저</span></div>
       <ol class="board" id="board"></ol>
-      <div class="board-foot"><span>상위 10명 · 기록은 이 기기의 브라우저에만 저장됩니다</span><button id="reset" class="quiet">초기화</button></div>
+      <div class="board-foot"><span>상위 10명 · 기록은 이 기기에만 저장돼요</span><button id="reset" class="quiet">기록 지우기</button></div>
     </section>
   </div>
 
-  <footer class="note">불러온 사진은 서버로 전송되지 않고 이 브라우저에만 저장됩니다.</footer>
+  <footer class="note">불러온 사진은 어디로도 전송되지 않아요. 이 브라우저에만 살짝 저장해 둡니다.</footer>
 </div>
 
 <script>
 (function(){
-  const W = 480, DEFAULT_REF = 'ref.jpg';
+  const W = 480, DEFAULT_REF = 'ref.jpg', CHALK = '#F2F4F7';
   const LEVELS = 8, TOP = [242,244,247];
-  const LV = Array.from({length:LEVELS}, (_,i) => 'rgb(' + TOP.map(v=>Math.round(v*i/(LEVELS-1))).join(',') + ')');
   const LVRGB = Array.from({length:LEVELS}, (_,i) => TOP.map(v=>Math.round(v*i/(LEVELS-1))));
   const $ = id => document.getElementById(id);
   const mk = n => { const c=document.createElement('canvas'); c.width=c.height=n; return c; };
   function rng(seed){ let x = seed>>>0 || 1; return () => { x = (x*1664525 + 1013904223)>>>0; return x/4294967296; }; }
 
-  /* ---------- 인물 드로잉: 사진 구도를 따라 직접 작성 (예시 낙서 + 사진 없을 때의 폴백) ---------- */
+  /* ---------- 선 드로잉: 사진 구도를 따라 직접 작성 (예시 낙서 + 사진 없을 때의 폴백) ---------- */
   function drawFigure(c, o){
-    o = o || {}; const r = rng(o.seed||1), J = o.jitter||0;
-    const T = i => LV[i];
+    o = o || {}; const r = rng(o.seed||1), J = o.jitter||0, w = o.width||5;
     const jp = p => [p[0]+(r()-.5)*2*J, p[1]+(r()-.5)*2*J];
-    const path = (pts, close) => { const q=pts.map(jp); c.beginPath(); c.moveTo(q[0][0],q[0][1]); for(let i=1;i<q.length;i++) c.lineTo(q[i][0],q[i][1]); if(close) c.closePath(); };
-    const fill = (pts, col) => { path(pts,true); c.fillStyle=col; c.fill(); };
-    const stroke = (pts, col, w, close) => { path(pts,close); c.strokeStyle=col; c.lineWidth=w; c.lineCap='round'; c.lineJoin='round'; c.stroke(); };
-    const dot = (x,y,rad,col) => { const q=jp([x,y]); c.fillStyle=col; c.beginPath(); c.arc(q[0],q[1],rad,0,Math.PI*2); c.fill(); };
+    const stroke = (pts, close, ww) => { const q=pts.map(jp); c.beginPath(); c.moveTo(q[0][0],q[0][1]); for(let i=1;i<q.length;i++) c.lineTo(q[i][0],q[i][1]); if(close) c.closePath(); c.lineWidth=ww||w; c.stroke(); };
+    const ellipse = (x,y,rx,ry) => { const q=jp([x,y]); c.beginPath(); c.ellipse(q[0],q[1],rx,ry,0,0,Math.PI*2); c.lineWidth=w; c.stroke(); };
     c.save(); c.translate(o.dx||0, o.dy||0); c.scale(o.s||1, o.s||1);
     c.fillStyle='#000'; c.fillRect(-W,-W,W*3,W*3);
+    c.strokeStyle=CHALK; c.lineCap='round'; c.lineJoin='round';
 
-    // 바지 — 넓은 통, 왼쪽으로 기운 다리
-    fill([[321,199],[409,203],[400,258],[374,298],[352,340],[340,400],[331,470],[269,470],[258,420],[241,334],[266,300],[298,262]], T(3));
-    fill([[298,262],[352,340],[340,400],[331,470],[300,470],[298,405],[281,335]], T(2));           // 안쪽 그늘
-    stroke([[300,262],[352,338]], T(4), 2); stroke([[262,330],[290,400],[300,468]], T(4), 2);      // 주름
-    stroke([[321,199],[409,203]], T(5), 4);                                                        // 허리단
-    fill([[269,470],[331,470],[337,479],[262,479]], T(5));                                         // 맨발
-
-    // 민소매 — 밝은 톤, 어깨끈
-    fill([[333,119],[352,111],[369,127],[391,111],[409,119],[405,199],[321,207]], T(7));
-    stroke([[352,111],[356,86]], T(7), 6); stroke([[391,111],[386,90]], T(7), 6);
-    fill([[338,150],[352,140],[360,205],[326,207]], T(6));                                         // 옆구리 음영
-    stroke([[333,207],[331,235],[336,258]], T(7), 2);                                              // 늘어진 끈
-
-    // 목·머리
-    fill([[350,86],[382,84],[390,116],[348,120]], T(5));
-    dot(361,44,23,T(5));                                                                           // 얼굴
-    fill([[343,26],[360,19],[381,26],[387,50],[380,40],[364,34],[349,38]], T(1));                  // 머리카락
-    stroke([[347,34],[340,44],[343,55],[338,63],[344,72],[352,75]], T(6), 3);                      // 옆얼굴 윤곽
-    dot(379,50,5,T(4));                                                                            // 귀
-    stroke([[338,53],[356,51]], T(7), 2); dot(346,53,5,T(7));                                      // 안경
-    stroke([[346,53],[351,53]], T(1), 2);
-
-    // 팔 — 뒤쪽 팔은 어둡게, 앞쪽 팔은 밝게
-    stroke([[395,128],[340,162],[302,112]], T(3), 16);
-    stroke([[389,119],[322,142],[289,92]], T(5), 20);
-    dot(289,92,12,T(5)); dot(301,101,11,T(5));                                                     // 손
-    stroke([[281,84],[276,92]], T(4), 3); stroke([[292,82],[287,90]], T(4), 3); stroke([[303,88],[299,96]], T(4), 3); // 손가락
-
-    // 트럼펫 — 관·밸브·벨
-    stroke([[345,76],[212,96]], T(5), 8);
-    stroke([[345,72],[214,92]], T(7), 2);                                                          // 하이라이트
-    stroke([[300,96],[222,108]], T(4), 4);                                                         // 아래쪽 관
-    [262,274,286].forEach(x => { stroke([[x,74],[x,104]], T(5), 5); dot(x,72,3,T(7)); });          // 밸브
-    c.fillStyle=T(5); { const q=jp([203,99]); c.beginPath(); c.ellipse(q[0],q[1],22,18,0,0,Math.PI*2); c.fill(); }
-    { const q=jp([203,99]); c.strokeStyle=T(7); c.lineWidth=2; c.beginPath(); c.ellipse(q[0],q[1],22,18,0,0,Math.PI*2); c.stroke(); }
-    dot(203,99,7,T(2));                                                                            // 벨 안쪽
-
-    if(o.rough){ // 손그림 느낌의 분필 윤곽
-      stroke([[321,199],[409,203],[400,258],[374,298],[352,340],[340,400],[331,470],[269,470],[258,420],[241,334],[266,300],[298,262]], T(7), 3, true);
-      stroke([[333,119],[352,111],[369,127],[391,111],[409,119],[405,199],[321,207]], T(7), 3, true);
-    }
+    // 머리
+    ellipse(361,44,23,23);
+    stroke([[343,30],[358,20],[380,24],[388,44]]);                    // 머리카락 경계
+    stroke([[347,34],[340,44],[343,55],[338,63],[344,72],[352,75]]);  // 옆얼굴
+    stroke([[338,53],[356,51]], false, 3); ellipse(346,53,5,4);       // 안경
+    ellipse(379,50,5,6);                                              // 귀
+    // 목·민소매
+    stroke([[352,72],[350,86]]); stroke([[378,84],[386,116]]);
+    stroke([[333,119],[352,111],[369,127],[391,111],[409,119]]);      // 목선·어깨끈
+    stroke([[352,111],[356,86]]); stroke([[391,111],[386,90]]);
+    stroke([[333,119],[321,207]]); stroke([[409,119],[405,199]]);     // 옆선
+    stroke([[321,207],[405,199]]);                                    // 밑단
+    stroke([[333,207],[331,235],[336,258]], false, 3);                // 늘어진 끈
+    // 팔
+    stroke([[389,119],[322,142],[289,92]], false, 9);                 // 앞팔 (굵게)
+    stroke([[395,132],[344,164],[306,118]]);                          // 뒷팔
+    ellipse(289,92,12,12); ellipse(301,101,11,11);                    // 손
+    // 트럼펫
+    stroke([[345,76],[212,96]], false, 7);
+    stroke([[300,96],[222,108]], false, 3);
+    [262,274,286].forEach(x => stroke([[x,74],[x,104]], false, 4));
+    ellipse(203,99,22,18);
+    // 바지·발
+    stroke([[321,199],[298,262],[266,300],[241,334],[258,420],[269,470]]);          // 왼쪽 선
+    stroke([[409,203],[400,258],[374,298],[352,340],[340,400],[331,470]]);         // 오른쪽 선
+    stroke([[300,262],[352,338]], false, 3); stroke([[262,330],[290,400],[300,468]], false, 3); // 주름
+    stroke([[269,470],[262,479],[337,479],[331,470]]);                              // 발
     c.restore();
   }
   const baseRef = mk(W); drawFigure(baseRef.getContext('2d'));
 
-  /* ---------- 픽셀화 ---------- */
-  function quant(l){ return Math.min(LEVELS-1, Math.floor(l/32)); }
-  function gridOf(src, N){
-    const mid = mk(128), m = mid.getContext('2d'); m.fillStyle='#000'; m.fillRect(0,0,128,128);
-    m.imageSmoothingEnabled=true; m.imageSmoothingQuality='high'; m.drawImage(src,0,0,128,128);
-    const o = mk(N), c = o.getContext('2d'); c.fillStyle='#000'; c.fillRect(0,0,N,N);
-    c.imageSmoothingEnabled=true; c.imageSmoothingQuality='high'; c.drawImage(mid,0,0,N,N);
-    const d=c.getImageData(0,0,N,N).data, g=new Uint8Array(N*N);
-    for(let i=0;i<N*N;i++) g[i]=quant((d[i*4]*299+d[i*4+1]*587+d[i*4+2]*114)/1000);
+  /* ---------- 그레이스케일 축소 ---------- */
+  function gray(src, M){
+    const mid = mk(256), m = mid.getContext('2d'); m.fillStyle='#000'; m.fillRect(0,0,256,256);
+    m.imageSmoothingEnabled=true; m.imageSmoothingQuality='high'; m.drawImage(src,0,0,256,256);
+    const o = mk(M), c = o.getContext('2d'); c.fillStyle='#000'; c.fillRect(0,0,M,M);
+    c.imageSmoothingEnabled=true; c.imageSmoothingQuality='high'; c.drawImage(mid,0,0,M,M);
+    const d=c.getImageData(0,0,M,M).data, g=new Float32Array(M*M);
+    for(let i=0;i<M*M;i++) g[i]=(d[i*4]*299+d[i*4+1]*587+d[i*4+2]*114)/1000;
     return g;
   }
-  function paintGrid(canvas, g, N){
+  /* 내 그림: 선이 있는 칸 = 1 */
+  function inkGrid(src, N){
+    const g=gray(src, N), out=new Uint8Array(N*N);
+    for(let i=0;i<N*N;i++) out[i]= g[i]>=60 ? 1 : 0;
+    return out;
+  }
+  /* 사진: 2N 해상도에서 소벨 엣지 → 상위 비율만 남기고 → N으로 풀링 */
+  function edgeGrid(src, N){
+    const M=N*2, g=gray(src, M), b=new Float32Array(M*M);
+    for(let y=0;y<M;y++) for(let x=0;x<M;x++){ let s=0,n=0; for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){ const yy=y+dy,xx=x+dx; if(yy>=0&&yy<M&&xx>=0&&xx<M){ s+=g[yy*M+xx]; n++; } } b[y*M+x]=s/n; }
+    const mag=new Float32Array(M*M);
+    for(let y=1;y<M-1;y++) for(let x=1;x<M-1;x++){
+      const p=(yy,xx)=>b[yy*M+xx];
+      const gx = -p(y-1,x-1)-2*p(y,x-1)-p(y+1,x-1) + p(y-1,x+1)+2*p(y,x+1)+p(y+1,x+1);
+      const gy = -p(y-1,x-1)-2*p(y-1,x)-p(y-1,x+1) + p(y+1,x-1)+2*p(y+1,x)+p(y+1,x+1);
+      mag[y*M+x]=Math.hypot(gx,gy);
+    }
+    const sorted=Array.from(mag).sort((a,b)=>a-b), thr=Math.max(40, sorted[Math.floor(sorted.length*0.90)]);
+    const out=new Uint8Array(N*N);
+    for(let y=0;y<M;y++) for(let x=0;x<M;x++) if(mag[y*M+x]>=thr) out[(y>>1)*N+(x>>1)]=1;
+    return out;
+  }
+  /* 사진: N×N, 8단계 명암 (표시용) */
+  function toneGrid(src, N){
+    const g=gray(src, N), out=new Uint8Array(N*N);
+    for(let i=0;i<N*N;i++) out[i]=Math.min(LEVELS-1, Math.floor(g[i]/32));
+    return out;
+  }
+  function paintTones(canvas, g, N){
     canvas.width=canvas.height=N; const c=canvas.getContext('2d'), im=c.createImageData(N,N);
     for(let i=0;i<N*N;i++){ const p=LVRGB[g[i]]; im.data[i*4]=p[0]; im.data[i*4+1]=p[1]; im.data[i*4+2]=p[2]; im.data[i*4+3]=255; }
     c.putImageData(im,0,0);
   }
+  function paintGrid(canvas, g, N, color){
+    canvas.width=canvas.height=N; const c=canvas.getContext('2d'); c.fillStyle='#000'; c.fillRect(0,0,N,N); c.fillStyle=color||CHALK;
+    for(let i=0;i<N*N;i++) if(g[i]) c.fillRect(i%N, Math.floor(i/N), 1, 1);
+  }
 
-  /* ---------- 기준 관리: 업로드 > ref.jpg > 실루엣 ---------- */
+  /* ---------- 기준 관리: 업로드 > ref.jpg > 선 드로잉 ---------- */
   const refC = $('ref'), refSrc = mk(W), RKEY='miles-dot-ref-v1';
-  let N = 48, fit = 'contain', refImg = null, refKind = 'silhouette', REF = null, REF_LIT = null;
+  let N = 48, fit = 'contain', refImg = null, refKind = 'silhouette', REF = null;
   function buildRefSrc(){
     const c = refSrc.getContext('2d'); c.fillStyle='#000'; c.fillRect(0,0,W,W);
     if(!refImg){ c.drawImage(baseRef,0,0); return; }
@@ -271,14 +301,15 @@
   }
   function rebuildRef(){
     buildRefSrc();
-    try { REF = gridOf(refSrc, N); }
-    catch(e){ refImg=null; refKind='silhouette'; buildRefSrc(); REF = gridOf(refSrc, N); }   // file:// 등에서 캔버스가 오염된 경우
-    REF_LIT = REF.map(v=>v>0?1:0);
+    try { REF = refImg ? edgeGrid(refSrc, N) : inkGrid(refSrc, N); }
+    catch(e){ refImg=null; refKind='silhouette'; buildRefSrc(); REF = inkGrid(refSrc, N); }   // file:// 등에서 캔버스가 오염된 경우
     if($('show-src').checked){ refC.className='smooth'; refC.width=refC.height=W; refC.getContext('2d').drawImage(refSrc,0,0); }
-    else { refC.className=''; paintGrid(refC, REF, N); }
-    $('ref-note').textContent = {upload:'불러온 사진', file:DEFAULT_REF, silhouette:'기본 실루엣'}[refKind];
+    else if($('show-edge').checked || !refImg){ refC.className=''; paintGrid(refC, REF, N); }
+    else { refC.className=''; paintTones(refC, toneGrid(refSrc, N), N); }
+    $('ref-note').textContent = {upload:'불러온 사진', file:DEFAULT_REF, silhouette:'기본 그림'}[refKind];
     $('ref-reset').hidden = refKind !== 'upload';
-    $('pv-note').textContent = N+' × '+N; $('h-sub').textContent = 'Miles Davis · '+N+' × '+N+' · '+LEVELS+' tones';
+    $('pv-note').textContent = N+' × '+N;
+    $('h-sub').textContent = 'Miles Davis · '+N+' × '+N+' · '+LEVELS+' tones';
     update();
   }
   function loadDefault(cb){
@@ -287,25 +318,27 @@
   $('file').addEventListener('change', e => {
     const f=e.target.files[0]; if(!f) return;
     const rd=new FileReader(); rd.onload=()=>{ const im=new Image(); im.onload=()=>{ refImg=im; refKind='upload'; rebuildRef();
-      try{ const t=mk(192), c=t.getContext('2d'); const s=Math.min(192/im.width,192/im.height); c.fillStyle='#000'; c.fillRect(0,0,192,192); c.drawImage(im,(192-im.width*s)/2,(192-im.height*s)/2,im.width*s,im.height*s); localStorage.setItem(RKEY, t.toDataURL('image/jpeg',.8)); }catch(err){}
+      try{ const t=mk(256), c=t.getContext('2d'); const s=Math.min(256/im.width,256/im.height); c.fillStyle='#000'; c.fillRect(0,0,256,256); c.drawImage(im,(256-im.width*s)/2,(256-im.height*s)/2,im.width*s,im.height*s); localStorage.setItem(RKEY, t.toDataURL('image/jpeg',.85)); }catch(err){}
     }; im.src=rd.result; }; rd.readAsDataURL(f); e.target.value='';
   });
   $('ref-reset').onclick = () => { try{ localStorage.removeItem(RKEY); }catch(e){} loadDefault(rebuildRef); };
   $('fit').onchange = e => { fit=e.target.value; rebuildRef(); };
   $('res').onchange = e => { N=+e.target.value; rebuildRef(); };
-  $('show-src').onchange = rebuildRef;
+  $('show-src').onchange = rebuildRef; $('show-edge').onchange = rebuildRef;
 
   /* ---------- 그림판 ---------- */
   const cv = $('draw'), ctx = cv.getContext('2d');
-  let lv=7, size=14, drawing=false, last=null, undo=[], isSample=false, cur=null, raf=false;
+  let lv=1, size=7, drawing=false, last=null, undo=[], isSample=false, cur=null, raf=false;
+  const LIMIT = 45; let state='idle', t0=0, timerId=0;
   function blank(){ ctx.fillStyle='#000'; ctx.fillRect(0,0,W,W); }
   function pushUndo(){ undo.push(ctx.getImageData(0,0,W,W)); if(undo.length>30) undo.shift(); }
   function pos(e){ const r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left)*W/r.width, y:(e.clientY-r.top)*W/r.height}; }
-  function setStyle(){ ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle=ctx.fillStyle=LV[lv]; ctx.lineWidth = lv===0 ? size*2 : size; }
-  function touched(){ if(isSample){ isSample=false; $('corner').textContent=''; } }
+  function setStyle(){ ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle=ctx.fillStyle= lv ? CHALK : '#000'; ctx.lineWidth = lv ? size : size*3; }
+  function touched(){}
   function schedule(){ if(raf) return; raf=true; requestAnimationFrame(()=>{ raf=false; update(); }); }
 
   cv.addEventListener('pointerdown', e => {
+    if(state!=='playing') return;
     e.preventDefault(); cv.setPointerCapture(e.pointerId); pushUndo(); drawing=true; last=pos(e); setStyle();
     ctx.beginPath(); ctx.arc(last.x,last.y,ctx.lineWidth/2,0,Math.PI*2); ctx.fill(); touched(); schedule();
   });
@@ -313,47 +346,73 @@
   ['pointerup','pointercancel','pointerleave'].forEach(t => cv.addEventListener(t, () => { drawing=false; }));
   document.querySelectorAll('.tone').forEach(b => b.onclick = () => { lv=+b.dataset.lv; document.querySelectorAll('.tone').forEach(x=>x.setAttribute('aria-pressed', x===b)); });
   $('size').oninput = e => size=+e.target.value;
-  $('undo').onclick = () => { const im=undo.pop(); if(im){ ctx.putImageData(im,0,0); update(); } };
-  $('clear').onclick = () => { pushUndo(); blank(); touched(); update(); };
+  $('undo').onclick = () => { if(state!=='playing') return; const im=undo.pop(); if(im){ ctx.putImageData(im,0,0); update(); } };
+  $('clear').onclick = () => { if(state!=='playing') return; pushUndo(); blank(); update(); };
+
+  /* ---------- 라운드 · 45초 타이머 ---------- */
+  function fmt(sec){ return Math.max(0,sec).toFixed(1)+'초'; }
+  function setGate(mode){
+    const g=$('gate'); g.hidden = mode==='playing';
+    if(mode==='idle'){ $('gate-title').textContent='무대에 오를 준비가 되었나요?'; $('gate-big').hidden=true; $('gate-text').textContent='제한 시간은 '+LIMIT+'초! 시작하면 예시 낙서가 지워지고 빈 무대가 나와요.'; $('start').textContent='시작하기'; }
+    if(mode==='done'){ $('gate-title').textContent='시간 종료!'; $('gate-big').hidden=false; $('gate-big').textContent=cur?cur.total:0; $('gate-text').textContent=cur?verdict(cur.total):''; $('start').textContent='다시 도전하기'; }
+  }
+  function startRound(){
+    state='playing'; isSample=false; undo=[]; blank(); $('corner').textContent='';
+    $('undo').disabled=false; $('clear').disabled=false; $('submit').disabled=true; lastId=null;
+    setGate('playing'); t0=Date.now(); clearInterval(timerId); timerId=setInterval(tick,100); tick(); update();
+  }
+  function tick(){
+    const left = LIMIT - (Date.now()-t0)/1000;
+    $('timer').textContent=fmt(left); $('timebar').firstElementChild.style.width=Math.max(0,left/LIMIT*100)+'%';
+    const urgent = left<=10; $('timer').classList.toggle('urgent',urgent); $('timebar').classList.toggle('urgent',urgent);
+    if(left<=0) endRound();
+  }
+  function endRound(){
+    state='done'; drawing=false; clearInterval(timerId);
+    $('timer').textContent=fmt(0); $('timebar').firstElementChild.style.width='0%';
+    $('undo').disabled=true; $('clear').disabled=true;
+    update(); setGate('done');
+  }
+  $('start').onclick = startRound;
 
   /* ---------- 비교 ---------- */
-  function dilate(g){ const R=Math.max(1,Math.round(N/32)), o=new Uint8Array(N*N); for(let y=0;y<N;y++) for(let x=0;x<N;x++){ if(!g[y*N+x]) continue; for(let dy=-R;dy<=R;dy++) for(let dx=-R;dx<=R;dx++){ const yy=y+dy,xx=x+dx; if(yy>=0&&yy<N&&xx>=0&&xx<N) o[yy*N+xx]=1; } } return o; }
+  function dilate(g){ const R=1, o=new Uint8Array(N*N); for(let y=0;y<N;y++) for(let x=0;x<N;x++){ if(!g[y*N+x]) continue; for(let dy=-R;dy<=R;dy++) for(let dx=-R;dx<=R;dx++){ const yy=y+dy,xx=x+dx; if(yy>=0&&yy<N&&xx>=0&&xx<N) o[yy*N+xx]=1; } } return o; }
+  function density(g){ const G=8, cell=N/G, h=new Float64Array(G*G); for(let i=0;i<N*N;i++) if(g[i]) h[Math.floor((i/N|0)/cell)*G+Math.floor((i%N)/cell)]++; return h; }
+  function cosine(a,b){ let d=0,na=0,nb=0; for(let i=0;i<a.length;i++){ d+=a[i]*b[i]; na+=a[i]*a[i]; nb+=b[i]*b[i]; } return (na&&nb)? d/Math.sqrt(na*nb) : 0; }
   function compare(U){
-    const uLit=U.map(v=>v>0?1:0), uD=dilate(uLit), rD=dilate(REF_LIT);
-    let uN=0,rN=0,hit=0,cov=0,union=0,diff=0; const mark=new Uint8Array(N*N);
+    const uD=dilate(U), rD=dilate(REF); let uN=0,rN=0,hit=0,cov=0; const mark=new Uint8Array(N*N);
     for(let i=0;i<N*N;i++){
-      if(uLit[i]){ uN++; if(rD[i]) hit++; } if(REF_LIT[i]){ rN++; if(uD[i]) cov++; }
-      if(U[i]||REF[i]){ union++; diff+=Math.abs(U[i]-REF[i]); }
-      if(U[i]-REF[i]>=3) mark[i]=1; else if(REF[i]-U[i]>=3) mark[i]=2;
+      if(U[i]){ uN++; if(rD[i]) hit++; else mark[i]=1; }
+      if(REF[i]){ rN++; if(uD[i]) cov++; else mark[i]=2; }
     }
-    if(uN < rN*0.03) return {shape:0,tone:0,total:0,mark};
-    const P=hit/uN, R=cov/rN, shape=(P+R)?2*P*R/(P+R):0, tone=union?1-diff/((LEVELS-1)*union):0;
-    return {shape, tone, total:Math.round(100*Math.pow(0.5*shape+0.5*tone, 0.9)), mark};
+    if(uN < rN*0.03) return {shape:0,layout:0,total:0,mark};
+    const P=hit/uN, R=cov/rN, shape=(P+R)?2*P*R/(P+R):0, layout=cosine(density(U),density(REF));
+    return {shape, layout, total:Math.round(100*Math.pow(0.8*shape+0.2*layout, 1.25)), mark};
   }
   function verdict(t){
-    if(t>=85) return '거의 사진입니다.';
-    if(t>=70) return '무대 조명 안에 들어왔습니다.';
-    if(t>=55) return '트럼펫이 보입니다.';
-    if(t>=40) return '사람의 형태는 잡혔습니다.';
-    if(t>=25) return '실루엣을 찾는 중입니다.';
-    return '아직 빈 무대입니다.';
+    if(t>=85) return '대단해요! 마일스 본인도 깜짝 놀라겠는걸요!';
+    if(t>=70) return '훌륭해요! 무대 조명이 당신을 비추고 있어요.';
+    if(t>=55) return '좋아요! 트럼펫 소리가 들리기 시작했어요.';
+    if(t>=40) return '괜찮아요! 형태가 잡히고 있어요. 조금만 더!';
+    if(t>=25) return '포기하지 마세요! 실루엣이 보일락 말락 해요.';
+    return '무대가 비어 있어요. 분필을 들어 볼까요?';
   }
   function update(){
     if(!REF) return;
-    const U=gridOf(cv,N); paintGrid($('pv'),U,N);
+    const U=inkGrid(cv,N); paintGrid($('pv'),U,N);
     cur=compare(U);
     const dc=$('diff'); dc.width=dc.height=N; const d=dc.getContext('2d'); d.clearRect(0,0,N,N);
-    if($('show-diff').checked){ for(let i=0;i<N*N;i++){ if(!cur.mark[i]) continue; d.fillStyle = cur.mark[i]===1 ? 'rgba(224,96,58,.75)' : 'rgba(201,164,92,.75)'; d.fillRect(i%N, Math.floor(i/N), 1, 1); } }
+    if($('show-diff').checked){ for(let i=0;i<N*N;i++){ if(!cur.mark[i]) continue; d.fillStyle = cur.mark[i]===1 ? 'rgba(224,96,58,.8)' : 'rgba(201,164,92,.7)'; d.fillRect(i%N, Math.floor(i/N), 1, 1); } }
     $('total').textContent=cur.total;
     $('f-shape').style.width=Math.round(cur.shape*100)+'%'; $('v-shape').textContent=Math.round(cur.shape*100);
-    $('f-tone').style.width=Math.round(cur.tone*100)+'%'; $('v-tone').textContent=Math.round(cur.tone*100);
+    $('f-tone').style.width=Math.round(cur.layout*100)+'%'; $('v-tone').textContent=Math.round(cur.layout*100);
     $('verdict').textContent=verdict(cur.total);
-    $('submit').disabled = isSample || cur.total===0;
+    $('submit').disabled = state!=='done' || cur.total===0 || lastId!==null;
   }
   $('show-diff').onchange = update;
 
   /* ---------- 순위 ---------- */
-  const KEY='miles-dot-board-v3';
+  const KEY='miles-dot-board-v4';
   function load(){ try{ return JSON.parse(localStorage.getItem(KEY))||[]; }catch(e){ return []; } }
   function save(b){ try{ localStorage.setItem(KEY, JSON.stringify(b)); }catch(e){} }
   function thumb(){ return $('pv').toDataURL('image/png'); }
@@ -361,19 +420,20 @@
   let lastId=null;
   function renderBoard(){
     const b=load().sort((x,y)=>y.score-x.score).slice(0,10), ol=$('board'); ol.innerHTML='';
-    if(!b.length){ ol.innerHTML='<li class="empty">아직 기록이 없습니다.</li>'; return; }
+    if(!b.length){ ol.innerHTML='<li class="empty">아직 아무도 없어요. 첫 번째 주인공이 되어 볼까요?</li>'; return; }
     b.forEach((e,i)=>{ const li=document.createElement('li'); if(e.id===lastId) li.className='me';
       li.innerHTML=`<span class="rk">${i+1}</span><img alt="" src="${e.thumb}"><span class="nm">${esc(e.name)}<small>${e.n}×${e.n}${e.sample?' · 예시':''}</small></span><span class="sc">${e.score}</span>`; ol.appendChild(li); });
   }
-  $('submit').onclick = () => { if(!cur) return; const e={id:Date.now()+''+Math.random(), name:$('name').value.trim()||'익명', score:cur.total, n:N, thumb:thumb(), ts:Date.now()}; lastId=e.id; const b=load(); b.push(e); save(b); renderBoard(); $('submit').disabled=true; };
-  $('reset').onclick = () => { if(confirm('이 브라우저의 순위 기록을 모두 지울까요?')){ save([]); lastId=null; renderBoard(); } };
+  $('submit').onclick = () => { if(!cur) return; const e={id:Date.now()+''+Math.random(), name:$('name').value.trim()||'이름 없는 연주자', score:cur.total, n:N, thumb:thumb(), ts:Date.now()}; lastId=e.id; const b=load(); b.push(e); save(b); renderBoard(); $('submit').disabled=true; };
+  $('reset').onclick = () => { if(confirm('명예의 전당 기록을 모두 지울까요? 되돌릴 수 없어요!')){ save([]); lastId=null; renderBoard(); } };
 
-  /* 예시 낙서: 같은 인물을 살짝 어긋나게, 손그림 윤곽으로 */
-  function sampleDoodle(){ const o=mk(W); drawFigure(o.getContext('2d'), {jitter:3, seed:5, dx:-9, dy:6, s:0.985, rough:true}); return o; }
+  /* 예시 낙서: 같은 인물을 살짝 어긋나게, 흔들리는 선으로 */
+  function sampleDoodle(){ const o=mk(W); drawFigure(o.getContext('2d'), {jitter:3, seed:5, dx:-9, dy:6, s:0.985, width:6}); return o; }
 
   /* ---------- 부팅 ---------- */
   function start(){
-    blank(); isSample=true; ctx.drawImage(sampleDoodle(),0,0);
+    blank(); isSample=true; ctx.drawImage(sampleDoodle(),0,0); $('corner').textContent='지금 보이는 건 예시 낙서예요.'; setGate('idle');
+    $('timer').textContent=fmt(LIMIT);
     let stored=null; try{ stored=localStorage.getItem(RKEY); }catch(e){}
     const go = () => { rebuildRef(); if(!load().length && cur){ save([{id:'sample', name:'예시', score:cur.total, n:N, thumb:thumb(), ts:Date.now(), sample:true}]); } renderBoard(); };
     if(stored){ const im=new Image(); im.onload=()=>{ refImg=im; refKind='upload'; go(); }; im.onerror=()=>loadDefault(go); im.src=stored; }
