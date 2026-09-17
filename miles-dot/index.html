@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>마일스 데이비스 도트 낙서</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --ground:#0C0E13; --surface:#141720; --surface-2:#1A1E29; --line:#262B38; --line-2:#333A4A;
+    --ink:#ECEEF2; --muted:#9299A8; --faint:#5C6474;
+    --brass:#C9A45C; --brass-ink:#E2BF78; --brass-soft:#26200F;
+    --hot:#E0603A;
+    --track:#20242F;
+    --sans:"IBM Plex Sans KR","Pretendard",-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box} [hidden]{display:none!important}
+  html,body{background:var(--ground)}
+  body{color:var(--ink); font-family:var(--sans); font-size:14px; line-height:1.6; margin:0; padding:0 24px; padding-block:40px 56px; -webkit-font-smoothing:antialiased}
+  .wrap{max-width:1120px; margin:0 auto; display:flex; flex-direction:column; gap:28px}
+
+  header{display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:12px 32px; padding-bottom:20px; border-bottom:1px solid var(--line-2)}
+  h1{font-weight:600; font-size:clamp(24px,3.4vw,32px); line-height:1.2; letter-spacing:-.02em; margin:0; text-wrap:balance}
+  h1 small{display:block; font-family:var(--mono); font-weight:400; font-size:12px; letter-spacing:.08em; color:var(--brass); margin-bottom:8px; text-transform:uppercase}
+  .tag{color:var(--muted); max-width:44ch; margin:0; font-size:14px}
+
+  .grid{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.25fr) minmax(0,1fr); gap:24px}
+  .grid.lower{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}
+  @media (max-width:900px){ .grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .grid .panel.draw{grid-column:1 / -1; order:-1} }
+  @media (max-width:640px){ .grid,.grid.lower{grid-template-columns:minmax(0,1fr)} }
+  .panel{display:flex; flex-direction:column; gap:12px; min-width:0}
+  .label{display:flex; justify-content:space-between; align-items:baseline; gap:12px; font-size:12px; font-weight:500; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+  .label span:last-child{font-family:var(--mono); font-weight:400; letter-spacing:0; text-transform:none; color:var(--faint)}
+
+  .sheet{position:relative; background:#000; border:1px solid var(--line); aspect-ratio:1; max-width:100%; overflow:hidden; border-radius:4px}
+  .sheet canvas{display:block; width:100%; height:100%; image-rendering:pixelated; image-rendering:crisp-edges}
+  .sheet canvas.smooth{image-rendering:auto}
+  .sheet.draw canvas{touch-action:none; cursor:crosshair}
+  .sheet .overlay{position:absolute; inset:0; pointer-events:none}
+  .sheet .note{position:absolute; left:0; right:0; bottom:0; padding:8px 12px; font-size:12px; color:var(--muted); background:linear-gradient(transparent, rgba(0,0,0,.75)); pointer-events:none}
+  .sheet .note:empty{display:none}
+
+  .tools{display:flex; flex-wrap:wrap; align-items:center; gap:6px}
+  .tools .sep{flex:1}
+  button,.filebtn,select,input[type=text]{font:inherit; font-size:13px; color:var(--ink); background:var(--surface-2); border:1px solid var(--line-2); border-radius:6px; line-height:1.2}
+  button,.filebtn{font-weight:500; padding:7px 12px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; transition:background .12s, border-color .12s}
+  button:hover,.filebtn:hover{background:var(--line); border-color:var(--faint)}
+  button:focus-visible,input:focus-visible,select:focus-visible,.filebtn:focus-within{outline:2px solid var(--brass); outline-offset:2px}
+  button[aria-pressed="true"]{background:var(--ink); color:var(--ground); border-color:var(--ink)}
+  button.primary{background:var(--brass); border-color:var(--brass); color:#15110A; font-weight:600; padding:9px 18px}
+  button.primary:hover{background:var(--brass-ink); border-color:var(--brass-ink)}
+  button.quiet{background:transparent; border-color:transparent; color:var(--muted)}
+  button.quiet:hover{background:var(--surface-2); color:var(--ink)}
+  button:disabled{opacity:.4; cursor:not-allowed}
+  .swatch{width:12px; height:12px; border-radius:50%; border:1px solid var(--line-2); display:inline-block}
+  label.size{display:flex; align-items:center; gap:8px; color:var(--muted); font-size:13px; padding-left:4px}
+  input[type=range]{width:84px; accent-color:var(--brass)}
+  select,input[type=text]{padding:7px 10px; min-width:0}
+  input[type=text]{flex:1}
+  input[type=file]{position:absolute; width:1px; height:1px; opacity:0; overflow:hidden}
+  .filebtn{position:relative}
+  .row{display:flex; flex-wrap:wrap; gap:6px 14px; align-items:center; font-size:13px; color:var(--muted)}
+  .row label{display:flex; align-items:center; gap:6px}
+  input[type=checkbox]{accent-color:var(--brass); margin:0}
+
+  .score{background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:20px 22px; display:grid; grid-template-columns:auto 1fr; gap:8px 28px; align-items:center}
+  @media (max-width:480px){ .score{grid-template-columns:1fr} }
+  .total{font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:64px; font-weight:500; line-height:1; letter-spacing:-.04em}
+  .total sub{font-size:14px; font-weight:400; color:var(--faint); letter-spacing:0; vertical-align:baseline; margin-left:4px}
+  .verdict{font-size:15px; font-weight:500; color:var(--brass-ink); grid-column:1 / -1; min-height:1.4em}
+  .bars{display:flex; flex-direction:column; gap:10px}
+  .bar{display:grid; grid-template-columns:4.5em 1fr 3em; align-items:center; gap:12px; font-size:13px}
+  .bar .n{color:var(--muted)}
+  .bar .t{height:6px; background:var(--track); border-radius:99px; overflow:hidden}
+  .bar .f{height:100%; width:0; background:var(--brass); border-radius:99px; transition:width .3s cubic-bezier(.2,.8,.2,1)}
+  .bar .v{font-family:var(--mono); font-variant-numeric:tabular-nums; text-align:right; color:var(--ink)}
+  .hint{font-size:12px; color:var(--faint); grid-column:1 / -1; margin:0; line-height:1.6}
+  .legend{display:flex; gap:14px; font-size:12px; color:var(--muted)}
+  .legend i{display:inline-block; width:10px; height:10px; margin-right:6px; vertical-align:-1px; border-radius:2px}
+  .submit{display:flex; gap:8px; align-items:center}
+
+  ol.board{list-style:none; margin:0; padding:0; background:var(--surface); border:1px solid var(--line); border-radius:4px; display:flex; flex-direction:column; overflow:hidden}
+  ol.board li{display:grid; grid-template-columns:2em 44px 1fr auto; align-items:center; gap:12px; padding:10px 16px; border-top:1px solid var(--line)}
+  ol.board li:first-child{border-top:0}
+  ol.board li.me{background:var(--brass-soft); box-shadow:inset 2px 0 0 var(--brass)}
+  ol.board .rk{font-family:var(--mono); font-variant-numeric:tabular-nums; color:var(--faint)}
+  ol.board li:first-child .rk{color:var(--brass)}
+  ol.board img{width:44px; height:44px; display:block; background:#000; border:1px solid var(--line-2); border-radius:3px; image-rendering:pixelated}
+  ol.board .nm{min-width:0; overflow-wrap:anywhere; font-weight:500}
+  ol.board .nm small{display:block; color:var(--faint); font-size:11px; font-family:var(--mono); font-weight:400}
+  ol.board .sc{font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:18px; font-weight:500}
+  ol.board li.empty{grid-template-columns:1fr; color:var(--faint); text-align:center; padding:28px}
+  .board-foot{display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--faint)}
+  .board-foot button{font-size:12px; padding:4px 9px}
+  footer.note{color:var(--faint); font-size:12px; border-top:1px solid var(--line); padding-top:14px; max-width:72ch}
+  @media (prefers-reduced-motion: reduce){ .bar .f{transition:none} button{transition:none} }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1><small id="h-sub">Miles Davis · 48 × 48 · 8 tones</small>마일스 데이비스 도트 낙서</h1>
+    <p class="tag">검은 무대에 분필로 그립니다. 그리는 동안 도트로 바뀌고, 기준 사진의 도트와 칸 단위로 비교해 점수가 갱신됩니다.</p>
+  </header>
+
+  <div class="grid">
+    <section class="panel">
+      <div class="label"><span>기준</span><span id="ref-note">ref.jpg</span></div>
+      <div class="sheet"><canvas id="ref" width="32" height="32" aria-label="기준 도트 이미지"></canvas></div>
+      <div class="tools">
+        <label class="filebtn"><span>다른 사진 불러오기</span><input id="file" type="file" accept="image/*"></label>
+        <button id="ref-reset" class="quiet" hidden>기본 사진으로</button>
+      </div>
+      <div class="row">
+        <label>맞춤 <select id="fit"><option value="contain">전체 보이기</option><option value="cover">꽉 채우기</option></select></label>
+        <label>해상도 <select id="res"><option value="32">32</option><option value="48" selected>48</option><option value="64">64</option></select></label>
+        <label><input id="show-src" type="checkbox"> 원본</label>
+      </div>
+    </section>
+
+    <section class="panel draw">
+      <div class="label"><span>그리기</span><span>480 × 480</span></div>
+      <div class="sheet draw"><canvas id="draw" class="smooth" width="480" height="480" aria-label="그림판"></canvas><div class="note" id="corner">예시입니다. 새 무대를 누르고 직접 그려보세요.</div></div>
+      <div class="tools">
+        <button class="tone" data-lv="7" aria-pressed="true"><i class="swatch" style="background:#F2F4F7"></i>밝게</button>
+        <button class="tone" data-lv="5" aria-pressed="false"><i class="swatch" style="background:#A3AAB5"></i>중간</button>
+        <button class="tone" data-lv="3" aria-pressed="false"><i class="swatch" style="background:#6E7480"></i>어둡게</button>
+        <button class="tone" data-lv="0" aria-pressed="false"><i class="swatch" style="background:#000"></i>지우개</button>
+        <label class="size">굵기 <input id="size" type="range" min="4" max="40" value="14"></label>
+        <span class="sep"></span>
+        <button id="undo" class="quiet">되돌리기</button>
+        <button id="clear" class="quiet">새 무대</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="label"><span>미리보기</span><span id="pv-note">48 × 48</span></div>
+      <div class="sheet"><canvas id="pv" width="32" height="32" aria-label="내 그림의 도트 미리보기"></canvas><canvas id="diff" class="overlay" width="32" height="32" aria-hidden="true"></canvas></div>
+      <div class="row">
+        <label><input id="show-diff" type="checkbox" checked> 차이 표시</label>
+        <span class="legend"><span><i style="background:#E0603A"></i>과하게 칠함</span><span><i style="background:#C9A45C"></i>덜 칠함</span></span>
+      </div>
+    </section>
+  </div>
+
+  <div class="grid lower">
+    <section class="panel">
+      <div class="label"><span>점수</span><span>실시간</span></div>
+      <div class="score">
+        <div class="total"><span id="total">—</span><sub>/ 100</sub></div>
+        <div class="bars">
+          <div class="bar"><span class="n">실루엣</span><div class="t"><div class="f" id="f-shape"></div></div><span class="v" id="v-shape">—</span></div>
+          <div class="bar"><span class="n">명암</span><div class="t"><div class="f" id="f-tone"></div></div><span class="v" id="v-tone">—</span></div>
+        </div>
+        <div class="verdict" id="verdict"></div>
+        <p class="hint">실루엣은 밝은 칸의 위치 일치(한 칸 오차 허용), 명암은 칠해진 칸의 8단계 밝기 차이입니다. 각 50%.</p>
+      </div>
+      <div class="submit">
+        <input id="name" type="text" maxlength="14" placeholder="닉네임" aria-label="닉네임">
+        <button id="submit" class="primary" disabled>순위에 올리기</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="label"><span>순위</span><span>이 브라우저</span></div>
+      <ol class="board" id="board"></ol>
+      <div class="board-foot"><span>상위 10명 · 기록은 이 기기의 브라우저에만 저장됩니다</span><button id="reset" class="quiet">초기화</button></div>
+    </section>
+  </div>
+
+  <footer class="note">불러온 사진은 서버로 전송되지 않고 이 브라우저에만 저장됩니다.</footer>
+</div>
+
+<script>
+(function(){
+  const W = 480, DEFAULT_REF = 'ref.jpg';
+  const LEVELS = 8, TOP = [242,244,247];
+  const LV = Array.from({length:LEVELS}, (_,i) => 'rgb(' + TOP.map(v=>Math.round(v*i/(LEVELS-1))).join(',') + ')');
+  const LVRGB = Array.from({length:LEVELS}, (_,i) => TOP.map(v=>Math.round(v*i/(LEVELS-1))));
+  const $ = id => document.getElementById(id);
+  const mk = n => { const c=document.createElement('canvas'); c.width=c.height=n; return c; };
+  function rng(seed){ let x = seed>>>0 || 1; return () => { x = (x*1664525 + 1013904223)>>>0; return x/4294967296; }; }
+
+  /* ---------- 인물 드로잉: 사진 구도를 따라 직접 작성 (예시 낙서 + 사진 없을 때의 폴백) ---------- */
+  function drawFigure(c, o){
+    o = o || {}; const r = rng(o.seed||1), J = o.jitter||0;
+    const T = i => LV[i];
+    const jp = p => [p[0]+(r()-.5)*2*J, p[1]+(r()-.5)*2*J];
+    const path = (pts, close) => { const q=pts.map(jp); c.beginPath(); c.moveTo(q[0][0],q[0][1]); for(let i=1;i<q.length;i++) c.lineTo(q[i][0],q[i][1]); if(close) c.closePath(); };
+    const fill = (pts, col) => { path(pts,true); c.fillStyle=col; c.fill(); };
+    const stroke = (pts, col, w, close) => { path(pts,close); c.strokeStyle=col; c.lineWidth=w; c.lineCap='round'; c.lineJoin='round'; c.stroke(); };
+    const dot = (x,y,rad,col) => { const q=jp([x,y]); c.fillStyle=col; c.beginPath(); c.arc(q[0],q[1],rad,0,Math.PI*2); c.fill(); };
+    c.save(); c.translate(o.dx||0, o.dy||0); c.scale(o.s||1, o.s||1);
+    c.fillStyle='#000'; c.fillRect(-W,-W,W*3,W*3);
+
+    // 바지 — 넓은 통, 왼쪽으로 기운 다리
+    fill([[321,199],[409,203],[400,258],[374,298],[352,340],[340,400],[331,470],[269,470],[258,420],[241,334],[266,300],[298,262]], T(3));
+    fill([[298,262],[352,340],[340,400],[331,470],[300,470],[298,405],[281,335]], T(2));           // 안쪽 그늘
+    stroke([[300,262],[352,338]], T(4), 2); stroke([[262,330],[290,400],[300,468]], T(4), 2);      // 주름
+    stroke([[321,199],[409,203]], T(5), 4);                                                        // 허리단
+    fill([[269,470],[331,470],[337,479],[262,479]], T(5));                                         // 맨발
+
+    // 민소매 — 밝은 톤, 어깨끈
+    fill([[333,119],[352,111],[369,127],[391,111],[409,119],[405,199],[321,207]], T(7));
+    stroke([[352,111],[356,86]], T(7), 6); stroke([[391,111],[386,90]], T(7), 6);
+    fill([[338,150],[352,140],[360,205],[326,207]], T(6));                                         // 옆구리 음영
+    stroke([[333,207],[331,235],[336,258]], T(7), 2);                                              // 늘어진 끈
+
+    // 목·머리
+    fill([[350,86],[382,84],[390,116],[348,120]], T(5));
+    dot(361,44,23,T(5));                                                                           // 얼굴
+    fill([[343,26],[360,19],[381,26],[387,50],[380,40],[364,34],[349,38]], T(1));                  // 머리카락
+    stroke([[347,34],[340,44],[343,55],[338,63],[344,72],[352,75]], T(6), 3);                      // 옆얼굴 윤곽
+    dot(379,50,5,T(4));                                                                            // 귀
+    stroke([[338,53],[356,51]], T(7), 2); dot(346,53,5,T(7));                                      // 안경
+    stroke([[346,53],[351,53]], T(1), 2);
+
+    // 팔 — 뒤쪽 팔은 어둡게, 앞쪽 팔은 밝게
+    stroke([[395,128],[340,162],[302,112]], T(3), 16);
+    stroke([[389,119],[322,142],[289,92]], T(5), 20);
+    dot(289,92,12,T(5)); dot(301,101,11,T(5));                                                     // 손
+    stroke([[281,84],[276,92]], T(4), 3); stroke([[292,82],[287,90]], T(4), 3); stroke([[303,88],[299,96]], T(4), 3); // 손가락
+
+    // 트럼펫 — 관·밸브·벨
+    stroke([[345,76],[212,96]], T(5), 8);
+    stroke([[345,72],[214,92]], T(7), 2);                                                          // 하이라이트
+    stroke([[300,96],[222,108]], T(4), 4);                                                         // 아래쪽 관
+    [262,274,286].forEach(x => { stroke([[x,74],[x,104]], T(5), 5); dot(x,72,3,T(7)); });          // 밸브
+    c.fillStyle=T(5); { const q=jp([203,99]); c.beginPath(); c.ellipse(q[0],q[1],22,18,0,0,Math.PI*2); c.fill(); }
+    { const q=jp([203,99]); c.strokeStyle=T(7); c.lineWidth=2; c.beginPath(); c.ellipse(q[0],q[1],22,18,0,0,Math.PI*2); c.stroke(); }
+    dot(203,99,7,T(2));                                                                            // 벨 안쪽
+
+    if(o.rough){ // 손그림 느낌의 분필 윤곽
+      stroke([[321,199],[409,203],[400,258],[374,298],[352,340],[340,400],[331,470],[269,470],[258,420],[241,334],[266,300],[298,262]], T(7), 3, true);
+      stroke([[333,119],[352,111],[369,127],[391,111],[409,119],[405,199],[321,207]], T(7), 3, true);
+    }
+    c.restore();
+  }
+  const baseRef = mk(W); drawFigure(baseRef.getContext('2d'));
+
+  /* ---------- 픽셀화 ---------- */
+  function quant(l){ return Math.min(LEVELS-1, Math.floor(l/32)); }
+  function gridOf(src, N){
+    const mid = mk(128), m = mid.getContext('2d'); m.fillStyle='#000'; m.fillRect(0,0,128,128);
+    m.imageSmoothingEnabled=true; m.imageSmoothingQuality='high'; m.drawImage(src,0,0,128,128);
+    const o = mk(N), c = o.getContext('2d'); c.fillStyle='#000'; c.fillRect(0,0,N,N);
+    c.imageSmoothingEnabled=true; c.imageSmoothingQuality='high'; c.drawImage(mid,0,0,N,N);
+    const d=c.getImageData(0,0,N,N).data, g=new Uint8Array(N*N);
+    for(let i=0;i<N*N;i++) g[i]=quant((d[i*4]*299+d[i*4+1]*587+d[i*4+2]*114)/1000);
+    return g;
+  }
+  function paintGrid(canvas, g, N){
+    canvas.width=canvas.height=N; const c=canvas.getContext('2d'), im=c.createImageData(N,N);
+    for(let i=0;i<N*N;i++){ const p=LVRGB[g[i]]; im.data[i*4]=p[0]; im.data[i*4+1]=p[1]; im.data[i*4+2]=p[2]; im.data[i*4+3]=255; }
+    c.putImageData(im,0,0);
+  }
+
+  /* ---------- 기준 관리: 업로드 > ref.jpg > 실루엣 ---------- */
+  const refC = $('ref'), refSrc = mk(W), RKEY='miles-dot-ref-v1';
+  let N = 48, fit = 'contain', refImg = null, refKind = 'silhouette', REF = null, REF_LIT = null;
+  function buildRefSrc(){
+    const c = refSrc.getContext('2d'); c.fillStyle='#000'; c.fillRect(0,0,W,W);
+    if(!refImg){ c.drawImage(baseRef,0,0); return; }
+    const iw=refImg.naturalWidth||refImg.width, ih=refImg.naturalHeight||refImg.height;
+    const sc = fit==='contain' ? Math.min(W/iw, W/ih) : Math.max(W/iw, W/ih);
+    const w=iw*sc, h=ih*sc; c.drawImage(refImg, (W-w)/2, (W-h)/2, w, h);
+  }
+  function rebuildRef(){
+    buildRefSrc();
+    try { REF = gridOf(refSrc, N); }
+    catch(e){ refImg=null; refKind='silhouette'; buildRefSrc(); REF = gridOf(refSrc, N); }   // file:// 등에서 캔버스가 오염된 경우
+    REF_LIT = REF.map(v=>v>0?1:0);
+    if($('show-src').checked){ refC.className='smooth'; refC.width=refC.height=W; refC.getContext('2d').drawImage(refSrc,0,0); }
+    else { refC.className=''; paintGrid(refC, REF, N); }
+    $('ref-note').textContent = {upload:'불러온 사진', file:DEFAULT_REF, silhouette:'기본 실루엣'}[refKind];
+    $('ref-reset').hidden = refKind !== 'upload';
+    $('pv-note').textContent = N+' × '+N; $('h-sub').textContent = 'Miles Davis · '+N+' × '+N+' · '+LEVELS+' tones';
+    update();
+  }
+  function loadDefault(cb){
+    const im=new Image(); im.onload=()=>{ refImg=im; refKind='file'; cb(); }; im.onerror=()=>{ refImg=null; refKind='silhouette'; cb(); }; im.src=DEFAULT_REF;
+  }
+  $('file').addEventListener('change', e => {
+    const f=e.target.files[0]; if(!f) return;
+    const rd=new FileReader(); rd.onload=()=>{ const im=new Image(); im.onload=()=>{ refImg=im; refKind='upload'; rebuildRef();
+      try{ const t=mk(192), c=t.getContext('2d'); const s=Math.min(192/im.width,192/im.height); c.fillStyle='#000'; c.fillRect(0,0,192,192); c.drawImage(im,(192-im.width*s)/2,(192-im.height*s)/2,im.width*s,im.height*s); localStorage.setItem(RKEY, t.toDataURL('image/jpeg',.8)); }catch(err){}
+    }; im.src=rd.result; }; rd.readAsDataURL(f); e.target.value='';
+  });
+  $('ref-reset').onclick = () => { try{ localStorage.removeItem(RKEY); }catch(e){} loadDefault(rebuildRef); };
+  $('fit').onchange = e => { fit=e.target.value; rebuildRef(); };
+  $('res').onchange = e => { N=+e.target.value; rebuildRef(); };
+  $('show-src').onchange = rebuildRef;
+
+  /* ---------- 그림판 ---------- */
+  const cv = $('draw'), ctx = cv.getContext('2d');
+  let lv=7, size=14, drawing=false, last=null, undo=[], isSample=false, cur=null, raf=false;
+  function blank(){ ctx.fillStyle='#000'; ctx.fillRect(0,0,W,W); }
+  function pushUndo(){ undo.push(ctx.getImageData(0,0,W,W)); if(undo.length>30) undo.shift(); }
+  function pos(e){ const r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left)*W/r.width, y:(e.clientY-r.top)*W/r.height}; }
+  function setStyle(){ ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle=ctx.fillStyle=LV[lv]; ctx.lineWidth = lv===0 ? size*2 : size; }
+  function touched(){ if(isSample){ isSample=false; $('corner').textContent=''; } }
+  function schedule(){ if(raf) return; raf=true; requestAnimationFrame(()=>{ raf=false; update(); }); }
+
+  cv.addEventListener('pointerdown', e => {
+    e.preventDefault(); cv.setPointerCapture(e.pointerId); pushUndo(); drawing=true; last=pos(e); setStyle();
+    ctx.beginPath(); ctx.arc(last.x,last.y,ctx.lineWidth/2,0,Math.PI*2); ctx.fill(); touched(); schedule();
+  });
+  cv.addEventListener('pointermove', e => { if(!drawing) return; const p=pos(e); setStyle(); ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke(); last=p; schedule(); });
+  ['pointerup','pointercancel','pointerleave'].forEach(t => cv.addEventListener(t, () => { drawing=false; }));
+  document.querySelectorAll('.tone').forEach(b => b.onclick = () => { lv=+b.dataset.lv; document.querySelectorAll('.tone').forEach(x=>x.setAttribute('aria-pressed', x===b)); });
+  $('size').oninput = e => size=+e.target.value;
+  $('undo').onclick = () => { const im=undo.pop(); if(im){ ctx.putImageData(im,0,0); update(); } };
+  $('clear').onclick = () => { pushUndo(); blank(); touched(); update(); };
+
+  /* ---------- 비교 ---------- */
+  function dilate(g){ const R=Math.max(1,Math.round(N/32)), o=new Uint8Array(N*N); for(let y=0;y<N;y++) for(let x=0;x<N;x++){ if(!g[y*N+x]) continue; for(let dy=-R;dy<=R;dy++) for(let dx=-R;dx<=R;dx++){ const yy=y+dy,xx=x+dx; if(yy>=0&&yy<N&&xx>=0&&xx<N) o[yy*N+xx]=1; } } return o; }
+  function compare(U){
+    const uLit=U.map(v=>v>0?1:0), uD=dilate(uLit), rD=dilate(REF_LIT);
+    let uN=0,rN=0,hit=0,cov=0,union=0,diff=0; const mark=new Uint8Array(N*N);
+    for(let i=0;i<N*N;i++){
+      if(uLit[i]){ uN++; if(rD[i]) hit++; } if(REF_LIT[i]){ rN++; if(uD[i]) cov++; }
+      if(U[i]||REF[i]){ union++; diff+=Math.abs(U[i]-REF[i]); }
+      if(U[i]-REF[i]>=3) mark[i]=1; else if(REF[i]-U[i]>=3) mark[i]=2;
+    }
+    if(uN < rN*0.03) return {shape:0,tone:0,total:0,mark};
+    const P=hit/uN, R=cov/rN, shape=(P+R)?2*P*R/(P+R):0, tone=union?1-diff/((LEVELS-1)*union):0;
+    return {shape, tone, total:Math.round(100*Math.pow(0.5*shape+0.5*tone, 0.9)), mark};
+  }
+  function verdict(t){
+    if(t>=85) return '거의 사진입니다.';
+    if(t>=70) return '무대 조명 안에 들어왔습니다.';
+    if(t>=55) return '트럼펫이 보입니다.';
+    if(t>=40) return '사람의 형태는 잡혔습니다.';
+    if(t>=25) return '실루엣을 찾는 중입니다.';
+    return '아직 빈 무대입니다.';
+  }
+  function update(){
+    if(!REF) return;
+    const U=gridOf(cv,N); paintGrid($('pv'),U,N);
+    cur=compare(U);
+    const dc=$('diff'); dc.width=dc.height=N; const d=dc.getContext('2d'); d.clearRect(0,0,N,N);
+    if($('show-diff').checked){ for(let i=0;i<N*N;i++){ if(!cur.mark[i]) continue; d.fillStyle = cur.mark[i]===1 ? 'rgba(224,96,58,.75)' : 'rgba(201,164,92,.75)'; d.fillRect(i%N, Math.floor(i/N), 1, 1); } }
+    $('total').textContent=cur.total;
+    $('f-shape').style.width=Math.round(cur.shape*100)+'%'; $('v-shape').textContent=Math.round(cur.shape*100);
+    $('f-tone').style.width=Math.round(cur.tone*100)+'%'; $('v-tone').textContent=Math.round(cur.tone*100);
+    $('verdict').textContent=verdict(cur.total);
+    $('submit').disabled = isSample || cur.total===0;
+  }
+  $('show-diff').onchange = update;
+
+  /* ---------- 순위 ---------- */
+  const KEY='miles-dot-board-v3';
+  function load(){ try{ return JSON.parse(localStorage.getItem(KEY))||[]; }catch(e){ return []; } }
+  function save(b){ try{ localStorage.setItem(KEY, JSON.stringify(b)); }catch(e){} }
+  function thumb(){ return $('pv').toDataURL('image/png'); }
+  function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  let lastId=null;
+  function renderBoard(){
+    const b=load().sort((x,y)=>y.score-x.score).slice(0,10), ol=$('board'); ol.innerHTML='';
+    if(!b.length){ ol.innerHTML='<li class="empty">아직 기록이 없습니다.</li>'; return; }
+    b.forEach((e,i)=>{ const li=document.createElement('li'); if(e.id===lastId) li.className='me';
+      li.innerHTML=`<span class="rk">${i+1}</span><img alt="" src="${e.thumb}"><span class="nm">${esc(e.name)}<small>${e.n}×${e.n}${e.sample?' · 예시':''}</small></span><span class="sc">${e.score}</span>`; ol.appendChild(li); });
+  }
+  $('submit').onclick = () => { if(!cur) return; const e={id:Date.now()+''+Math.random(), name:$('name').value.trim()||'익명', score:cur.total, n:N, thumb:thumb(), ts:Date.now()}; lastId=e.id; const b=load(); b.push(e); save(b); renderBoard(); $('submit').disabled=true; };
+  $('reset').onclick = () => { if(confirm('이 브라우저의 순위 기록을 모두 지울까요?')){ save([]); lastId=null; renderBoard(); } };
+
+  /* 예시 낙서: 같은 인물을 살짝 어긋나게, 손그림 윤곽으로 */
+  function sampleDoodle(){ const o=mk(W); drawFigure(o.getContext('2d'), {jitter:3, seed:5, dx:-9, dy:6, s:0.985, rough:true}); return o; }
+
+  /* ---------- 부팅 ---------- */
+  function start(){
+    blank(); isSample=true; ctx.drawImage(sampleDoodle(),0,0);
+    let stored=null; try{ stored=localStorage.getItem(RKEY); }catch(e){}
+    const go = () => { rebuildRef(); if(!load().length && cur){ save([{id:'sample', name:'예시', score:cur.total, n:N, thumb:thumb(), ts:Date.now(), sample:true}]); } renderBoard(); };
+    if(stored){ const im=new Image(); im.onload=()=>{ refImg=im; refKind='upload'; go(); }; im.onerror=()=>loadDefault(go); im.src=stored; }
+    else loadDefault(go);
+  }
+  start();
+})();
+</script>
+</body>
+</html>
