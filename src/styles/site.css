@@ -470,7 +470,8 @@ main {
   color: var(--ink);
 }
 
-.chip--보류 {
+.chip--보류,
+.chip--예정 {
   border-color: var(--line-strong);
   color: var(--muted);
 }

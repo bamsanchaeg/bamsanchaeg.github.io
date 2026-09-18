@@ -24,7 +24,7 @@ const WEEKS = [
   { n: 3, title: '리스트 — 글 목록 · 아카이브 · 필터', desc: '카테고리·태그 필터를 stripe 의 Directory 패턴(데스크톱 세로 / 모바일 가로 칩)으로 — 단 메타포 없이', href: null, status: '예정' },
   { n: 4, title: '조합 — 포트폴리오 카드 · 헤더', desc: '카드에 썸네일 슬롯, 헤더에 현재 위치 표시와 키보드 접근성 정비', href: null, status: '예정' },
   { n: 5, title: '페이지 — 홈 재구성 · 회고', desc: '최근 글 + 진행 중 프로젝트를 한 화면에. 전 주차 회고를 write-up 에 정리', href: null, status: '예정' },
-];
+] as const;
 ---
 
 <Base title="stripe.dev 스터디" description="stripe.dev 디자인 시스템을 분석해 원리를 뽑고, 밤산책 자체 디자인 시스템에 적용하는 5주 스터디">
