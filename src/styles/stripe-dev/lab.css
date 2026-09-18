@@ -1,0 +1,98 @@
+/* stripe.dev 랩 셸 — nav / footer / 쇼케이스 전용 스타일. 토큰은 tokens.css. */
+
+.sd-body { margin: 0; min-height: 100vh; }
+.sd-page { min-height: 100vh; display: flex; flex-direction: column; }
+.sd-main { flex: 1; padding-top: 64px; padding-bottom: 100px; row-gap: 0; }
+.sd * { box-sizing: border-box; }
+
+/* Nav — position: fixed, blur, [B] 라벨 (stripe.dev Nav/NavButton 모듈) */
+.sd-nav {
+  position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+  z-index: 2; width: 100%; max-width: 1728px;
+  display: flex; justify-content: space-between; gap: 3px; padding: 12px;
+}
+.sd-nav__left, .sd-switcher { display: flex; gap: 2px; flex-wrap: wrap; }
+.sd-navbtn {
+  display: flex; align-items: center; justify-content: center;
+  padding: 5px 8px; border: 0; border-radius: 2px; line-height: 1; letter-spacing: -.3px;
+  background: var(--sd-navButtonBG); color: var(--sd-buttonColor);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  cursor: pointer; appearance: none; font: inherit;
+}
+.sd-navbtn.is-active { background: var(--sd-buttonColor); color: var(--sd-backgroundColor); }
+.sd-navbtn .hotkey { letter-spacing: -1px; }
+@media (pointer: fine) {
+  .sd-navbtn:hover { background: var(--sd-highlightColor); color: var(--sd-invertedTextColor); }
+}
+@media (max-width: 959px) {
+  /* 모바일: 단축키 표기 숨김, nav 는 흐름 안에 두어 히어로와 겹치지 않게 */
+  .sd-navbtn .hotkey { display: none; }
+  .sd-navbtn { font-size: 11px; }
+  .sd-nav { position: static; transform: none; }
+  .sd-main { padding-top: 8px; }
+}
+select.sd-navbtn { text-transform: uppercase; }
+
+/* Section header — /라벨 + .5px 밑줄 (TableHeader 모듈) */
+.sd-th { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; border-bottom: .5px solid var(--sd-sectionLabels); padding-bottom: 6px; margin-top: 56px; }
+.sd-th .text-smallcaps { grid-column: 1 / -1; color: var(--sd-sectionLabels); }
+
+/* Hero */
+.sd-hero { margin-top: 24px; }
+.sd-hero__title { grid-column: 1 / 15; }
+.sd-hero__sub { grid-column: 1 / 15; padding: 50px 6px 0; }
+@media (max-width: 759px) { .sd-hero__title, .sd-hero__sub { grid-column: 1 / -1; } }
+
+/* Tag (점선 테두리) */
+.sd-tag {
+  display: inline-block; border: 1px dotted var(--sd-tagBorderColor); border-radius: 3px;
+  padding: 2px 5px 2.5px; line-height: 1; white-space: nowrap; color: var(--sd-tagTextColor);
+}
+
+/* Showcase blocks */
+.sd-block { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; row-gap: 16px; padding: 24px 0; }
+.sd-block + .sd-block { border-top: 1px dotted var(--sd-dottedBorderColor); }
+.sd-block__label { grid-column: 1 / 5; align-self: start; display: flex; gap: 8px; align-items: flex-start; }
+.sd-block__body { grid-column: 5 / -1; min-width: 0; }
+@media (max-width: 959px) { .sd-block__label, .sd-block__body { grid-column: 1 / -1; } }
+.sd-square { width: 8px; min-width: 8px; height: 8px; margin-top: 3px; background: var(--sd-squareTextColor); }
+
+/* Type specimen */
+.sd-specimen { display: grid; gap: 28px; }
+.sd-specimen > div { display: grid; gap: 8px; }
+.sd-specimen .meta { color: var(--sd-sectionLabels); }
+.sd-specimen .text-hero { overflow-wrap: anywhere; }
+
+/* Swatches */
+.sd-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.sd-swatch { display: grid; gap: 6px; }
+.sd-swatch__chip { height: 56px; border: 1px solid var(--sd-borderColor); }
+.sd-swatch .text-smallcaps { overflow-wrap: anywhere; }
+
+/* Grid demo */
+.sd-griddemo { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+.sd-griddemo span { height: 40px; border: 1px dotted var(--sd-dottedBorderColor); display: grid; place-items: center; font-family: var(--sd-font-mono); font-size: 10px; color: var(--sd-filterTextInactive); }
+@media (min-width: 760px) { .sd-griddemo { grid-template-columns: repeat(16, 1fr); } }
+@media (min-width: 960px) { .sd-griddemo { grid-template-columns: repeat(24, 1fr); } }
+
+/* Highlight (형광펜) — hover 시 라임 반전 */
+.sd-hl { background-image: linear-gradient(transparent var(--sd-overlap), var(--sd-hl-fill, transparent) var(--sd-overlap)); }
+.sd-link { border-bottom: 1px solid var(--sd-borderColor); transition: background-color .1s linear; }
+@media (pointer: fine) {
+  .sd-link:hover { background: var(--sd-highlightColor); color: var(--sd-invertedTextColor); }
+  .sd-hl-parent:hover .sd-hl { --sd-hl-fill: var(--sd-highlightColor); color: var(--sd-invertedTextColor); }
+}
+
+/* Checklist (주차 완료 기준) */
+.sd-check { margin: 0; padding: 0; list-style: none; display: grid; }
+.sd-check li { display: flex; gap: 10px; align-items: baseline; padding: 10px 0; border-bottom: 1px dotted var(--sd-dottedBorderColor); }
+.sd-check li::before { content: "[ ]"; font-family: var(--sd-font-mono); font-size: 12px; color: var(--sd-filterTextInactive); }
+.sd-check li.done::before { content: "[x]"; color: var(--sd-filterTextActive); }
+
+/* Footer */
+.sd-footer { margin-top: 100px; border-top: .5px solid var(--sd-borderColor); padding: 16px 0 40px; row-gap: 12px; }
+.sd-footer__label { grid-column: 1 / -1; }
+.sd-footer__body { grid-column: 1 / 13; margin: 0; line-height: 130%; }
+@media (max-width: 959px) { .sd-footer__body { grid-column: 1 / -1; } }
+.sd-main, .sd-footer { padding-left: 12px; padding-right: 12px; }
+.sd-footer { width: 100%; max-width: 1728px; margin-left: auto; margin-right: auto; }

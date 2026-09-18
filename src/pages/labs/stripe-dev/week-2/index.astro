@@ -1,0 +1,98 @@
+---
+import Base from '../../../../layouts/Base.astro';
+import Chip from '../../../../components/ui/Chip.astro';
+import Button from '../../../../components/ui/Button.astro';
+import SectionLabel from '../../../../components/ui/SectionLabel.astro';
+import '../../../../styles/lab.css';
+
+const FIGMA = 'https://www.figma.com/design/rgWioHzV1jbcYJCFVmNSTo';
+
+const MAPPING = [
+  { figma: 'Button', variant: 'Style=Outline · State=Default/Hover', code: '<Button variant="outline">', css: '.button.button--outline', was: '.text-button' },
+  { figma: 'Button', variant: 'Style=Solid · State=Default/Hover', code: '<Button variant="solid">', css: '.button.button--solid', was: '.main-nav .github-link' },
+  { figma: 'Chip', variant: 'Kind=Category', code: '<Chip>', css: '.chip.chip--category', was: '.post-meta span:first-child (암묵적)' },
+  { figma: 'Chip', variant: 'Kind=진행중 / 완료 / 보류', code: '<Chip kind="진행중">', css: '.chip.chip--진행중 …', was: '.status.status--*' },
+  { figma: 'Section Label', variant: '—', code: '<SectionLabel as="p">', css: '.section-label', was: '.section-label (그대로)' },
+];
+
+const RULES = [
+  ['이름이 곧 계약', 'Figma 컴포넌트 이름 = Astro 컴포넌트 이름 = CSS 블록 이름. 변형 축(Style/Kind)은 그대로 prop 이름이 된다. 어느 쪽을 보든 다른 쪽을 찾을 수 있다.'],
+  ['상태는 CSS 가 갖는다', 'Figma 의 State=Hover 는 코드에서 prop 이 아니라 :hover 다. 디자인 도구는 상태를 변형으로 그려야 하지만 코드는 그럴 필요가 없다 — 변형 축을 억지로 prop 으로 옮기지 않는다.'],
+  ['토큰만 참조', '세 컴포넌트의 CSS 는 하드코딩 색이 0 이다. Figma 쪽도 미바인딩 0. 그래서 다크 모드에서 양쪽이 같은 이유로 같은 색이 된다.'],
+];
+---
+
+<Base title="Week 2 · 원자 컴포넌트" description=".status / .text-button / .github-link / .section-label 을 Chip · Button · SectionLabel 컴포넌트로 승격하고 Figma 와 1:1 로 맞춘 기록">
+  <section class="lab-intro">
+    <SectionLabel><a href="/labs/stripe-dev/" style="color:inherit;text-decoration:none">Lab · stripe.dev study</a> / Week 2</SectionLabel>
+    <h1>원자 컴포넌트</h1>
+    <p>
+      1주차에 토큰을 정리했으니 이제 토큰을 쓰는 가장 작은 단위를 컴포넌트로 만든다.
+      네 곳에 흩어져 있던 클래스(<code>.status</code>, <code>.text-button</code>, <code>.github-link</code>, <code>.section-label</code>)가
+      Astro 컴포넌트 <strong>3개</strong>가 됐고, 각각 <a href={FIGMA} rel="noopener">Figma 컴포넌트</a>와 이름·변형이 1:1 이다.
+    </p>
+  </section>
+
+  <section class="lab-section" aria-labelledby="chip-title">
+    <h2 id="chip-title">Chip</h2>
+    <p class="lead">글 카테고리와 포트폴리오 상태. 액센트가 하나뿐이라 네 가지 kind 를 <code>accent-soft</code> / <code>ink-line</code> / 테두리 세 단계로만 구분한다 — 원리 02.</p>
+    <div class="demo demo--row">
+      <Chip>공지</Chip>
+      <Chip kind="진행중">진행중</Chip>
+      <Chip kind="완료">완료</Chip>
+      <Chip kind="보류">보류</Chip>
+    </div>
+  </section>
+
+  <section class="lab-section" aria-labelledby="button-title">
+    <h2 id="button-title">Button</h2>
+    <p class="lead">Outline 은 헤어라인, Solid 는 잉크. hover 는 둘 다 색을 더하지 않고 액센트로 반전한다 — 원리 01. <code>href</code> 가 있으면 <code>&lt;a&gt;</code>, 없으면 <code>&lt;button&gt;</code>.</p>
+    <div class="demo demo--row">
+      <Button href="#button-title">Demo ↗</Button>
+      <Button href="#button-title">Repo ↗</Button>
+      <Button variant="solid" href="#button-title">GitHub</Button>
+      <Button variant="solid">type=button</Button>
+    </div>
+  </section>
+
+  <section class="lab-section" aria-labelledby="label-title">
+    <h2 id="label-title">Section Label</h2>
+    <p class="lead">페이지·섹션 상단의 대문자 라벨. 액센트가 텍스트 색으로 쓰이는 유일한 곳이라 별도 변형이 없다.</p>
+    <div class="demo demo--row">
+      <SectionLabel as="span">Personal archive</SectionLabel>
+      <SectionLabel as="span">Portfolio</SectionLabel>
+      <SectionLabel as="span">Lab · stripe.dev study</SectionLabel>
+    </div>
+  </section>
+
+  <section class="lab-section" aria-labelledby="map-title">
+    <h2 id="map-title">Figma ↔ 코드 매핑</h2>
+    <p class="lead">Figma 변형 이름이 그대로 prop 이 된다. 유일한 예외는 State — 코드에선 <code>:hover</code> 다.</p>
+    <table class="diff-table">
+      <thead><tr><th>Figma</th><th>변형</th><th>Astro</th><th>CSS</th><th>이전</th></tr></thead>
+      <tbody>
+        {MAPPING.map((m) => (
+          <tr><td>{m.figma}</td><td>{m.variant}</td><td><code class="add">{m.code}</code></td><td><code>{m.css}</code></td><td><code class="del">{m.was}</code></td></tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="lab-section" aria-labelledby="rules-title">
+    <h2 id="rules-title">이번 주에 정한 규칙</h2>
+    <div class="principles">
+      {RULES.map(([t, b], i) => (
+        <article class="principle">
+          <span class="num">{String(i + 1).padStart(2, '0')}</span>
+          <div><h3>{t}</h3><p>{b}</p></div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="lab-section" aria-labelledby="next-title">
+    <h2 id="next-title">다음 주</h2>
+    <p class="lead">리스트 — 글 목록·아카이브 행을 컴포넌트로, 카테고리 필터를 stripe 의 Directory 패턴(데스크톱 세로 / 모바일 가로 칩)으로. 메타포는 빼고 동작만.</p>
+    <Button href="/labs/stripe-dev/">← 스터디 목차</Button>
+  </section>
+</Base>

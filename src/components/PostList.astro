@@ -1,0 +1,42 @@
+---
+import Chip from './ui/Chip.astro';
+import { formatDate } from '../lib/posts';
+import type { Post } from '../lib/posts';
+
+interface Props {
+  items: { post: Post; date: Date; url: string }[];
+  variant?: 'recent' | 'archive';
+}
+const { items, variant = 'recent' } = Astro.props;
+---
+
+{variant === 'recent' ? (
+  <ol class="post-list">
+    {items.length === 0 && <li class="empty">아직 기록이 없습니다.</li>}
+    {items.map(({ post, date, url }) => (
+      <li>
+        <a href={url}>
+          <span class="post-meta">
+            <Chip>{post.data.category}</Chip>
+            <time datetime={date.toISOString()}>{formatDate(date)}</time>
+          </span>
+          <strong>{post.data.title}</strong>
+          <span class="post-arrow" aria-hidden="true">↗</span>
+        </a>
+      </li>
+    ))}
+  </ol>
+) : (
+  <ol class="archive-list">
+    {items.length === 0 && <li class="empty">아직 기록이 없습니다.</li>}
+    {items.map(({ post, date, url }) => (
+      <li>
+        <a href={url}>
+          <time datetime={date.toISOString()}>{formatDate(date)}</time>
+          <strong>{post.data.title}</strong>
+          <span>{post.data.category}</span>
+        </a>
+      </li>
+    ))}
+  </ol>
+)}

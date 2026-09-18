@@ -1,0 +1,17 @@
+---
+import SectionLabel from '../components/ui/SectionLabel.astro';
+import Base from '../layouts/Base.astro';
+import PostList from '../components/PostList.astro';
+import { getPosts } from '../lib/posts';
+
+const posts = await getPosts();
+---
+
+<Base title="ARCHIVE">
+  <section class="page-intro">
+    <SectionLabel>Archive</SectionLabel>
+    <h1>모든 기록</h1>
+    <p>{posts.length}개의 글</p>
+  </section>
+  <PostList items={posts} variant="archive" />
+</Base>

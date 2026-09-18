@@ -1,0 +1,17 @@
+---
+/**
+ * Chip — 메타 칩. Figma `Chip` 컴포넌트와 1:1.
+ *   kind=category → 글 카테고리 (.post-meta)      Figma: Kind=Category
+ *   kind=진행중|완료|보류 → 포트폴리오 상태          Figma: Kind=진행중|완료|보류
+ * 액센트는 하나뿐이므로 상태 구분도 accent-soft / ink-line / 테두리 세 단계로만 한다.
+ */
+export type ChipKind = 'category' | '진행중' | '완료' | '보류' | '예정';
+
+interface Props {
+  kind?: ChipKind;
+  class?: string;
+}
+const { kind = 'category', class: className } = Astro.props;
+---
+
+<span class:list={['chip', `chip--${kind}`, className]}><slot /></span>

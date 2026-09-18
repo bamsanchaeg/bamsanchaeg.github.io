@@ -1,0 +1,24 @@
+---
+import Button from './ui/Button.astro';
+import ThemeToggle from './ThemeToggle.astro';
+import { SITE_TITLE, GITHUB_URL } from '../consts';
+const path = Astro.url.pathname;
+const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
+const links = [
+  { href: '/', label: 'Notes' },
+  { href: '/archive/', label: 'Archive' },
+  { href: '/portfolio/', label: 'Portfolio' },
+  { href: '/about/', label: 'About' },
+];
+---
+
+<header class="site-header">
+  <a class="brand" href="/">{SITE_TITLE}</a>
+  <nav class="main-nav" aria-label="주요 메뉴">
+    {links.map(({ href, label }) => (
+      <a href={href} aria-current={isActive(href) ? 'page' : undefined}>{label}</a>
+    ))}
+    <Button variant="solid" href={GITHUB_URL} rel="noopener">GitHub</Button>
+    <ThemeToggle />
+  </nav>
+</header>

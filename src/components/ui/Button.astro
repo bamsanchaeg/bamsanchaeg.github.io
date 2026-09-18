@@ -1,0 +1,24 @@
+---
+/**
+ * Button — 텍스트 버튼. Figma `Button` 컴포넌트와 1:1.
+ *   variant=outline → 헤어라인 테두리 (포트폴리오 Demo/Repo, 404, 랩 링크)   Figma: Style=Outline
+ *   variant=solid   → 잉크 배경 (헤더 GitHub)                              Figma: Style=Solid
+ * hover 는 색을 더하지 않고 액센트로 반전한다 — 원리 01.
+ * href 가 있으면 <a>, 없으면 <button>.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'a'> {
+  variant?: 'outline' | 'solid';
+  href?: string;
+  type?: 'button' | 'submit';
+}
+const { variant = 'outline', href, type = 'button', class: className, ...rest } = Astro.props;
+const classes = ['button', `button--${variant}`, className];
+---
+
+{href ? (
+  <a class:list={classes} href={href} {...rest}><slot /></a>
+) : (
+  <button class:list={classes} type={type} {...rest}><slot /></button>
+)}

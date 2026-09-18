@@ -1,0 +1,38 @@
+---
+import Chip from '../../components/ui/Chip.astro';
+import Button from '../../components/ui/Button.astro';
+import SectionLabel from '../../components/ui/SectionLabel.astro';
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<Base title="PORTFOLIO" description="만든 것들과 그 과정의 기록">
+  <section class="page-intro">
+    <SectionLabel>Portfolio</SectionLabel>
+    <h1>만든 것들</h1>
+    <p>{projects.length}개의 프로젝트 · 각 항목에 문제, 설계, 결과, 회고를 적습니다.</p>
+  </section>
+
+  <ol class="project-list">
+    {projects.length === 0 && <li class="empty">아직 프로젝트가 없습니다.</li>}
+    {projects.map((p) => (
+      <li class="project-card">
+        <a class="project-card__main" href={`/portfolio/${p.id}/`}>
+          <span class="post-meta">
+            <Chip kind={p.data.status}>{p.data.status}</Chip>
+            <span>{p.data.period}</span>
+          </span>
+          <strong>{p.data.title}</strong>
+          <p>{p.data.summary}</p>
+          <span class="project-card__stack">{p.data.stack.join(' · ')}</span>
+        </a>
+        <div class="project-card__links">
+          {p.data.demo && <Button href={p.data.demo}>Demo ↗</Button>}
+          {p.data.repo && <Button href={p.data.repo} rel="noopener">Repo ↗</Button>}
+        </div>
+      </li>
+    ))}
+  </ol>
+</Base>

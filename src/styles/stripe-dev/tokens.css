@@ -1,0 +1,521 @@
+/* stripe.dev 디자인 토큰 — 2026-09-18 https://stripe.dev 에서 추출.
+ * 모든 변수는 `.sd` 루트에 스코프되어 블로그 본체 스타일과 섞이지 않는다.
+ * 테마 전환: <div class="sd" data-theme="night-owl"> — 12개 테마는 themes.json 참고. */
+
+.sd {
+  /* 구조 토큰 */
+  --sd-font-sans: "Inter", "sohne-var", "Helvetica Neue", Arial, sans-serif;
+  --sd-font-mono: "JetBrains Mono", "sohne-mono", "Courier New", monospace;
+  --sd-stickyOffset: 60px;
+  --sd-overlap: calc(3px + .3vw);      /* 형광펜 하이라이트 시작 오프셋 */
+  --sd-chromeHeight: 20px;             /* 윈도우 타이틀바 높이 */
+  --sd-iconWidth: clamp(63px, calc(63px + 25 * (100vw - 390px) / 1050), 88px);
+
+  /* 시맨틱 토큰 (theme: default) */
+  --sd-fontInvertColor: #e8e8e8;
+  --sd-buttonColor: #1e1e1e;
+  --sd-borderColorLight: #1e1e1e44;
+  --sd-inactiveColor: #8d8d8d;
+  --sd-backgroundColor: #e8e8e8;
+  --sd-highlightColor: #c4e817;
+  --sd-listItemIconColor: #1e1e1e;
+  --sd-backgroundIconColor: #1e1e1e;
+  --sd-globeGraphicColor: #1e1e1e;
+  --sd-tagTextColor: #1e1e1e;
+  --sd-headingTextColor: #1e1e1e;
+  --sd-bodyTextColor: #1e1e1e;
+  --sd-pixelTextColor: #1e1e1e;
+  --sd-marqueeTextColor: #1e1e1e;
+  --sd-filterTextActive: #1e1e1e;
+  --sd-squareTextColor: #1e1e1e;
+  --sd-sectionLabels: #1e1e1e;
+  --sd-borderColor: #1e1e1e;
+  --sd-filterBorderColor: #1e1e1e44;
+  --sd-tagBorderColor: #1e1e1e44;
+  --sd-tagHighlightColor: #c4e817;
+  --sd-dottedBorderColor: #1e1e1e44;
+  --sd-marqueeTagBorder: #1e1e1e44;
+  --sd-filterTextInactive: #1e1e1e44;
+  --sd-navButtonBG: #1e1e1e11;
+  --sd-counterColor: #1e1e1e;
+  --sd-windowFrameBG: #e9e9e9;
+  --sd-artBackground: transparent;
+  --sd-artForeground: #e8e8e8;
+  --sd-artStroke: #1e1e1e;
+  --sd-windowBarText: #011627;
+  --sd-terminalTextSecondary: #cacaca;
+  --sd-terminalTextPrimary: #e8e8e8;
+  --sd-terminalHighlight: #c4e817;
+  --sd-terminalBackground: #1e1e1e;
+  --sd-listItemText: #1e1e1e;
+  --sd-invertedTextColor: #1e1e1e;
+  --sd-codeBG: #f5f5f5;
+  --sd-codeBorderColor: #d5d5d5;
+  --sd-blogImageBorder: #cacaca;
+  --sd-blogImageBG: #dedede;
+}
+
+.sd[data-theme="paper"] {
+  --sd-backgroundColor: #E8E8E8;
+  --sd-highlightColor: #C4E817;
+  --sd-headingTextColor: #1e1e1e;
+  --sd-bodyTextColor: #1E1E1E;
+  --sd-pixelTextColor: #1E1E1E;
+  --sd-backgroundIconColor: #1E1E1E;
+  --sd-globeGraphicColor: #1E1E1E;
+  --sd-navButtonBG: #DCDCDC;
+  --sd-buttonColor: #1E1E1E;
+  --sd-marqueeTextColor: #1E1E1E;
+  --sd-marqueeTagBorder: #ABABAB;
+  --sd-counterColor: #1E1E1E;
+  --sd-tagTextColor: #1E1E1E;
+  --sd-tagBorderColor: #ABABAB;
+  --sd-tagHighlightColor: #C4E817;
+  --sd-filterTextActive: #1e1e1e;
+  --sd-filterTextInactive: #979797;
+  --sd-filterBorderColor: #C0C0C0;
+  --sd-squareTextColor: #1e1e1e;
+  --sd-borderColor: #1e1e1e;
+  --sd-dottedBorderColor: #ABABAB;
+  --sd-sectionLabels: #1e1e1e;
+  --sd-windowFrameBG: #DCDCDC;
+  --sd-artBackground: #e8e8e8;
+  --sd-artForeground: #e8e8e8;
+  --sd-artStroke: #1E1E1E;
+  --sd-windowBarText: #1E1E1E;
+  --sd-terminalTextPrimary: #e8e8e8;
+  --sd-terminalTextSecondary: #5b5b5b;
+  --sd-terminalHighlight: #C4E817;
+  --sd-terminalBackground: #1E1E1E;
+  --sd-listItemText: #1E1E1E;
+  --sd-invertedTextColor: #1E1E1E;
+  --sd-codeBG: #f5f5f5;
+  --sd-codeBorderColor: #d5d5d5;
+  --sd-blogImageBorder: #cacaca;
+  --sd-blogImageBG: #dedede;
+}
+
+.sd[data-theme="night-owl"] {
+  --sd-backgroundColor: #011627;
+  --sd-highlightColor: #AAE87B;
+  --sd-headingTextColor: #C0C7D1;
+  --sd-bodyTextColor: #708DA6;
+  --sd-pixelTextColor: #FEC97D;
+  --sd-backgroundIconColor: #5F7D97;
+  --sd-globeGraphicColor: #FEC97D;
+  --sd-navButtonBG: #0A2534;
+  --sd-buttonColor: #75D1C4;
+  --sd-marqueeTextColor: #AAE87B;
+  --sd-marqueeTagBorder: #345540;
+  --sd-counterColor: #FEC97D;
+  --sd-tagTextColor: #9372C9;
+  --sd-tagBorderColor: #9372C9;
+  --sd-tagHighlightColor: #9372C9;
+  --sd-filterTextActive: #75D1C4;
+  --sd-filterTextInactive: #418A9B;
+  --sd-filterBorderColor: #12323F;
+  --sd-squareTextColor: #6E9CF1;
+  --sd-borderColor: #5F7D97;
+  --sd-dottedBorderColor: #C0C7D1;
+  --sd-sectionLabels: #708DA6;
+  --sd-windowFrameBG: #C0C7D1;
+  --sd-artBackground: #011627;
+  --sd-artForeground: #011627;
+  --sd-artStroke: #C0C7D1;
+  --sd-windowBarText: #011627;
+  --sd-terminalTextPrimary: #C0C7D1;
+  --sd-terminalTextSecondary: #708DA6;
+  --sd-terminalHighlight: #75D1C4;
+  --sd-terminalBackground: #011627;
+  --sd-listItemText: #C0C7D1;
+  --sd-invertedTextColor: #011627;
+  --sd-codeBG: #00070D;
+  --sd-codeBorderColor: #011627;
+  --sd-blogImageBorder: #273947;
+  --sd-blogImageBG: #0e2232;
+}
+
+.sd[data-theme="omaha"] {
+  --sd-backgroundColor: #ffffff;
+  --sd-highlightColor: #00017B;
+  --sd-headingTextColor: #00017B;
+  --sd-bodyTextColor: #00017B;
+  --sd-pixelTextColor: #75147C;
+  --sd-backgroundIconColor: #00017B;
+  --sd-globeGraphicColor: #75147C;
+  --sd-navButtonBG: #F0F0F7;
+  --sd-buttonColor: #00017B;
+  --sd-marqueeTextColor: #75147C;
+  --sd-marqueeTagBorder: #D6B8D8;
+  --sd-counterColor: #75147C;
+  --sd-tagTextColor: #75147C;
+  --sd-tagBorderColor: #D6B8D8;
+  --sd-tagHighlightColor: #75147C;
+  --sd-filterTextActive: #00017B;
+  --sd-filterTextInactive: #B2B3D7;
+  --sd-filterBorderColor: #B2B3D7;
+  --sd-squareTextColor: #75147C;
+  --sd-borderColor: #00017B;
+  --sd-dottedBorderColor: #D6B8D8;
+  --sd-sectionLabels: #00017B;
+  --sd-windowFrameBG: #ffffff;
+  --sd-artBackground: #EFEFF9;
+  --sd-artForeground: #EFEFF9;
+  --sd-artStroke: #5657CA;
+  --sd-windowBarText: #00017B;
+  --sd-terminalTextPrimary: #ffffff;
+  --sd-terminalTextSecondary: #4D4DA3;
+  --sd-terminalHighlight: #ffffff;
+  --sd-terminalBackground: #00017B;
+  --sd-listItemText: #75147C;
+  --sd-invertedTextColor: #ffffff;
+  --sd-codeBG: #f0f0f7;
+  --sd-codeBorderColor: #d6b8d8;
+  --sd-blogImageBorder: #d9d9eb;
+  --sd-blogImageBG: #f2f2f8;
+}
+
+.sd[data-theme="web-rings"] {
+  --sd-backgroundColor: #000000;
+  --sd-highlightColor: #74FBFD;
+  --sd-headingTextColor: #74FBFD;
+  --sd-bodyTextColor: #ffffff;
+  --sd-pixelTextColor: #FFFF55;
+  --sd-backgroundIconColor: #ffffff;
+  --sd-globeGraphicColor: #EA34F7;
+  --sd-navButtonBG: #0E1E1E;
+  --sd-buttonColor: #74FBFD;
+  --sd-marqueeTextColor: #74FBFD;
+  --sd-marqueeTagBorder: #234B4C;
+  --sd-counterColor: #FFFF55;
+  --sd-tagTextColor: #FFFF55;
+  --sd-tagBorderColor: #4D4D1A;
+  --sd-tagHighlightColor: #FFFF55;
+  --sd-filterTextActive: #00FF00;
+  --sd-filterTextInactive: #007300;
+  --sd-filterBorderColor: #007300;
+  --sd-squareTextColor: #EA34F7;
+  --sd-borderColor: #ffffff;
+  --sd-dottedBorderColor: #74FBFD;
+  --sd-sectionLabels: #ffffff;
+  --sd-windowFrameBG: #ffffff;
+  --sd-artBackground: #000000;
+  --sd-artForeground: #000000;
+  --sd-artStroke: #CCCCCC;
+  --sd-windowBarText: #000000;
+  --sd-terminalTextPrimary: #ffffff;
+  --sd-terminalTextSecondary: #4D4D4D;
+  --sd-terminalHighlight: #74FBFD;
+  --sd-terminalBackground: #000000;
+  --sd-listItemText: #74FBFD;
+  --sd-invertedTextColor: #000000;
+  --sd-codeBG: #121212;
+  --sd-codeBorderColor: #121212;
+  --sd-blogImageBorder: #808080;
+  --sd-blogImageBG: #262626;
+}
+
+.sd[data-theme="crt-red"] {
+  --sd-backgroundColor: #210901;
+  --sd-highlightColor: #FE2305;
+  --sd-headingTextColor: #FE2305;
+  --sd-bodyTextColor: #FE2305;
+  --sd-pixelTextColor: #FE2305;
+  --sd-backgroundIconColor: #FE2305;
+  --sd-globeGraphicColor: #FE2305;
+  --sd-navButtonBG: #330B01;
+  --sd-buttonColor: #FE2305;
+  --sd-marqueeTextColor: #FE2305;
+  --sd-marqueeTagBorder: #631102;
+  --sd-counterColor: #FE2305;
+  --sd-tagTextColor: #FE2305;
+  --sd-tagBorderColor: #631102;
+  --sd-tagHighlightColor: #FE2305;
+  --sd-filterTextActive: #FE2305;
+  --sd-filterTextInactive: #791303;
+  --sd-filterBorderColor: #4D0E02;
+  --sd-squareTextColor: #FE2305;
+  --sd-borderColor: #FE2305;
+  --sd-dottedBorderColor: #631102;
+  --sd-sectionLabels: #FE2305;
+  --sd-windowFrameBG: #330B01;
+  --sd-artBackground: #210901;
+  --sd-artForeground: #210901;
+  --sd-artStroke: #FF3708;
+  --sd-windowBarText: #FE2305;
+  --sd-terminalTextPrimary: #FE2305;
+  --sd-terminalTextSecondary: #791303;
+  --sd-terminalHighlight: #FE2305;
+  --sd-terminalBackground: #210901;
+  --sd-listItemText: #FE2305;
+  --sd-invertedTextColor: #210901;
+  --sd-codeBG: #210901;
+  --sd-codeBorderColor: #4D0E02;
+  --sd-blogImageBorder: #4d0e02;
+  --sd-blogImageBG: #2c0a01;
+}
+
+.sd[data-theme="crt-amber"] {
+  --sd-backgroundColor: #170F01;
+  --sd-highlightColor: #E49F02;
+  --sd-headingTextColor: #E49F02;
+  --sd-bodyTextColor: #E49F02;
+  --sd-pixelTextColor: #E49F02;
+  --sd-backgroundIconColor: #E49F02;
+  --sd-globeGraphicColor: #E49F02;
+  --sd-navButtonBG: #271B01;
+  --sd-buttonColor: #E49F02;
+  --sd-marqueeTextColor: #E49F02;
+  --sd-marqueeTagBorder: #553A01;
+  --sd-counterColor: #E49F02;
+  --sd-tagTextColor: #E49F02;
+  --sd-tagBorderColor: #553A01;
+  --sd-tagHighlightColor: #E49F02;
+  --sd-filterTextActive: #E49F02;
+  --sd-filterTextInactive: #694901;
+  --sd-filterBorderColor: #402C01;
+  --sd-squareTextColor: #E49F02;
+  --sd-borderColor: #E49F02;
+  --sd-dottedBorderColor: #553A01;
+  --sd-sectionLabels: #E49F02;
+  --sd-windowFrameBG: #271B01;
+  --sd-artBackground: #170F01;
+  --sd-artForeground: #170F01;
+  --sd-artStroke: #F3C603;
+  --sd-windowBarText: #E49F02;
+  --sd-terminalTextPrimary: #E49F02;
+  --sd-terminalTextSecondary: #694901;
+  --sd-terminalHighlight: #E49F02;
+  --sd-terminalBackground: #170F01;
+  --sd-listItemText: #E49F02;
+  --sd-invertedTextColor: #170F01;
+  --sd-codeBG: #120C01;
+  --sd-codeBorderColor: #402C01;
+  --sd-blogImageBorder: #362501;
+  --sd-blogImageBG: #211601;
+}
+
+.sd[data-theme="crt-green"] {
+  --sd-backgroundColor: #011700;
+  --sd-highlightColor: #00CC00;
+  --sd-headingTextColor: #00CC00;
+  --sd-bodyTextColor: #00CC00;
+  --sd-pixelTextColor: #00CC00;
+  --sd-backgroundIconColor: #00CC00;
+  --sd-globeGraphicColor: #00CC00;
+  --sd-navButtonBG: #012500;
+  --sd-buttonColor: #00CC00;
+  --sd-marqueeTextColor: #00CC00;
+  --sd-marqueeTagBorder: #014D00;
+  --sd-counterColor: #00CC00;
+  --sd-tagTextColor: #00CC00;
+  --sd-tagBorderColor: #014D00;
+  --sd-tagHighlightColor: #00CC00;
+  --sd-filterTextActive: #00CC00;
+  --sd-filterTextInactive: #015F00;
+  --sd-filterBorderColor: #013B00;
+  --sd-squareTextColor: #00CC00;
+  --sd-borderColor: #00CC00;
+  --sd-dottedBorderColor: #014D00;
+  --sd-sectionLabels: #00CC00;
+  --sd-windowFrameBG: #012500;
+  --sd-artBackground: #011700;
+  --sd-artForeground: #011700;
+  --sd-artStroke: #00CB00;
+  --sd-windowBarText: #00CC00;
+  --sd-terminalTextPrimary: #00CC00;
+  --sd-terminalTextSecondary: #015F00;
+  --sd-terminalHighlight: #00CC00;
+  --sd-terminalBackground: #011700;
+  --sd-listItemText: #00CC00;
+  --sd-invertedTextColor: #011700;
+  --sd-codeBG: #010F00;
+  --sd-codeBorderColor: #013B00;
+  --sd-blogImageBorder: #013200;
+  --sd-blogImageBG: #012000;
+}
+
+.sd[data-theme="crt-mono"] {
+  --sd-backgroundColor: #090909;
+  --sd-highlightColor: #D9D9D9;
+  --sd-headingTextColor: #D9D9D9;
+  --sd-bodyTextColor: #D9D9D9;
+  --sd-pixelTextColor: #D9D9D9;
+  --sd-backgroundIconColor: #D9D9D9;
+  --sd-globeGraphicColor: #D9D9D9;
+  --sd-navButtonBG: #181818;
+  --sd-buttonColor: #D9D9D9;
+  --sd-marqueeTextColor: #D9D9D9;
+  --sd-marqueeTagBorder: #434343;
+  --sd-counterColor: #D9D9D9;
+  --sd-tagTextColor: #D9D9D9;
+  --sd-tagBorderColor: #434343;
+  --sd-tagHighlightColor: #D9D9D9;
+  --sd-filterTextActive: #D9D9D9;
+  --sd-filterTextInactive: #585858;
+  --sd-filterBorderColor: #2D2D2D;
+  --sd-squareTextColor: #D9D9D9;
+  --sd-borderColor: #D9D9D9;
+  --sd-dottedBorderColor: #434343;
+  --sd-sectionLabels: #D9D9D9;
+  --sd-windowFrameBG: #181818;
+  --sd-artBackground: #090909;
+  --sd-artForeground: #090909;
+  --sd-artStroke: #D9D9D9;
+  --sd-windowBarText: #D9D9D9;
+  --sd-terminalTextPrimary: #D9D9D9;
+  --sd-terminalTextSecondary: #585858;
+  --sd-terminalHighlight: #D9D9D9;
+  --sd-terminalBackground: #090909;
+  --sd-listItemText: #D9D9D9;
+  --sd-invertedTextColor: #090909;
+  --sd-codeBG: #000000;
+  --sd-codeBorderColor: #434343;
+  --sd-blogImageBorder: #282828;
+  --sd-blogImageBG: #131313;
+}
+
+.sd[data-theme="90s-vibes"] {
+  --sd-backgroundColor: #000000;
+  --sd-highlightColor: #00ffea;
+  --sd-headingTextColor: #ff00cc;
+  --sd-bodyTextColor: #ffffff;
+  --sd-pixelTextColor: #00ff00;
+  --sd-plusIconColor: #c0c0c0;
+  --sd-globeGraphicColor: #00b7ff;
+  --sd-navButtonBG: #00ff00;
+  --sd-buttonColor: #ff00cc;
+  --sd-marqueeTextColor: #fffb00;
+  --sd-marqueeTagBorder: #ff00cc;
+  --sd-counterColor: #00b7ff;
+  --sd-tagTextColor: #ff00cc;
+  --sd-tagBorderColor: #0000ee;
+  --sd-tagHighlightColor: #0000ee;
+  --sd-filterTextActive: #0000ee;
+  --sd-filterTextInactive: #00ffea;
+  --sd-filterBorderColor: #00ffea;
+  --sd-squareTextColor: #00ff00;
+  --sd-borderColor: #c0c0c0;
+  --sd-dottedBorderColor: #ff00cc;
+  --sd-sectionLabels: #00ffea;
+  --sd-windowFrameBG: #f0f0f0;
+  --sd-artBackground: #ffffff;
+  --sd-artForeground: #ffcc00;
+  --sd-artStroke: #000000;
+  --sd-windowBarText: #000000;
+  --sd-terminalTextPrimary: #00ff00;
+  --sd-terminalTextSecondary: #00b7ff;
+  --sd-terminalHighlight: #ff00cc;
+  --sd-terminalBackground: #000000;
+  --sd-listItemText: #0000ee;
+  --sd-invertedTextColor: #ffffff;
+  --sd-codeBG: #000000;
+  --sd-codeBorderColor: #00ffea;
+  --sd-blogImageBorder: #000000;
+  --sd-blogImageBG: #f0f0f0;
+}
+
+.sd[data-theme="valentines-day"] {
+  --sd-backgroundColor: #FFF1F5;
+  --sd-highlightColor: #FF4D8D;
+  --sd-headingTextColor: #7A1E3A;
+  --sd-bodyTextColor: #7A1E3A;
+  --sd-pixelTextColor: #FF4D8D;
+  --sd-backgroundIconColor: #C73569;
+  --sd-globeGraphicColor: #FF6FA0;
+  --sd-navButtonBG: #FFE2EC;
+  --sd-buttonColor: #C73569;
+  --sd-marqueeTextColor: #C73569;
+  --sd-marqueeTagBorder: #F3B5CA;
+  --sd-counterColor: #C73569;
+  --sd-tagTextColor: #C73569;
+  --sd-tagBorderColor: #F3B5CA;
+  --sd-tagHighlightColor: #FF4D8D;
+  --sd-filterTextActive: #7A1E3A;
+  --sd-filterTextInactive: #C98BA3;
+  --sd-filterBorderColor: #F0BED0;
+  --sd-squareTextColor: #7A1E3A;
+  --sd-borderColor: #7A1E3A;
+  --sd-dottedBorderColor: #F3B5CA;
+  --sd-sectionLabels: #7A1E3A;
+  --sd-windowFrameBG: #FFE2EC;
+  --sd-artBackground: #FFF1F5;
+  --sd-artForeground: #FFF1F5;
+  --sd-artStroke: #C73569;
+  --sd-windowBarText: #7A1E3A;
+  --sd-terminalTextPrimary: #FFF1F5;
+  --sd-terminalTextSecondary: #D37C9E;
+  --sd-terminalHighlight: #FF4D8D;
+  --sd-terminalBackground: #7A1E3A;
+  --sd-listItemText: #7A1E3A;
+  --sd-invertedTextColor: #7A1E3A;
+  --sd-codeBG: #fff5f8;
+  --sd-codeBorderColor: #f0cad8;
+  --sd-blogImageBorder: #f0cad8;
+  --sd-blogImageBG: #ffe6ef;
+}
+
+.sd[data-theme="st-patricks-day"] {
+  --sd-backgroundColor: #F3FAF4;
+  --sd-highlightColor: #CFAE3D;
+  --sd-headingTextColor: #0F4C2D;
+  --sd-bodyTextColor: #0F4C2D;
+  --sd-pixelTextColor: #2A8A52;
+  --sd-backgroundIconColor: #2A8A52;
+  --sd-globeGraphicColor: #1D6E40;
+  --sd-navButtonBG: #E2F2E6;
+  --sd-buttonColor: #1D6E40;
+  --sd-marqueeTextColor: #1D6E40;
+  --sd-marqueeTagBorder: #B7D9C3;
+  --sd-counterColor: #1D6E40;
+  --sd-tagTextColor: #1D6E40;
+  --sd-tagBorderColor: #B7D9C3;
+  --sd-tagHighlightColor: #CFAE3D;
+  --sd-filterTextActive: #0F4C2D;
+  --sd-filterTextInactive: #7CA893;
+  --sd-filterBorderColor: #CDE6D4;
+  --sd-squareTextColor: #0F4C2D;
+  --sd-borderColor: #0F4C2D;
+  --sd-dottedBorderColor: #B7D9C3;
+  --sd-sectionLabels: #0F4C2D;
+  --sd-windowFrameBG: #E2F2E6;
+  --sd-artBackground: #F3FAF4;
+  --sd-artForeground: #F3FAF4;
+  --sd-artStroke: #2A8A52;
+  --sd-windowBarText: #0F4C2D;
+  --sd-terminalTextPrimary: #F3FAF4;
+  --sd-terminalTextSecondary: #8CC8A2;
+  --sd-terminalHighlight: #CFAE3D;
+  --sd-terminalBackground: #0F4C2D;
+  --sd-listItemText: #0F4C2D;
+  --sd-invertedTextColor: #0F4C2D;
+  --sd-codeBG: #eaf5ed;
+  --sd-codeBorderColor: #cde6d4;
+  --sd-blogImageBorder: #CDE6D4;
+  --sd-blogImageBG: #EAF5ED;
+}
+
+
+/* ---------- 타이포그래피 스케일 (stripe.dev 원본 수치) ---------- */
+.sd { font-family: var(--sd-font-sans); color: var(--sd-bodyTextColor); background: var(--sd-backgroundColor); -webkit-font-smoothing: antialiased; }
+.sd .text-hero      { color: var(--sd-headingTextColor); font-weight: 300; letter-spacing: -.07em; line-height: 80%;  font-size: calc(12.2807vw + 32.1053px); }
+.sd .section-title  { color: var(--sd-headingTextColor); font-weight: 300; letter-spacing: -.06em; line-height: 84%;  font-size: calc(4.48431vw + 36.5112px); }
+.sd .text-lg        { color: var(--sd-headingTextColor); font-weight: 300; letter-spacing: -.06em; line-height: 95%;  font-size: calc(1.71898vw + 13.296px); }
+.sd .text-md        { color: var(--sd-headingTextColor); font-weight: 300; letter-spacing: -.04em; line-height: 100%; font-size: calc(1.89189vw + 12.6216px); }
+.sd .text-md b      { font-weight: 500; }
+.sd .text-sm        { color: var(--sd-bodyTextColor);    font-weight: 300; letter-spacing: -.03em; line-height: 100%; font-size: calc(.523169vw + 11.9596px); }
+.sd .text-xs        { font-weight: 300; letter-spacing: -.03em; line-height: 100%; font-size: 14px; }
+.sd .text-smallcaps { color: var(--sd-squareTextColor); font-family: var(--sd-font-mono); font-weight: 300; letter-spacing: -.012em; text-transform: uppercase; font-size: 12px; }
+.sd .super          { color: var(--sd-counterColor); letter-spacing: -.03em; vertical-align: top; margin-left: 8px; font-size: calc(.597907vw + 9.66816px); line-height: 100%; }
+@media (min-width: 1728px) { .sd .section-title { font-size: 114px; } .sd .super { font-size: 20px; } }
+
+/* ---------- 레이아웃 그리드: 8 → 16 → 24열 + subgrid ---------- */
+.sd .grid    { display: grid; grid-template-columns: repeat(8, 1fr); width: 100%; max-width: 1728px; margin: 0 auto; padding: 0 12px; }
+.sd .section { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; }
+@media (min-width: 760px) { .sd .grid { grid-template-columns: repeat(16, 1fr); } }
+@media (min-width: 960px) { .sd .grid { grid-template-columns: repeat(24, 1fr); } }
+
+/* ---------- 공통 규칙: 선은 .5px 실선 또는 1px 점선, hover 는 라임 반전 ---------- */
+.sd .rule        { border-bottom: .5px solid var(--sd-borderColor); }
+.sd .rule-dotted { border-bottom: 1px dotted var(--sd-dottedBorderColor); }
+.sd a { color: inherit; text-decoration: none; }
