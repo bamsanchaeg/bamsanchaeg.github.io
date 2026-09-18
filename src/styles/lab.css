@@ -1,8 +1,8 @@
 /* 스터디 본 트랙 페이지(/labs/stripe-dev/*)용. 블로그 디자인 시스템 위에 얹는 전시 컴포넌트. */
 
 .lab-intro { max-width: 720px; margin-bottom: 56px; }
-.lab-intro h1 { margin: 0; font-size: clamp(1.75rem, 4vw, 2.75rem); font-weight: 500; letter-spacing: -0.05em; line-height: 1.15; }
-.lab-intro p { margin: 18px 0 0; max-width: 60ch; color: var(--ink-body); }
+/* .lab-intro h1 크기·굵기는 site.css 의 공통 페이지 제목 규칙을 따른다 */
+.lab-intro p { margin: 12px 0 0; max-width: 60ch; color: var(--ink-body); }
 .lab-intro .lab-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
 
 .lab-section { padding: 40px 0; border-top: 1px solid var(--line); }
