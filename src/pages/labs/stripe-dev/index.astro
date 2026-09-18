@@ -1,0 +1,77 @@
+---
+import Base from '../../../layouts/Base.astro';
+import '../../../styles/lab.css';
+
+const PRINCIPLES = [
+  { n: '01', title: '액센트는 하나, hover 는 반전', take: true,
+    body: 'stripe.dev 는 잉크 + 라임 한 색으로 모든 상태를 표현한다. hover 시 색을 더하는 대신 배경을 액센트로 반전한다. 밤산책의 세이지에 그대로 적용 — 리스트 행 hover 가 accent-soft 배경 반전으로 바뀌었다.' },
+  { n: '02', title: '알파 계층으로 위계', take: true,
+    body: '#1e1e1e → #1e1e1e44 → #1e1e1e11. 같은 잉크에 투명도만 달리해 텍스트·선·배경의 위계를 만든다. 밤산책의 muted / line / line-strong / accent-soft 등 6개 고정 색을 원색 4개 + color-mix 파생으로 정리했다.' },
+  { n: '03', title: '컴포넌트는 토큰만 참조, 테마 = 객체 하나', take: true,
+    body: '원본은 45개 변수를 data-theme 에 주입해 12개 테마를 돌린다. 밤산책은 원색 4개만 재정의하는 다크 모드를 추가했다 — 파생 토큰이 자동으로 따라오므로 컴포넌트 CSS 는 한 줄도 안 바꿨다.' },
+  { n: '04', title: 'OS 메타포 ([B] 단축키 · 윈도우 프레임 · 마퀴)', take: false,
+    body: '원본의 개성은 여기서 나오지만, 밤산책은 글을 읽는 에디토리얼 사이트다. 장식이 본문과 경쟁하므로 가져오지 않는다. 표본으로만 Reference 페이지에 남겼다.' },
+  { n: '05', title: '24열 subgrid · 유동 타이포 calc(a·vw + b)', take: false,
+    body: '단일 칼럼 글 사이트에 24열은 과하고, 한글 본문은 고정 16px 이 더 잘 읽힌다. 제목에만 clamp() 를 유지한다.' },
+];
+
+const WEEKS = [
+  { n: 1, title: '파운데이션 — 토큰·알파 계층·다크 모드', desc: '원색 4개 + 파생 토큰으로 site.css 리팩터링, 액센트 반전 hover, 테마 토글', href: '/labs/stripe-dev/week-1/', status: '완료' },
+  { n: 2, title: '원자 — Chip · Button · 섹션 라벨', desc: '기존 .status, .text-button, .section-label 을 상태(hover/active/disabled)와 크기가 있는 컴포넌트로 승격', href: null, status: '예정' },
+  { n: 3, title: '리스트 — 글 목록 · 아카이브 · 필터', desc: '카테고리·태그 필터를 stripe 의 Directory 패턴(데스크톱 세로 / 모바일 가로 칩)으로 — 단 메타포 없이', href: null, status: '예정' },
+  { n: 4, title: '조합 — 포트폴리오 카드 · 헤더', desc: '카드에 썸네일 슬롯, 헤더에 현재 위치 표시와 키보드 접근성 정비', href: null, status: '예정' },
+  { n: 5, title: '페이지 — 홈 재구성 · 회고', desc: '최근 글 + 진행 중 프로젝트를 한 화면에. 전 주차 회고를 write-up 에 정리', href: null, status: '예정' },
+];
+---
+
+<Base title="stripe.dev 스터디" description="stripe.dev 디자인 시스템을 분석해 원리를 뽑고, 밤산책 자체 디자인 시스템에 적용하는 5주 스터디">
+  <section class="lab-intro">
+    <p class="section-label">Lab · stripe.dev study</p>
+    <h1>분석은 stripe.dev,<br />적용은 밤산책.</h1>
+    <p>
+      Stripe 개발자 허브의 CSS·테마 토큰을 번들에서 직접 추출해 분석하고, 거기서 뽑은 원리를
+      <strong>이 사이트의 디자인 시스템</strong>에 적용합니다. 재현이 아니라 적용이 목표라서,
+      매주 산출물은 밤산책의 실제 페이지가 바뀌는 것입니다.
+    </p>
+    <div class="lab-links">
+      <a class="text-button" href="/labs/stripe-dev/reference/">원본 분석 전시 ↗</a>
+      <a class="text-button" href="/portfolio/stripe-dev-design-study/">Write-up</a>
+      <a class="text-button" href="https://github.com/bamsanchaeg/bamsanchaeg.github.io/blob/main/docs/labs/stripe-dev-reference.md" rel="noopener">분석 문서 (GitHub)</a>
+      <a class="text-button" href="https://www.figma.com/design/rgWioHzV1jbcYJCFVmNSTo" rel="noopener">Figma ↗</a>
+    </div>
+  </section>
+
+  <section class="lab-section" aria-labelledby="principles-title">
+    <h2 id="principles-title">원리 — 채택 3, 기각 2</h2>
+    <p class="lead">원본에서 뽑은 것 중 무엇을 가져오고 무엇을 버렸는지가 이 스터디의 핵심 판단입니다.</p>
+    <div class="principles">
+      {PRINCIPLES.map((p) => (
+        <article class="principle">
+          <span class="num">{p.n}</span>
+          <div>
+            <h3>{p.title}</h3>
+            <p>{p.body}</p>
+            <span class:list={['verdict', p.take ? 'verdict--take' : 'verdict--drop']}>{p.take ? '채택' : '기각'}</span>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="lab-section" aria-labelledby="weeks-title">
+    <h2 id="weeks-title">주차별 진행</h2>
+    <p class="lead">의존 순서대로 — 토큰 → 원자 → 리스트 → 조합 → 페이지.</p>
+    <ol class="weeks">
+      {WEEKS.map((w) => (
+        <li>
+          <span class="wk">WEEK {w.n}</span>
+          <div>
+            {w.href ? <a href={w.href}><strong>{w.title}</strong></a> : <strong>{w.title}</strong>}
+            <p>{w.desc}</p>
+          </div>
+          <span class:list={['status', `status--${w.status}`]}>{w.status}</span>
+        </li>
+      ))}
+    </ol>
+  </section>
+</Base>

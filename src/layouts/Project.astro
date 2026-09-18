@@ -1,0 +1,31 @@
+---
+import Base from './Base.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+const { project } = Astro.props;
+const { title, summary, period, status, stack, repo, demo } = project.data;
+---
+
+<Base title={title} description={summary}>
+  <article class="post-view project-view">
+    <header class="post-header">
+      <a class="back-link" href="/portfolio/">← Portfolio</a>
+      <div class="post-meta">
+        <span class:list={['status', `status--${status}`]}>{status}</span>
+        <span>{period}</span>
+      </div>
+      <h1>{title}</h1>
+      <p class="project-summary">{summary}</p>
+      <dl class="project-facts">
+        <div><dt>Stack</dt><dd>{stack.join(' · ')}</dd></div>
+        {demo && <div><dt>Demo</dt><dd><a href={demo}>{demo}</a></dd></div>}
+        {repo && <div><dt>Repo</dt><dd><a href={repo} rel="noopener">{repo.replace('https://github.com/', '')}</a></dd></div>}
+      </dl>
+    </header>
+
+    <div class="post-body"><slot /></div>
+  </article>
+</Base>

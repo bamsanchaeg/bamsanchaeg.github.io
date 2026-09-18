@@ -1,17 +1,51 @@
 :root {
-  --ink: #2f2f2f;
-  --muted: #757871;
-  --line: #dedfd9;
-  --line-strong: #c5c8bf;
-  --surface: #ffffff;
-  --canvas: #f4f5f0;
-  --accent: #7d8f71;
-  --accent-dark: #596650;
-  --accent-soft: #e7ebdf;
-  --code: #363936;
+  /* ---- 원색 4개. 테마는 이 넷만 바꾼다. ---- */
+  --ink: #2f2f2f;      /* 글자·선·코드 배경 */
+  --accent: #7d8f71;   /* 단 하나의 포인트 (세이지) */
+  --canvas: #f4f5f0;   /* 페이지 바탕 */
+  --surface: #ffffff;  /* 콘텐츠 면 */
+
+  /* ---- 잉크 알파 계층. stripe.dev 의 #1e1e1e → 44 → 11 패턴:
+          같은 잉크에 투명도만 달리해 위계를 만들면 테마가 바뀌어도 위계가 유지된다. ---- */
+  --ink-muted: color-mix(in srgb, var(--ink) 66%, transparent);       /* 보조 텍스트 (AA 4.5:1) */
+  --ink-body: color-mix(in srgb, var(--ink) 90%, var(--canvas));      /* 본문 */
+  --ink-line-strong: color-mix(in srgb, var(--ink) 24%, transparent); /* 강조 선·테두리 */
+  --ink-line: color-mix(in srgb, var(--ink) 12%, transparent);        /* 헤어라인 */
+
+  /* ---- 액센트 파생 ---- */
+  --accent-ink: color-mix(in srgb, var(--accent) 55%, var(--ink));    /* 액센트 위 텍스트 · accent-soft 위에서 AA 5.2:1 */
+  --accent-soft: color-mix(in srgb, var(--accent) 18%, var(--surface)); /* 칩·hover 배경 (반전 lite) */
+
+  /* ---- 호환 별칭 (기존 규칙이 참조) ---- */
+  --muted: var(--ink-muted);
+  --line: var(--ink-line);
+  --line-strong: var(--ink-line-strong);
+  --accent-dark: var(--accent-ink);
+  --code: var(--ink);
+
   --font-sans: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   --font-mono: "SFMono-Regular", Consolas, monospace;
   font-family: var(--font-sans);
+  color-scheme: light;
+}
+
+/* 다크 테마 = 원색 4개만 재정의. 파생·별칭은 자동으로 따라온다. */
+:root[data-theme="dark"] {
+  --ink: #e6e7e2;
+  --accent: #9fb392;
+  --canvas: #17181a;
+  --surface: #202225;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink: #e6e7e2;
+    --accent: #9fb392;
+    --canvas: #17181a;
+    --surface: #202225;
+    color-scheme: dark;
+  }
 }
 
 * { box-sizing: border-box; }
@@ -50,7 +84,7 @@ a:hover { color: var(--accent); }
   padding: 0.6rem 1rem;
   border-radius: 999px;
   background: var(--ink);
-  color: white;
+  color: var(--canvas);
 }
 
 .skip-link:focus { top: 1rem; }
@@ -99,12 +133,12 @@ a:hover { color: var(--accent); }
   padding: 8px 15px;
   border-radius: 999px;
   background: var(--ink);
-  color: white;
+  color: var(--canvas);
 }
 
 .main-nav .github-link:hover {
   background: var(--accent);
-  color: white;
+  color: var(--surface);
 }
 
 main {
@@ -186,11 +220,20 @@ main {
   grid-template-columns: 180px minmax(0, 1fr) auto;
   align-items: center;
   gap: 28px;
-  padding: 25px 4px;
+  margin: 0 -12px;
+  padding: 25px 12px;
+  border-radius: 10px;
   text-decoration: none;
+  transition: background-color 120ms ease;
 }
 
-.post-list a:hover { color: var(--ink); }
+/* stripe.dev 원리 1 — hover 는 색을 더하지 않고 배경을 액센트로 반전한다 (에디토리얼 톤에 맞춰 soft 로) */
+.post-list a:hover,
+.archive-list a:hover,
+.project-card__main:hover {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
 
 .post-list a:hover .post-arrow {
   color: var(--accent);
@@ -212,7 +255,7 @@ main {
   padding: 3px 10px;
   border-radius: 999px;
   background: var(--accent-soft);
-  color: #596650;
+  color: var(--accent-ink);
 }
 
 .post-list strong {
@@ -247,8 +290,11 @@ main {
   grid-template-columns: 130px minmax(0, 1fr) 100px;
   gap: 24px;
   align-items: center;
-  padding: 22px 2px;
+  margin: 0 -12px;
+  padding: 22px 12px;
+  border-radius: 10px;
   text-decoration: none;
+  transition: background-color 120ms ease;
 }
 
 .archive-list time,
@@ -289,7 +335,7 @@ main {
 .post-body {
   padding-top: 44px;
   border-top: 1px solid var(--ink);
-  color: #454545;
+  color: var(--ink-body);
 }
 
 .post-body h2 {
@@ -317,7 +363,7 @@ main {
   padding: 22px;
   border-radius: 12px;
   background: var(--code);
-  color: #f1f1ed;
+  color: var(--canvas);
   font-size: 0.88rem;
   line-height: 1.7;
 }
@@ -407,10 +453,10 @@ main {
     padding: 18px;
   }
 
-  .main-nav { gap: 14px; }
+  .main-nav { gap: 12px; }
   .main-nav a { font-size: 0.78rem; }
-  .main-nav a:nth-child(3) { display: none; }
   .main-nav .github-link { padding: 6px 11px; }
+  .theme-toggle { width: 28px; height: 28px; }
 
   main { padding: 48px 20px 72px; }
   .intro { margin-bottom: 48px; }
@@ -460,7 +506,160 @@ main {
   .post-body { padding-top: 32px; }
 }
 
+/* ---------- Theme toggle ---------- */
+.theme-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent-ink); }
+.theme-toggle svg { width: 15px; height: 15px; }
+.theme-toggle .icon-moon { display: none; }
+:root[data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+:root[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-toggle .icon-sun { display: none; }
+  :root:not([data-theme="light"]) .theme-toggle .icon-moon { display: block; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .post-arrow { transition: none; }
+  .post-arrow,
+  .post-list a,
+  .archive-list a,
+  .project-card__main { transition: none; }
+}
+
+/* ---------- Portfolio ---------- */
+.main-nav a[aria-current="page"] { color: var(--ink); }
+
+.project-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--ink);
+}
+
+.project-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: start;
+  padding: 28px 4px;
+  border-bottom: 1px solid var(--line);
+}
+
+.project-card__main {
+  display: grid;
+  gap: 12px;
+  margin: -12px;
+  padding: 12px;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: background-color 120ms ease;
+}
+
+.project-card__main strong {
+  font-size: 1.35rem;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+}
+
+.project-card__main p {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--ink-body);
+}
+
+.project-card__stack,
+.project-facts dd,
+.project-facts dt {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.project-card__links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.project-card__links .text-button {
+  justify-content: center;
+  padding: 8px 14px;
+  font-size: 0.82rem;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 27px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+}
+
+.status--완료 { background: var(--line); color: var(--ink); }
+.status--보류 { background: transparent; border: 1px solid var(--line-strong); }
+
+.project-summary {
+  max-width: 62ch;
+  margin: 20px 0 0;
+  color: var(--ink-body);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.project-facts {
+  display: grid;
+  gap: 8px;
+  margin: 28px 0 0;
+}
+
+.project-facts div {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.project-facts dt { font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+.project-facts dd { margin: 0; overflow-wrap: anywhere; }
+
+.post-body table {
+  width: 100%;
+  margin: 1.5rem 0;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.post-body th,
+.post-body td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.post-body th {
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 720px) {
+  .project-card { grid-template-columns: 1fr; gap: 16px; }
+  .project-card__links { flex-direction: row; }
+  .main-nav a:nth-child(4) { display: none; } /* 모바일에선 About 숨김 */
 }

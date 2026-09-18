@@ -6,7 +6,7 @@
 
 1. 저장소 `Settings → Pages`에서 Source를 `GitHub Actions`로 선택합니다.
 2. `Settings → Actions → General`에서 워크플로 실행이 허용되어 있는지 확인합니다.
-3. 작업 브랜치를 푸시하고 Pull Request에서 `Build Jekyll` 검사가 성공하는지 확인합니다.
+3. 작업 브랜치를 푸시하고 Pull Request에서 `Build Astro` 검사가 성공하는지 확인합니다.
 
 ### 자동 배포
 
@@ -37,7 +37,7 @@
 ### 빌드 실패
 
 - Actions 실패 로그에서 최초 오류 파일을 확인합니다.
-- 최근 게시물의 front matter와 Liquid 문법을 우선 확인합니다.
+- 최근 게시물의 front matter 가 `src/content.config.ts` 스키마와 맞는지 우선 확인합니다 (`npm run check`).
 - 수정 커밋 후 자동 검증과 Pages 배포가 끝날 때까지 기다립니다.
 
 ### 배포 작업이 시작되지 않음
@@ -49,7 +49,7 @@
 ### 디자인 없이 텍스트만 표시됨
 
 - 배포 주소에 저장소 하위 경로가 있는지 확인합니다.
-- `_config.yml`의 `baseurl`을 `/<저장소명>`으로 설정합니다.
+- `astro.config.mjs`의 `site`와 `base`를 실제 주소에 맞게 설정합니다.
 
 ### 잘못된 글을 공개함
 
@@ -58,4 +58,4 @@
 
 ## 브랜치 보호 권장 설정
 
-`main` 규칙에 Pull Request와 `Build Jekyll` 상태 검사 통과를 요구합니다. 강제 푸시는 차단하고, 긴급 복구도 `git revert`를 이용해 이력으로 남깁니다.
+`main` 규칙에 Pull Request와 `Build Astro` 상태 검사 통과를 요구합니다. 강제 푸시는 차단하고, 긴급 복구도 `git revert`를 이용해 이력으로 남깁니다.

@@ -1,6 +1,6 @@
 # ADR-0001: GitHub Pages와 Jekyll 채택
 
-- 상태: Accepted
+- 상태: Superseded — Jekyll 부분은 [ADR-0002](0002-migrate-to-astro.md) 로 대체. GitHub Pages 채택은 유지.
 - 날짜: 2026-09-08
 
 ## 맥락

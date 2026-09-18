@@ -1,0 +1,89 @@
+---
+/**
+ * stripe.dev 분석 전시(reference) 전용 셸.
+ * 원본을 그대로 재현하는 표본이므로 블로그의 Base.astro 를 쓰지 않고 `.sd` 루트로 완전히 격리한다.
+ * 스터디 본 트랙(주차 페이지)은 블로그 셸(Base.astro)을 쓴다 — OS 메타포는 기각했으므로.
+ */
+import '../styles/stripe-dev/tokens.css';
+import '../styles/stripe-dev/lab.css';
+import ThemeSwitcher from '../components/stripe-dev/ThemeSwitcher';
+import { SITE_LANG } from '../consts';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description = 'stripe.dev 디자인 시스템 분석 전시' } = Astro.props;
+
+const LINKS = [
+  { key: 'H', label: 'Bamsanchaeg', href: '/' },
+  { key: 'S', label: 'Study', href: '/labs/stripe-dev/' },
+  { key: 'R', label: 'Reference', href: '/labs/stripe-dev/reference/', active: true },
+];
+---
+
+<!doctype html>
+<html lang={SITE_LANG}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title} · stripe.dev study · Bamsanchaeg</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet" />
+    <script is:inline>
+      // 첫 페인트 전에 저장된 테마를 적용해 깜빡임을 막는다 (island hydrate 전).
+      try {
+        const t = localStorage.getItem('sd-theme');
+        if (t && t !== 'default') document.documentElement.dataset.sdTheme = t;
+      } catch {}
+    </script>
+  </head>
+  <body class="sd sd-body" id="sd-root">
+    <div class="sd-page">
+      <nav class="sd-nav" aria-label="랩 메뉴">
+        <div class="sd-nav__left">
+          {LINKS.map((l) => (
+            <a
+              class:list={['sd-navbtn', 'text-smallcaps', { 'is-active': l.active }]}
+              href={l.href}
+              aria-current={l.active ? 'page' : undefined}
+              data-hotkey={l.key}
+            ><span class="hotkey">[{l.key}] </span>{l.label}</a>
+          ))}
+        </div>
+        <ThemeSwitcher client:load />
+      </nav>
+      <main class="grid sd-main">
+        <slot />
+      </main>
+      <footer class="section sd-footer">
+        <div class="text-smallcaps sd-footer__label">/Reference</div>
+        <p class="text-sm sd-footer__body">
+          이 페이지는 stripe.dev 의 토큰·타이포·그리드를 재현한 <b>분석 표본</b>입니다. 디자인 자산은 Stripe 의 것이며 학습 목적으로만 재현했습니다.
+          분석 문서는 <a href="https://github.com/bamsanchaeg/bamsanchaeg.github.io/blob/main/docs/labs/stripe-dev-reference.md" class="sd-link">GitHub</a>,
+          적용 결과는 <a href="/labs/stripe-dev/" class="sd-link">스터디 본 트랙</a>에.
+        </p>
+      </footer>
+    </div>
+    <script>
+      // 첫 페인트용 임시 속성을 .sd 루트로 옮긴다.
+      const t = document.documentElement.dataset.sdTheme;
+      if (t) {
+        document.getElementById('sd-root')?.setAttribute('data-theme', t);
+        delete document.documentElement.dataset.sdTheme;
+      }
+      // 키보드 단축키 (stripe.dev 의 [B] Blog 패턴 재현)
+      document.addEventListener('keydown', (e) => {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        const target = e.target as HTMLElement | null;
+        if (target && /^(INPUT|SELECT|TEXTAREA)$/.test(target.tagName)) return;
+        const key = e.key.toUpperCase();
+        const link = document.querySelector<HTMLAnchorElement>(`.sd-nav a[data-hotkey="${key}"]`);
+        if (link) window.location.href = link.href;
+      });
+    </script>
+  </body>
+</html>

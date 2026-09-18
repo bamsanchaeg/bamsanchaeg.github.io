@@ -6,33 +6,50 @@
 
 | 도구 | 버전 | 확인 명령 |
 |---|---|---|
-| Ruby | 3.3 | `ruby --version` |
-| Bundler | Ruby 환경 호환 버전 | `bundle --version` |
+| Node.js | 22.12 이상 | `node --version` |
+| npm | Node 동봉 버전 | `npm --version` |
 
 ## 최초 설정과 실행
 
 ```shell
-bundle install
-bundle exec jekyll serve --livereload
+npm install
+npm run dev
 ```
 
-- 로컬 주소: `http://127.0.0.1:4000`
+- 로컬 주소: `http://localhost:4321`
 - 종료: 실행한 터미널에서 `Ctrl+C`
 
 ## 검증
 
 ```shell
-bundle exec jekyll build --strict_front_matter
+npm run check   # 템플릿 타입과 front matter 스키마 검사
+npm run build   # dist/ 에 정적 사이트 생성
+npm run preview # 빌드 결과를 로컬에서 확인
 ```
 
-생성 결과는 `_site`에 저장되며 Git에는 포함하지 않습니다.
+생성 결과는 `dist/`에 저장되며 Git에는 포함하지 않습니다.
+
+## 디렉터리 안내
+
+| 경로 | 역할 |
+|---|---|
+| `src/content/posts/` | 학습 기록. 파일명 `YYYY-MM-DD-slug.md` |
+| `src/content/projects/` | 포트폴리오 write-up. 파일명이 곧 URL slug |
+| `src/content.config.ts` | 두 컬렉션의 front matter 스키마 |
+| `src/pages/` | 라우트. 파일 경로가 URL |
+| `src/pages/labs/stripe-dev/` | stripe.dev 스터디 — 목차, 주차 페이지(블로그 셸), `reference/` 원본 재현 전시(`.sd` 셸) |
+| `src/components/stripe-dev/` | 분석 전시의 12테마 스위처 island |
+| `src/styles/site.css` | 블로그 디자인 시스템 |
+| `src/styles/stripe-dev/` | 분석 전시 전용 stripe 토큰 (`.sd` 루트에 스코프) |
+| `src/styles/lab.css` | 스터디 주차 페이지의 전시 컴포넌트 (블로그 토큰 사용) |
+| `public/labs/` | 빌드가 필요 없는 정적 데모 (예: `miles-dot`) |
+| `docs/labs/` | 스터디 레퍼런스 분석 문서 |
 
 ## 자주 발생하는 문제
 
 | 증상 | 원인 | 해결 |
 |---|---|---|
-| CSS 또는 링크가 404 | `baseurl`이 저장소 이름과 다름 | `_config.yml`의 `baseurl` 확인 |
-| 새 글이 보이지 않음 | 파일명 날짜가 미래이거나 형식이 다름 | `YYYY-MM-DD-title.md` 형식과 날짜 확인 |
-| front matter 오류 | 구분선 또는 YAML 문법 오류 | 문서 시작과 끝의 `---` 및 들여쓰기 확인 |
-| 로컬 주소가 배포와 다름 | 프로젝트 사이트 경로 적용 안 됨 | `bundle exec jekyll serve --baseurl /저장소명` 사용 |
-
+| 새 글이 빌드에서 실패 | front matter 가 스키마와 다름 | `npm run check` 오류 메시지의 필드 확인 (`title` 필수) |
+| 새 글이 보이지 않음 | 파일명 형식이 다름 | `YYYY-MM-DD-slug.md` 형식 확인, 또는 `date:` 를 front matter 에 명시 |
+| 글 주소가 예상과 다름 | 날짜·slug 는 파일명에서 읽음 | `src/lib/posts.ts` 의 `postMeta` 참고 |
+| 랩 테마가 블로그에 번짐 | `.sd` 밖에서 `--sd-*` 변수를 참조 | 랩 스타일은 `src/styles/stripe-dev/` 안에서만, 셀렉터는 `.sd` 로 시작 |

@@ -1,0 +1,35 @@
+---
+import { render } from 'astro:content';
+import Post from '../../../../../layouts/Post.astro';
+import { getPosts } from '../../../../../lib/posts';
+
+// Jekyll permalink /log/:year/:month/:day/:title/ 을 그대로 재현한다.
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map(({ post, date, slug }) => {
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return {
+      params: {
+        year: String(date.getFullYear()),
+        month: pad(date.getMonth() + 1),
+        day: pad(date.getDate()),
+        slug,
+      },
+      props: { post, date },
+    };
+  });
+}
+
+const { post, date } = Astro.props;
+const { Content } = await render(post);
+---
+
+<Post
+  title={post.data.title}
+  date={date}
+  category={post.data.category}
+  tags={post.data.tags}
+  description={post.data.description}
+>
+  <Content />
+</Post>

@@ -6,6 +6,25 @@
 
 ### Added
 
+- 포트폴리오 컬렉션(`src/content/projects`)과 `/portfolio/` 카드·상세 페이지
+- stripe.dev 디자인 시스템 스터디 `/labs/stripe-dev/` — 원리 채택/기각 목차, 1주차(밤산책 토큰 리팩터링), `reference/` 원본 분석 전시
+- 라이트/다크 테마 토글 (헤더). 시스템 설정을 따르고 선택은 localStorage 에 저장
+- 레퍼런스 분석 문서 `docs/labs/stripe-dev-reference.md`
+- 헤더 메뉴에 Portfolio 추가
+- 글 목록·아카이브·포트폴리오 카드 hover 를 액센트 배경 반전으로 통일
+
+### Changed
+
+- `site.css` 색 토큰을 원색 4개(`--ink`, `--accent`, `--canvas`, `--surface`) + `color-mix()` 파생으로 재구성. 하드코딩 색 제거
+- 사이트 엔진을 Jekyll에서 Astro로 전환 (ADR-0002). 게시물 주소·RSS 주소는 그대로.
+- `miles-dot/` 을 `/labs/miles-dot/` 으로 이동 (옛 주소는 301)
+- CI/CD 워크플로를 Node 기반(`astro check` + `astro build`, `withastro/action`)으로 교체
+
+### Removed
+
+- Ruby, Bundler, Jekyll 설정 파일
+
+
 - 프로젝트 문서 체계와 자동 빌드 검증
 - Pull Request와 `main` 푸시를 검증하는 CI 워크플로
 - `main` 변경을 GitHub Pages에 게시하는 CD 워크플로

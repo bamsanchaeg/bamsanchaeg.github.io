@@ -22,19 +22,11 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
+      - name: Build with Astro
+        uses: withastro/action@v4
         with:
-          source: ./
-          destination: ./_site
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./_site
+          node-version: 22
+          package-manager: npm@latest
 
   deploy:
     name: Deploy GitHub Pages
@@ -47,4 +39,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
-

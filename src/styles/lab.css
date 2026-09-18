@@ -1,0 +1,54 @@
+/* 스터디 본 트랙 페이지(/labs/stripe-dev/*)용. 블로그 디자인 시스템 위에 얹는 전시 컴포넌트. */
+
+.lab-intro { max-width: 720px; margin-bottom: 56px; }
+.lab-intro h1 { margin: 0; font-size: clamp(2.4rem, 6vw, 4.5rem); font-weight: 500; letter-spacing: -0.05em; line-height: 1.15; }
+.lab-intro p { margin: 18px 0 0; max-width: 60ch; color: var(--ink-body); }
+.lab-intro .lab-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+
+.lab-section { padding: 40px 0; border-top: 1px solid var(--line); }
+.lab-section > h2 { margin: 0 0 6px; font-size: 1.1rem; font-weight: 500; letter-spacing: -0.02em; }
+.lab-section > .lead { margin: 0 0 28px; max-width: 62ch; color: var(--muted); font-size: 0.95rem; }
+
+/* 원리 카드 */
+.principles { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.principle { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 16px; padding: 22px 24px; background: var(--surface); }
+.principle .num { font-family: var(--font-mono); font-size: 0.78rem; color: var(--accent); letter-spacing: 0.08em; padding-top: 4px; }
+.principle h3 { margin: 0 0 6px; font-size: 1rem; font-weight: 500; }
+.principle p { margin: 0; max-width: 60ch; color: var(--ink-body); font-size: 0.92rem; }
+.principle .verdict { display: inline-block; margin-top: 10px; padding: 2px 10px; border-radius: 999px; font-size: 0.75rem; }
+.verdict--take { background: var(--accent-soft); color: var(--accent-ink); }
+.verdict--drop { border: 1px solid var(--line-strong); color: var(--muted); }
+
+/* 토큰 표본 */
+.token-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+.token { display: grid; gap: 8px; }
+.token .chip { height: 64px; border-radius: 8px; border: 1px solid var(--line); }
+.token .chip--text { display: grid; place-items: center; font-size: 1.4rem; font-weight: 500; background: var(--surface); }
+.token code { font-family: var(--font-mono); font-size: 0.74rem; color: var(--muted); }
+.token small { display: block; font-size: 0.74rem; color: var(--ink-body); }
+
+/* before / after 표 */
+.diff-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+.diff-table th, .diff-table td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.diff-table th { color: var(--muted); font-weight: 500; font-size: 0.74rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.diff-table code { font-family: var(--font-mono); font-size: 0.8rem; }
+.diff-table .del { color: var(--muted); text-decoration: line-through; }
+.diff-table .add { color: var(--accent-ink); }
+
+/* 데모 프레임 */
+.demo { border: 1px dashed var(--line-strong); border-radius: 12px; padding: 8px 20px; }
+.demo .post-list li:first-child { border-top: 0; }
+
+/* 주차 목록 */
+.weeks { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--ink); }
+.weeks li { display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; gap: 20px; align-items: center; padding: 18px 4px; border-bottom: 1px solid var(--line); }
+.weeks .wk { font-family: var(--font-mono); font-size: 0.78rem; color: var(--accent); }
+.weeks strong { font-weight: 500; }
+.weeks p { margin: 4px 0 0; color: var(--muted); font-size: 0.85rem; }
+.weeks a { text-decoration: none; }
+.weeks .status { font-size: 0.74rem; }
+
+@media (max-width: 720px) {
+  .principle { grid-template-columns: 1fr; gap: 6px; padding: 18px; }
+  .weeks li { grid-template-columns: 1fr; gap: 6px; }
+}

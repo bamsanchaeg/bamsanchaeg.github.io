@@ -1,0 +1,98 @@
+---
+import Lab from '../../../../layouts/StripeDevLab.astro';
+import themes from '../../../../styles/stripe-dev/themes.json';
+
+const TYPE_SCALE = [
+  { cls: 'text-hero', label: 'text-hero', spec: 'calc(12.28vw + 32px) · 300 · -.07em · lh 80%', sample: 'Stripe Dot' },
+  { cls: 'section-title', label: 'section-title', spec: 'calc(4.48vw + 36.5px) → 114px · 300 · -.06em · lh 84%', sample: 'Featured', counter: '(20)' },
+  { cls: 'text-lg', label: 'text-lg', spec: 'calc(1.72vw + 13.3px) · 300 · -.06em · lh 95%', sample: 'Learn how to build web and mobile applications to accept payments.' },
+  { cls: 'text-md', label: 'text-md', spec: 'calc(1.89vw + 12.6px) · 300 · -.04em · lh 100%', sample: "AI didn't write our SDK. It changed how we built it." },
+  { cls: 'text-sm', label: 'text-sm', spec: 'calc(.52vw + 12px) · 300 · -.03em · lh 100%', sample: 'AI was involved at every stage of building the extensibility SDK.' },
+  { cls: 'text-xs', label: 'text-xs', spec: '14px · 300 · -.03em', sample: 'Agentic Commerce (1) · AI (6) · Best Practices (2)' },
+  { cls: 'text-smallcaps', label: 'text-smallcaps', spec: '12px mono · uppercase · -.012em', sample: '/Featured Post · [ Fig. 1 ] · 2026.09.18' },
+];
+
+// 스와치는 default 테마 기준 라벨을 보여주되, 실제 색은 현재 data-theme 의 변수를 따른다.
+const SWATCHES = [
+  'backgroundColor', 'headingTextColor', 'bodyTextColor', 'highlightColor', 'invertedTextColor',
+  'buttonColor', 'navButtonBG', 'borderColor', 'dottedBorderColor', 'tagBorderColor',
+  'filterTextInactive', 'sectionLabels', 'windowFrameBG', 'terminalBackground', 'terminalTextPrimary', 'codeBG',
+];
+const themeCount = Object.keys(themes).length;
+---
+
+<Lab title="Reference · stripe.dev 분석 전시">
+  <section class="section sd-hero">
+    <h1 class="text-hero sd-hero__title">stripe.dev<br />Reference</h1>
+    <p class="text-lg sd-hero__sub">
+      원본 사이트의 토큰·타이포·그리드를 <b>그대로</b> 재현한 분석 전시입니다. 이 페이지 자체는 산출물이 아니라 표본이며,
+      여기서 뽑은 원리를 밤산책에 적용한 결과는 <a class="sd-link" href="/labs/stripe-dev/">스터디 본 트랙</a>에 있습니다.
+      우측 상단에서 원본의 12개 테마를 전환해 볼 수 있습니다.
+    </p>
+  </section>
+
+  <div class="sd-th"><div class="text-smallcaps">/Theme tokens <span class="sd-tag">{themeCount} themes × 45 tokens</span></div></div>
+
+  <section class="sd-block">
+    <div class="sd-block__label"><span class="sd-square"></span><span class="text-xs">시맨틱 컬러</span></div>
+    <div class="sd-block__body">
+      <div class="sd-swatches">
+        {SWATCHES.map((name) => (
+          <div class="sd-swatch">
+            <div class="sd-swatch__chip" style={`background: var(--sd-${name})`}></div>
+            <span class="text-smallcaps">{name}</span>
+          </div>
+        ))}
+      </div>
+      <p class="text-sm" style="margin-top:16px; line-height:130%;">
+        원본은 잉크 한 색에 알파만 바꿔 위계를 만든다 — <code class="text-smallcaps">#1e1e1e</code> → <code class="text-smallcaps">#1e1e1e44</code>(점선·비활성) → <code class="text-smallcaps">#1e1e1e11</code>(버튼 배경).
+        테마마다 이 세 단계를 실제 hex 로 따로 정의하므로 배경이 바뀌어도 위계가 유지된다.
+      </p>
+    </div>
+  </section>
+
+  <div class="sd-th"><div class="text-smallcaps">/Typography <span class="sd-tag">Inter + JetBrains Mono (Söhne 대체)</span></div></div>
+
+  <section class="sd-block">
+    <div class="sd-block__label"><span class="sd-square"></span><span class="text-xs">7단계 스케일</span></div>
+    <div class="sd-block__body sd-specimen">
+      {TYPE_SCALE.map((t) => (
+        <div class="sd-hl-parent">
+          <span class="text-smallcaps meta">{t.label} — {t.spec}</span>
+          <span class={t.cls}><span class="sd-hl">{t.sample}</span>{t.counter && <sup class="super">{t.counter}</sup>}</span>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <div class="sd-th"><div class="text-smallcaps">/Grid <span class="sd-tag">8 → 16 → 24 columns · subgrid</span></div></div>
+
+  <section class="sd-block">
+    <div class="sd-block__label"><span class="sd-square"></span><span class="text-xs">브레이크포인트 600 / 760 / 960 / 1440 / 1728</span></div>
+    <div class="sd-block__body">
+      <div class="sd-griddemo" aria-hidden="true">
+        {Array.from({ length: 24 }, (_, i) => <span>{i + 1}</span>)}
+      </div>
+      <p class="text-sm" style="margin-top:16px; line-height:130%;">
+        창 너비를 바꿔 보세요. 모든 섹션은 <code class="text-smallcaps">grid-template-columns: subgrid</code> 로 상위 열에 정렬되고,
+        좌우 패딩은 12px 고정, 최대 너비 1728px.
+      </p>
+    </div>
+  </section>
+
+  <div class="sd-th"><div class="text-smallcaps">/What was taken, what was left</div></div>
+
+  <section class="sd-block">
+    <div class="sd-block__label"><span class="sd-square"></span><span class="text-xs">채택 · 기각</span></div>
+    <div class="sd-block__body">
+      <ul class="sd-check text-sm">
+        <li class="done">액센트 하나 + hover 는 배경 반전 → 밤산책 세이지로 적용</li>
+        <li class="done">잉크 한 색의 알파 계층으로 위계 → 밤산책 변수 6개를 원색 3개 + 파생으로 정리</li>
+        <li class="done">컴포넌트는 토큰만 참조, 테마 = 객체 하나 → 밤산책 다크 모드 추가</li>
+        <li>OS 메타포([B] 단축키, 윈도우 프레임, 마퀴) — 에디토리얼 톤과 맞지 않아 기각</li>
+        <li>24열 subgrid — 글 중심 단일 칼럼 사이트에 과함, 기각</li>
+        <li>유동 타이포 공식 calc(a·vw + b) — 한글 본문 가독성 우선, 기각. 제목에만 clamp() 유지</li>
+      </ul>
+    </div>
+  </section>
+</Lab>
