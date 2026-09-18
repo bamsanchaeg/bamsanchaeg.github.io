@@ -46,9 +46,11 @@
 .weeks strong { font-weight: 500; }
 .weeks p { margin: 4px 0 0; color: var(--muted); font-size: 0.85rem; }
 .weeks a { text-decoration: none; }
-.weeks .status { font-size: 0.74rem; }
+.weeks .chip { font-size: 0.74rem; }
 
 @media (max-width: 720px) {
   .principle { grid-template-columns: 1fr; gap: 6px; padding: 18px; }
   .weeks li { grid-template-columns: 1fr; gap: 6px; }
 }
+
+.demo--row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 20px; }

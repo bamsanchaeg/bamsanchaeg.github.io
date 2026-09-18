@@ -1,4 +1,5 @@
 ---
+import Chip from './ui/Chip.astro';
 import { formatDate } from '../lib/posts';
 import type { Post } from '../lib/posts';
 
@@ -16,7 +17,7 @@ const { items, variant = 'recent' } = Astro.props;
       <li>
         <a href={url}>
           <span class="post-meta">
-            <span>{post.data.category}</span>
+            <Chip>{post.data.category}</Chip>
             <time datetime={date.toISOString()}>{formatDate(date)}</time>
           </span>
           <strong>{post.data.title}</strong>

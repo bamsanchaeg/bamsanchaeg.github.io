@@ -1,4 +1,7 @@
 ---
+import Chip from '../../../../components/ui/Chip.astro';
+import Button from '../../../../components/ui/Button.astro';
+import SectionLabel from '../../../../components/ui/SectionLabel.astro';
 import Base from '../../../../layouts/Base.astro';
 import '../../../../styles/lab.css';
 
@@ -33,7 +36,7 @@ const SAMPLE_POSTS = [
 
 <Base title="Week 1 · 파운데이션" description="원색 4개 + 파생 토큰으로 site.css 를 다시 짜고, 액센트 반전 hover 와 다크 모드를 추가한 기록">
   <section class="lab-intro">
-    <p class="section-label"><a href="/labs/stripe-dev/" style="color:inherit;text-decoration:none">Lab · stripe.dev study</a> / Week 1</p>
+    <SectionLabel><a href="/labs/stripe-dev/" style="color:inherit;text-decoration:none">Lab · stripe.dev study</a> / Week 1</SectionLabel>
     <h1>파운데이션</h1>
     <p>
       이 페이지가 아니라 <strong>사이트 전체</strong>가 산출물입니다. 우측 상단 토글로 다크 모드를 켜 보세요 —
@@ -79,7 +82,7 @@ const SAMPLE_POSTS = [
         {SAMPLE_POSTS.map((p) => (
           <li>
             <a href="#hover-title">
-              <span class="post-meta"><span>{p.cat}</span><time>{p.date}</time></span>
+              <span class="post-meta"><Chip>{p.cat}</Chip><time>{p.date}</time></span>
               <strong>{p.title}</strong>
               <span class="post-arrow" aria-hidden="true">↗</span>
             </a>
@@ -105,6 +108,6 @@ const SAMPLE_POSTS = [
   <section class="lab-section" aria-labelledby="next-title">
     <h2 id="next-title">다음 주</h2>
     <p class="lead">원자 컴포넌트 — 지금 흩어져 있는 <code>.status</code>, <code>.text-button</code>, <code>.section-label</code> 을 상태와 크기가 있는 Chip · Button · Label 로 승격. Figma 컴포넌트와 1:1 로 맞춘다.</p>
-    <a class="text-button" href="/labs/stripe-dev/">← 스터디 목차</a>
+    <Button href="/labs/stripe-dev/week-2/">2주차로 →</Button>
   </section>
 </Base>

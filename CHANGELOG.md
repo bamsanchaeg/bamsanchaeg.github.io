@@ -11,6 +11,7 @@
 - 라이트/다크 테마 토글 (헤더). 시스템 설정을 따르고 선택은 localStorage 에 저장
 - 레퍼런스 분석 문서 `docs/labs/stripe-dev-reference.md`
 - 헤더 메뉴에 Portfolio 추가
+- 원자 컴포넌트 `Chip` · `Button` · `SectionLabel` (`src/components/ui/`) — Figma 컴포넌트와 1:1, 스터디 2주차
 - 글 목록·아카이브·포트폴리오 카드 hover 를 액센트 배경 반전으로 통일
 
 ### Changed

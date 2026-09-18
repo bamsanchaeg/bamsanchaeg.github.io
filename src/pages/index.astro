@@ -1,4 +1,5 @@
 ---
+import SectionLabel from '../components/ui/SectionLabel.astro';
 import Base from '../layouts/Base.astro';
 import PostList from '../components/PostList.astro';
 import { getPosts } from '../lib/posts';
@@ -8,7 +9,7 @@ const posts = (await getPosts()).slice(0, 8);
 
 <Base title="HOME">
   <section class="intro" aria-label="사이트 소개">
-    <p class="section-label">Personal archive</p>
+    <SectionLabel>Personal archive</SectionLabel>
     <p>웹, 디자인, 코드에 관한 기록.</p>
   </section>
   <section class="recent" aria-labelledby="recent-title">

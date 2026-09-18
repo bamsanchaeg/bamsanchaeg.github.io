@@ -38,6 +38,7 @@ npm run preview # 빌드 결과를 로컬에서 확인
 | `src/content.config.ts` | 두 컬렉션의 front matter 스키마 |
 | `src/pages/` | 라우트. 파일 경로가 URL |
 | `src/pages/labs/stripe-dev/` | stripe.dev 스터디 — 목차, 주차 페이지(블로그 셸), `reference/` 원본 재현 전시(`.sd` 셸) |
+| `src/components/ui/` | 원자 컴포넌트 Chip · Button · SectionLabel. Figma 컴포넌트와 이름·변형 1:1 |
 | `src/components/stripe-dev/` | 분석 전시의 12테마 스위처 island |
 | `src/styles/site.css` | 블로그 디자인 시스템 |
 | `src/styles/stripe-dev/` | 분석 전시 전용 stripe 토큰 (`.sd` 루트에 스코프) |

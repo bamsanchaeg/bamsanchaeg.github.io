@@ -1,4 +1,7 @@
 ---
+import Chip from '../../../components/ui/Chip.astro';
+import Button from '../../../components/ui/Button.astro';
+import SectionLabel from '../../../components/ui/SectionLabel.astro';
 import Base from '../../../layouts/Base.astro';
 import '../../../styles/lab.css';
 
@@ -17,7 +20,7 @@ const PRINCIPLES = [
 
 const WEEKS = [
   { n: 1, title: '파운데이션 — 토큰·알파 계층·다크 모드', desc: '원색 4개 + 파생 토큰으로 site.css 리팩터링, 액센트 반전 hover, 테마 토글', href: '/labs/stripe-dev/week-1/', status: '완료' },
-  { n: 2, title: '원자 — Chip · Button · 섹션 라벨', desc: '기존 .status, .text-button, .section-label 을 상태(hover/active/disabled)와 크기가 있는 컴포넌트로 승격', href: null, status: '예정' },
+  { n: 2, title: '원자 — Chip · Button · Section Label', desc: '.status / .text-button / .github-link / .section-label 을 Astro 컴포넌트 3개로 승격. Figma 컴포넌트와 이름·변형이 1:1', href: '/labs/stripe-dev/week-2/', status: '완료' },
   { n: 3, title: '리스트 — 글 목록 · 아카이브 · 필터', desc: '카테고리·태그 필터를 stripe 의 Directory 패턴(데스크톱 세로 / 모바일 가로 칩)으로 — 단 메타포 없이', href: null, status: '예정' },
   { n: 4, title: '조합 — 포트폴리오 카드 · 헤더', desc: '카드에 썸네일 슬롯, 헤더에 현재 위치 표시와 키보드 접근성 정비', href: null, status: '예정' },
   { n: 5, title: '페이지 — 홈 재구성 · 회고', desc: '최근 글 + 진행 중 프로젝트를 한 화면에. 전 주차 회고를 write-up 에 정리', href: null, status: '예정' },
@@ -26,7 +29,7 @@ const WEEKS = [
 
 <Base title="stripe.dev 스터디" description="stripe.dev 디자인 시스템을 분석해 원리를 뽑고, 밤산책 자체 디자인 시스템에 적용하는 5주 스터디">
   <section class="lab-intro">
-    <p class="section-label">Lab · stripe.dev study</p>
+    <SectionLabel>Lab · stripe.dev study</SectionLabel>
     <h1>분석은 stripe.dev,<br />적용은 밤산책.</h1>
     <p>
       Stripe 개발자 허브의 CSS·테마 토큰을 번들에서 직접 추출해 분석하고, 거기서 뽑은 원리를
@@ -34,10 +37,10 @@ const WEEKS = [
       매주 산출물은 밤산책의 실제 페이지가 바뀌는 것입니다.
     </p>
     <div class="lab-links">
-      <a class="text-button" href="/labs/stripe-dev/reference/">원본 분석 전시 ↗</a>
-      <a class="text-button" href="/portfolio/stripe-dev-design-study/">Write-up</a>
-      <a class="text-button" href="https://github.com/bamsanchaeg/bamsanchaeg.github.io/blob/main/docs/labs/stripe-dev-reference.md" rel="noopener">분석 문서 (GitHub)</a>
-      <a class="text-button" href="https://www.figma.com/design/rgWioHzV1jbcYJCFVmNSTo" rel="noopener">Figma ↗</a>
+      <Button href="/labs/stripe-dev/reference/">원본 분석 전시 ↗</Button>
+      <Button href="/portfolio/stripe-dev-design-study/">Write-up</Button>
+      <Button href="https://github.com/bamsanchaeg/bamsanchaeg.github.io/blob/main/docs/labs/stripe-dev-reference.md" rel="noopener">분석 문서 (GitHub)</Button>
+      <Button href="https://www.figma.com/design/rgWioHzV1jbcYJCFVmNSTo" rel="noopener">Figma ↗</Button>
     </div>
   </section>
 
@@ -69,7 +72,7 @@ const WEEKS = [
             {w.href ? <a href={w.href}><strong>{w.title}</strong></a> : <strong>{w.title}</strong>}
             <p>{w.desc}</p>
           </div>
-          <span class:list={['status', `status--${w.status}`]}>{w.status}</span>
+          <Chip kind={w.status}>{w.status}</Chip>
         </li>
       ))}
     </ol>

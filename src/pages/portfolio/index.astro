@@ -1,4 +1,7 @@
 ---
+import Chip from '../../components/ui/Chip.astro';
+import Button from '../../components/ui/Button.astro';
+import SectionLabel from '../../components/ui/SectionLabel.astro';
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 
@@ -7,7 +10,7 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
 
 <Base title="PORTFOLIO" description="만든 것들과 그 과정의 기록">
   <section class="page-intro">
-    <p class="section-label">Portfolio</p>
+    <SectionLabel>Portfolio</SectionLabel>
     <h1>만든 것들</h1>
     <p>{projects.length}개의 프로젝트 · 각 항목에 문제, 설계, 결과, 회고를 적습니다.</p>
   </section>
@@ -18,7 +21,7 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
       <li class="project-card">
         <a class="project-card__main" href={`/portfolio/${p.id}/`}>
           <span class="post-meta">
-            <span class:list={['status', `status--${p.data.status}`]}>{p.data.status}</span>
+            <Chip kind={p.data.status}>{p.data.status}</Chip>
             <span>{p.data.period}</span>
           </span>
           <strong>{p.data.title}</strong>
@@ -26,8 +29,8 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
           <span class="project-card__stack">{p.data.stack.join(' · ')}</span>
         </a>
         <div class="project-card__links">
-          {p.data.demo && <a class="text-button" href={p.data.demo}>Demo ↗</a>}
-          {p.data.repo && <a class="text-button" href={p.data.repo} rel="noopener">Repo ↗</a>}
+          {p.data.demo && <Button href={p.data.demo}>Demo ↗</Button>}
+          {p.data.repo && <Button href={p.data.repo} rel="noopener">Repo ↗</Button>}
         </div>
       </li>
     ))}

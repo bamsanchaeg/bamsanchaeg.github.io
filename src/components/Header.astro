@@ -1,4 +1,5 @@
 ---
+import Button from './ui/Button.astro';
 import ThemeToggle from './ThemeToggle.astro';
 import { SITE_TITLE, GITHUB_URL } from '../consts';
 const path = Astro.url.pathname;
@@ -17,7 +18,7 @@ const links = [
     {links.map(({ href, label }) => (
       <a href={href} aria-current={isActive(href) ? 'page' : undefined}>{label}</a>
     ))}
-    <a class="github-link" href={GITHUB_URL} rel="noopener">GitHub</a>
+    <Button variant="solid" href={GITHUB_URL} rel="noopener">GitHub</Button>
     <ThemeToggle />
   </nav>
 </header>
