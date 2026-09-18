@@ -16,6 +16,8 @@
 
 ### Changed
 
+- `labs/miles-dot` 을 HTML · `styles.css` · `miles-dot.js`(ES module) 로 분리하고 Airbnb JavaScript/CSS 스타일 가이드로 재작성 (`eslint-config-airbnb-base` 0 errors). 상태를 `state` 객체 하나로 모으고 기능별 주석 추가
+- 페이지 제목(h1) 크기 축소 — intro 60px·page 52px·post 44px 상한. Figma 텍스트 스타일 동기화
 - `site.css` 색 토큰을 원색 4개(`--ink`, `--accent`, `--canvas`, `--surface`) + `color-mix()` 파생으로 재구성. 하드코딩 색 제거
 - 사이트 엔진을 Jekyll에서 Astro로 전환 (ADR-0002). 게시물 주소·RSS 주소는 그대로.
 - `miles-dot/` 을 `/labs/miles-dot/` 으로 이동 (옛 주소는 301)
