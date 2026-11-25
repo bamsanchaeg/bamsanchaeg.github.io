@@ -51,9 +51,8 @@ button,input,select,textarea { font:inherit; color:inherit; }
 .stamp.off { background:none; color:var(--mid); border-color:var(--mid); }
 .row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px 0; border-bottom:1px dashed var(--mid); }
 .gate { display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; justify-content:space-between; border:1.5px dashed var(--ink); background:#fff6d6; padding:8px 12px; margin:8px 0; }
-.steps { display:flex; gap:6px; margin:4px 0 10px; }
-.steps span { flex:1; text-align:center; padding:3px 4px; border-bottom:3px solid var(--pale); color:var(--grey); font-size:14px; }
-.steps span.on { border-color:var(--ink); color:var(--deep); font-weight:700; }
+.shelfview { flex:none; padding:8px 10px; border:1.5px dashed var(--mid); }
+.shelfview canvas { display:block; width:132px; height:124px; image-rendering:pixelated; }
 input.code { font-size:26px; letter-spacing:.35em; text-align:center; }
 .check { display:flex; gap:10px; align-items:flex-start; font-size:14px; }
 .check input { width:20px; min-height:20px; flex:none; margin-top:2px; accent-color:var(--ink); }
