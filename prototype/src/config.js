@@ -5,4 +5,5 @@ const CONFIG = {
   url: "https://cncshhbsfkugqwgvkgwk.supabase.co",
   key: "sb_publishable_lvZvfqBR6vIWuEI2Tb3NHw_2nhGguFC",
   google: false,
+  captcha: '', // Cloudflare Turnstile '사이트 키'(공개값). 비워 두면 쓰지 않는다. 비밀 키는 Supabase 대시보드에만 넣는다.
 };

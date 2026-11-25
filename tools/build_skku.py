@@ -27,9 +27,10 @@ def bundle():
     if key and check_secrets.secret_kind(key[1]): sys.exit('config.js 에 비밀 키가 있어 묶지 않았습니다: ' + check_secrets.secret_kind(key[1]))
     # CSP: 이 파일의 스크립트와 무결성을 확인한 Supabase 라이브러리만 실행하고, 우리 프로젝트에만 연결한다
     url = re.search(r"url:\s*['\"`](https?://[^'\"`/]+)", rd('config.js')); sdk = re.search(r"src:'(https://[^']+)'", rd('cloud.js'))[1]
+    cap = re.search(r"captcha:\s*['\"`]([^'\"`]+)", rd('config.js')); cf = 'https://challenges.cloudflare.com'
     inline = lambda tag: sha(re.search(r'<%s>(.*?)</%s>' % (tag, tag), html, re.S)[1])
-    csp = '; '.join(["default-src 'none'", 'script-src %s %s' % (inline('script'), sdk), 'style-src %s https://fonts.googleapis.com' % inline('style'), 'font-src https://fonts.gstatic.com',
-                     "img-src 'self' data:", 'connect-src ' + (url[1] if url else "'none'"), "base-uri 'none'", "form-action 'none'", "object-src 'none'", "frame-src 'none'"])
+    csp = '; '.join(["default-src 'none'", 'script-src %s %s%s' % (inline('script'), sdk, ' ' + cf if cap else ''), 'style-src %s https://fonts.googleapis.com' % inline('style'), 'font-src https://fonts.gstatic.com',
+                     "img-src 'self' data:", 'connect-src ' + (url[1] if url else "'none'"), "base-uri 'none'", "form-action 'none'", "object-src 'none'", 'frame-src ' + (cf if cap else "'none'")])
     open(os.path.join(ROOT, 'village.html'), 'w', encoding='utf-8').write(html.replace('/*CSP*/', csp))
 if len(sys.argv) < 2: bundle(); sys.exit()
 

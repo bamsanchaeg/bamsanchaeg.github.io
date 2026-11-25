@@ -24,7 +24,7 @@ const newId=()=>store.nextId++, nm=w=>w===ME?mine().nick:w==='나'?store.me.nick
 /* ---------- 창 ---------- */
 const panel=document.getElementById('panel'), body=document.getElementById('body'), pt=document.getElementById('pt'), talk=document.getElementById('talk');
 function el(tag,props={},...kids){ const n=document.createElement(tag); for(const [k,v] of Object.entries(props)){ if(k==='cls')n.className=v; else if(k==='css')n.style.cssText=v; else n[k]=v; } n.append(...kids.filter(k=>k!==null&&k!==false&&k!==undefined)); return n; }
-function show(title,...kids){ keys.length=0; route=[]; after=null; pt.textContent=title; document.getElementById('pf').textContent=title; body.replaceChildren(...kids.filter(k=>k)); panel.classList.add('on'); body.scrollTop=0; (body.querySelector('.menu .btn')||document.getElementById('bClose')).focus({preventScroll:true}); }
+function show(title,...kids){ keys.length=0; route=[]; after=null; pt.textContent=title; body.replaceChildren(...kids.filter(k=>k)); panel.classList.add('on'); body.scrollTop=0; (body.querySelector('.menu .btn')||document.getElementById('bClose')).focus({preventScroll:true}); }
 function hide(){ panel.classList.remove('on'); document.activeElement?.blur(); }
 const btn=(t,f,dis)=>el('button',{cls:'btn',type:'button',textContent:t,onclick:f,disabled:!!dis}), field=(t,n)=>el('label',{},t,n), sub=t=>el('div',{cls:'sub',textContent:t}), h2=t=>el('h2',{textContent:t}), acts=(...k)=>el('div',{cls:'acts'},...k);
 const input=(v,max,x={})=>el('input',{value:v||'',maxLength:max,...x}), select=(o,v,x={})=>el('select',x,...o.map(t=>{const [a,b]=Array.isArray(t)?t:[t,t];return el('option',{value:a,textContent:b,selected:a===v});}));
@@ -52,7 +52,7 @@ const cover=(s,cls='cov')=>{const c=coverPic(s);c.className=cls;return c;};
 const listen=s=>el('a',{cls:'btn',textContent:'듣기',target:'_blank',rel:'noopener noreferrer',href:/^https?:\/\//.test(s.link||'')?s.link:'https://www.youtube.com/results?search_query='+encodeURIComponent(s.title+' '+s.artist)});
 /* ---------- 아카이브 ---------- */
 const arch={tab:'rec',q:'',tag:''};
-const gate=()=>db.sample?el('div',{cls:'gate'},el('span',{textContent:'보기용 예시예요. 로그인하고 승인받은 부원만 등록할 수 있어요.'}),btn('로그인',openAccount)):db.locked?el('div',{cls:'gate'},el('span',{textContent:cloud.state==='pending'?'리더의 승인을 기다리고 있어요.':cloud.state==='loading'?'연결하는 중이에요…':'승인받은 부원에게만 보여요.'}),btn(cloud.state==='pending'?'내 계정':'로그인',openAccount)):null;
+const gate=()=>db.sample?el('div',{cls:'gate'},el('span',{textContent:'보기용 예시예요. 로그인하고 승인받은 부원만 등록할 수 있어요.'}),btn('로그인',openAccount)):db.locked?el('div',{cls:'gate'},el('span',{textContent:cloud.state==='pending'?'리더의 승인을 기다리고 있어요.':cloud.state==='setup'?'가입을 마무리해 주세요.':cloud.state==='loading'?'연결하는 중이에요…':'승인받은 부원에게만 보여요.'}),btn(cloud.state==='pending'?'내 계정':cloud.state==='setup'?'가입 마무리':'로그인',openAccount)):null;
 function openArchive(tab){ if(tab)arch.tab=tab; const tabs=el('div',{cls:'tabs',role:'tablist'},...[['rec','추천곡'],['jam','잼 세션'],['log','잼 기록']].map(([k,t])=>el('button',{cls:'tab'+(arch.tab===k?' on':''),type:'button',role:'tab',textContent:t,onclick:()=>openArchive(k)})));
   const list=el('div'), hit=(...v)=>!arch.q||v.join(' ').toLowerCase().includes(arch.q.toLowerCase());
   const draw_=()=>{ list.replaceChildren(...(arch.tab==='rec'?recList(hit):arch.tab==='jam'?jamList(hit):logList(hit))); };
