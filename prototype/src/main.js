@@ -93,8 +93,19 @@ function drawWorld(){ const x0=Math.max(0,Math.floor(cx/CP)),x1=Math.min(Math.ce
 let last=0; function loop(t){const dt=Math.min(.05,(t-last)/1000||0);last=t;clock+=dt;update(dt);draw();requestAnimationFrame(loop);}
 /* ---------- 입력 ---------- */
 const KEYMAP={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',KeyW:'up',KeyS:'down',KeyA:'left',KeyD:'right'};
-const title=document.getElementById('title'); const startGame=()=>{ if(title.hidden)return; title.hidden=true; const r=/room=(GROOV1\.[\w-]+)/.exec(location.hash||''), o=r&&readCode(r[1]); if(o){addFriend(o);enterRoom(o);} }; title.onclick=startGame;
-addEventListener('keydown',e=>{ if(!title.hidden){ if(!e.metaKey&&!e.ctrlKey&&!e.altKey&&e.key!=='Tab'){e.preventDefault();startGame();} return; } run=e.shiftKey; if(e.metaKey||e.ctrlKey||e.altKey)return;
+const title=document.getElementById('title'); const startGame=()=>{ if(title.hidden)return; title.hidden=true; document.activeElement?.blur(); const r=/room=(GROOV1\.[\w-]+)/.exec(location.hash||''), o=r&&readCode(r[1]); if(o){addFriend(o);enterRoom(o);} }; 
+/* 첫 화면 메뉴: 로그인 상태에 따라 버튼이 바뀐다. 둘러보기는 언제나 할 수 있다 */
+let titleKey=''; const goBox=document.getElementById('go');
+const browse=()=>{ startGame(); if(scene===hub&&!cloud.member)say('익명의 유령',['둘러보는 중이구나. 천천히 걸어 봐.',...(cloud.pub?['게시판에서는 어떤 잼이 열리는지 이름 없이 볼 수 있어.']:[]),'추천곡과 사람들의 방은 로그인하고 승인받으면 열려. 오른쪽 위에서 언제든 할 수 있어.']); };
+const enterMember=()=>{ startGame(); const n=invites().length; if(scene===hub&&n)say('익명의 유령',[`잼 초대가 ${n}개 와 있어. 오른쪽 위 이름을 눌러 봐.`]); };
+function titleMenu(){ if(title.hidden)return; const st=cloud.state, shared=/room=GROOV1\./.test(location.hash||''), key=[st,cloud.note,cloud.profile&&cloud.profile.nick,shared].join('|'); if(key===titleKey)return; titleKey=key;
+  const login=btn('로그인',()=>needLogin()), look=btn('둘러보기',browse), visit=btn('놀러 가기',startGame), other=btn('다른 계정으로',async()=>{await cloud.sb.auth.signOut({scope:'local'});await session();needLogin();}), tell=el('div',{cls:'tip',role:'status'});
+  const check=btn('승인됐는지 확인',async()=>{await session();if(cloud.member)return;tell.textContent='아직 승인 전이에요. 조금 뒤에 다시 확인해 주세요.';});
+  const named=(t,b)=>{b.textContent=t;return b;};
+  const [main,...more]=shared&&st!=='loading'?[visit,...(st==='out'?[login]:[])]:st==='member'?[btn(`${cloud.profile.nick} 들어가기`,enterMember),other]:st==='out'?[named('로그인하고 시작',login),look]:st==='setup'?[btn('가입 이어서 하기',()=>needLogin()),look]:st==='pending'?[named('둘러보며 기다리기',look),check]:st==='blocked'?[look,btn('내 계정',()=>needLogin())]:[look];
+  tell.textContent=st==='loading'?'연결하는 중이에요…':st==='pending'?'리더의 승인을 기다리고 있어요.':st==='off'||st==='out'?cloud.note:'';
+  main.classList.add('main'); goBox.replaceChildren(el('div',{cls:'gobtns'},main,...more),tell); if(!panel.classList.contains('on'))main.focus({preventScroll:true}); }
+addEventListener('keydown',e=>{ if(!title.hidden&&!panel.classList.contains('on')&&!talk.classList.contains('on')){ const b=[...goBox.querySelectorAll('button')],i=b.indexOf(document.activeElement),d=e.key==='Tab'?(e.shiftKey?-1:1):/^Arrow(Down|Right)$/.test(e.key)?1:/^Arrow(Up|Left)$/.test(e.key)?-1:0; if(d&&b.length){e.preventDefault();b[(Math.max(i,d<0?0:-1)+d+b.length)%b.length].focus();} else if((e.key==='Enter'||e.key===' ')&&i<0&&!e.repeat){e.preventDefault();b[0]?.click();} return; } run=e.shiftKey; if(e.metaKey||e.ctrlKey||e.altKey)return;
   if(panel.classList.contains('on')){ if(e.key==='Escape'){hide();return;} const f=[...panel.querySelectorAll('button:not(:disabled),a[href],input:not(:disabled),select,textarea')],i=f.indexOf(document.activeElement); if(e.key==='Tab'){e.preventDefault();f[(i+(e.shiftKey?-1:1)+f.length)%f.length].focus();} else if(!e.repeat&&(e.key==='ArrowDown'||e.key==='ArrowUp')&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName)){e.preventDefault();f[(i+(e.key==='ArrowDown'?1:-1)+f.length)%f.length].focus();} return; }
   if(talk.classList.contains('on')){ if(['Enter',' '].includes(e.key)||e.code==='KeyZ'){e.preventDefault();if(!e.repeat)nextLine();} return; }
   if(jam.on){ if(e.key==='Escape'){stopJam(true);return;} const i=PADS.indexOf(e.code.replace('Key','')); if(i>=0&&!/INPUT|SELECT/.test(document.activeElement?.tagName)){e.preventDefault();if(!e.repeat)jamHit(i);} return; }
@@ -106,6 +117,6 @@ document.getElementById('bClose').onclick=hide; document.getElementById('bMenu')
 const bR=document.getElementById('bRide'); bR.onclick=()=>{ride=!ride;bR.textContent=ride?'걷기':'스쿠터';bR.blur();};
 const bN=document.getElementById('bNight'); bN.onclick=()=>{night=!night;bN.textContent=night?'낮으로':'밤으로';bN.blur();};
 if(matchMedia('(pointer: coarse)').matches||innerWidth<768)document.getElementById('hint').textContent='가고 싶은 곳이나 사람을 눌러 보세요';
-cloudInit(); document.getElementById('bAcct').onclick=()=>openAccount();
+titleMenu(); cloudInit(); document.getElementById('bAcct').onclick=()=>needLogin();
 me.dir=0;
 requestAnimationFrame(loop);
