@@ -1,14 +1,20 @@
-# build output
-dist/
-# generated types
-.astro/
-# dependencies
-node_modules/
-# logs
-npm-debug.log*
-# environment
+# 비밀 값
 .env
-.env.production
-# OS / IDE
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+credentials.json
+service-account*.json
+supabase/.temp/
+supabase/.branches/
+.claude/settings.local.json
+# 만들어지는 것
+node_modules/
+__pycache__/
+*.pyc
 .DS_Store
-.idea/
+# 지도 원본 (README 의 주소에서 다시 받을 수 있음)
+osm*.json
+skku.json

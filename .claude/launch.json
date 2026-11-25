@@ -1,0 +1,1 @@
+{ "version": "0.0.1", "configurations": [ { "name": "groov", "runtimeExecutable": "python3", "runtimeArgs": ["-m", "http.server", "8477", "--bind", "127.0.0.1", "--directory", "prototype"], "port": 8477 } ] }

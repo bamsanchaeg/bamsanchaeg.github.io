@@ -1,0 +1,3 @@
+#!/bin/sh
+# 비밀 값 검사. 켜기: git config core.hooksPath .githooks
+exec python3 "$(git rev-parse --show-toplevel)/tools/check_secrets.py"
