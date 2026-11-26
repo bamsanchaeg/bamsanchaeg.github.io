@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WupmVduLPplxoJV/rMv8wmajth0FOaOTj09CVhGoQlU=' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js; style-src 'sha256-MSM7TWoLCGpAhgPPfyc50oI1gTYT9SFymfZNZadtZ5U=' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; connect-src 'self' https://cncshhbsfkugqwgvkgwk.supabase.co; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-pz4xj6Dq2LxNI+yvjrkj/xr3E2WL6EOidcYV6ZxJI7Y=' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js; style-src 'sha256-boRyM4SBHkXMtfZbcgvXu/Q17rf65Vq+ambADNBZfWk=' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; connect-src 'self' https://cncshhbsfkugqwgvkgwk.supabase.co; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Cabinet</title>
@@ -22,6 +22,7 @@ button,input,select,textarea { font:inherit; color:inherit; }
 #who0 { position:fixed; left:calc(12px + var(--sl)); top:calc(12px + var(--st)); display:flex; align-items:center; gap:10px; padding:4px 14px 4px 5px; pointer-events:none; }
 #who0 canvas { width:44px; height:44px; border:1.5px solid var(--ink); background:#fff; }
 #hud { position:fixed; top:calc(12px + var(--st)); right:calc(12px + var(--sr)); z-index:2; display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; }
+#bMore { display:none; }
 .btn:active { transform:translate(2px,2px); box-shadow:none; }
 .btn { background:var(--paper); border:1.5px solid var(--ink); box-shadow:2px 2px 0 var(--mid); padding:4px 12px; cursor:pointer; min-height:36px; color:var(--deep); text-decoration:none; display:inline-grid; place-items:center; }
 .btn:hover,.btn:focus-visible { background:var(--ink); color:var(--paper); outline:none; }
@@ -159,7 +160,23 @@ form.find { display:flex; gap:8px; margin:6px 0 4px; } form.find input { flex:1;
 #title .gobtns .main { background:var(--ink); color:var(--paper); min-width:180px; }
 #title .gobtns .main:hover,#title .gobtns .btn:focus-visible { outline:2px solid var(--yel); outline-offset:2px; }
 #title .tip { min-height:22px; font-size:14px; color:var(--grey); text-align:center; }
-@media (max-width:640px) { .part { grid-template-columns:60px 1fr; } .part select:disabled { display:none; } .part select + select { grid-column:2; } #hint { display:none; } #who0 { font-size:14px; padding-right:10px; } #who0 canvas { width:36px; height:36px; } #hud { top:calc(64px + var(--st)); left:calc(12px + var(--sl)); justify-content:flex-start; } #hud .btn { padding:2px 8px; } .bars { grid-template-columns:repeat(4,1fr); } .three { grid-template-columns:1fr; } .mark { display:none; } .tab { padding:5px 8px; font-size:14px; } }
+@media (max-width:640px) {
+  .part { grid-template-columns:60px 1fr; }
+  .part select:disabled { display:none; }
+  .part select + select { grid-column:2; }
+  #hint { display:none; }
+  #who0 { font-size:14px; padding-right:10px; }
+  #who0 canvas { width:36px; height:36px; }
+  #hud { top:calc(64px + var(--st)); left:calc(12px + var(--sl)); gap:6px; justify-content:flex-start; flex-wrap:nowrap; }
+  #hud .btn { padding:2px 7px; font-size:14px; }
+  #hud #bMore { display:inline-grid; }
+  #hud:not(.expanded) #bRide,#hud:not(.expanded) #bNight,#hud:not(.expanded) #bMusic,#hud:not(.expanded) #bMail { display:none; }
+  #hud.expanded { flex-wrap:wrap; padding:6px; border:1.5px solid var(--ink); background:var(--paper); box-shadow:3px 3px 0 var(--mid); }
+  .bars { grid-template-columns:repeat(4,1fr); }
+  .three { grid-template-columns:1fr; }
+  .mark { display:none; }
+  .tab { padding:5px 8px; font-size:14px; }
+}
 
 </style>
 </head>
@@ -167,7 +184,7 @@ form.find { display:flex; gap:8px; margin:6px 0 4px; } form.find input { flex:1;
 <canvas id="cv"></canvas>
 <div id="labels"></div>
 <div id="who0" class="win"><span id="place"></span></div>
-<div id="hud"><button class="btn" id="bHome">푸른방</button><button class="btn" id="bMenu">지도</button><button class="btn" id="bRide">스쿠터</button><button class="btn" id="bNight">밤으로</button><button class="btn" id="bMusic" aria-pressed="true" aria-label="배경음악 끄기">♪</button><button class="btn" id="bMail" hidden>우편함</button><button class="btn" id="bAcct">로그인</button></div>
+<div id="hud"><button class="btn" id="bHome">푸른방</button><button class="btn" id="bMenu">지도</button><button class="btn" id="bRide">스쿠터</button><button class="btn" id="bNight">밤으로</button><button class="btn" id="bMusic" aria-pressed="true" aria-label="배경음악 끄기">♪</button><button class="btn" id="bMail" hidden>우편함</button><button class="btn" id="bAcct">로그인</button><button class="btn" id="bMore" aria-expanded="false" aria-label="추가 조작 열기">더보기</button></div>
 <div id="hint">방향키·클릭 이동 / Shift 스쿠터 / Enter 조사 / R 푸른방 / M 지도 / C 아카이브 / P 광장 / L 우편함</div>
 <a id="osm" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>
 <div id="jam" class="win"></div>
@@ -1534,7 +1551,17 @@ function update(dt){ fade=Math.max(0,fade-dt*2.6); if(me.moving&&advance(me,dt,r
 let notes=[]; const noteFx=()=>{ notes.push({x:me.px+Math.random()*18-4,y:me.py-18,t:0,c:pick(['#ffe49a','#9fd8ff','#ffb0c8'],Math.random())}); };
 /* ---------- 그리기 ---------- */
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),layer=document.getElementById('labels'); let S=3,VW=320,VH=240,cx=0,cy=0,clock=0; const lm=mk(8,8),lc=lm.getContext('2d');
-let sizeKey=''; function resize(){ sizeKey=innerWidth+'x'+innerHeight; S=Math.max(2,Math.floor(scene===world?Math.min(innerWidth/400,innerHeight/270):Math.min(innerWidth/(scene.W*T),(innerHeight-(jam.on?170:0))/(scene.H*T)))); VW=Math.ceil(innerWidth/S);VH=Math.ceil(innerHeight/S);cv.width=lm.width=VW;cv.height=lm.height=VH;cv.style.width=VW*S+'px';cv.style.height=VH*S+'px'; } addEventListener('resize',resize); resize();
+let sizeKey='';
+function resize(){
+  sizeKey=innerWidth+'x'+innerHeight;
+  const fit=scene===world?Math.min(innerWidth/400,innerHeight/270):Math.min(innerWidth/(scene.W*T),(innerHeight-(jam.on?170:0))/(scene.H*T));
+  // 작은 화면의 실내는 방 전체가 보이게 맞추고, 지도와 데스크탑의 픽셀 배율은 유지한다.
+  S=scene!==world&&innerWidth<=640?Math.max(.75,fit):Math.max(2,Math.floor(fit));
+  VW=Math.ceil(innerWidth/S);VH=Math.ceil(innerHeight/S);
+  cv.width=lm.width=VW;cv.height=lm.height=VH;
+  cv.style.width=VW*S+'px';cv.style.height=VH*S+'px';
+}
+addEventListener('resize',resize); resize();
 const labels=[]; const addLabel=(name,x,y,hot)=>{const e=document.createElement('div');e.className='label'+(hot?' hot':'');e.textContent=name;e.style.display='none';layer.append(e);labels.push({x,y,el:e,on:false});};
 B.forEach(b=>{ if(!b.n||b.k==='N')return; if(b.k==='u')addLabel(b.n,(b.x0+b.x1)/2,(b.y0+b.y1)/2-b.h); else if(b.k!=='K'||b.x1-b.x0>60)addLabel(b.n,(b.x0+b.x1)/2,b.k==='V'?(b.y0+b.y1)/2:b.y1+16); });
 setupPlazaBoard();
@@ -1618,6 +1645,12 @@ addEventListener('keydown',e=>{ if(!title.hidden&&!panel.classList.contains('on'
 addEventListener('keyup',e=>{run=e.shiftKey;const i=keys.indexOf(KEYMAP[e.code]);if(i>=0)keys.splice(i,1);}); addEventListener('blur',()=>{keys.length=0;});
 cv.addEventListener('pointerdown',e=>{document.activeElement?.blur();if(uiOpen()||jam.on||!title.hidden)return;const x=Math.floor((e.clientX/S+cx)/T),y=Math.floor((e.clientY/S+cy)/T),f=find(x,y);if(f){route=f.r;after=f.hit;}});
 document.getElementById('bClose').onclick=hide; document.getElementById('bMenu').onclick=()=>openMenu(); document.getElementById('bHome').onclick=()=>goHub();
+const hud=document.getElementById('hud'), bMore=document.getElementById('bMore');
+function mobileMenu(open){hud.classList.toggle('expanded',open);bMore.setAttribute('aria-expanded',String(open));bMore.setAttribute('aria-label',open?'추가 조작 닫기':'추가 조작 열기');}
+bMore.onclick=()=>mobileMenu(!hud.classList.contains('expanded'));
+hud.addEventListener('click',e=>{if(innerWidth<=640&&e.target.closest('button:not(#bMore)'))mobileMenu(false);});
+document.addEventListener('pointerdown',e=>{if(innerWidth<=640&&!hud.contains(e.target))mobileMenu(false);});
+addEventListener('resize',()=>{if(innerWidth>640)mobileMenu(false);});
 const bR=document.getElementById('bRide'); bR.onclick=()=>{ride=!ride;bR.textContent=ride?'걷기':'스쿠터';bR.blur();};
 const bN=document.getElementById('bNight'); bN.onclick=()=>{night=!night;bN.textContent=night?'낮으로':'밤으로';bN.blur();};
 /* 휴대폰: 키보드나 주소창 때문에 실제로 보이는 높이가 바뀌면 창이 그 안에 들어오게 한다 */

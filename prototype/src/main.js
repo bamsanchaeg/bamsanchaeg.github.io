@@ -54,7 +54,17 @@ function update(dt){ fade=Math.max(0,fade-dt*2.6); if(me.moving&&advance(me,dt,r
 let notes=[]; const noteFx=()=>{ notes.push({x:me.px+Math.random()*18-4,y:me.py-18,t:0,c:pick(['#ffe49a','#9fd8ff','#ffb0c8'],Math.random())}); };
 /* ---------- 그리기 ---------- */
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),layer=document.getElementById('labels'); let S=3,VW=320,VH=240,cx=0,cy=0,clock=0; const lm=mk(8,8),lc=lm.getContext('2d');
-let sizeKey=''; function resize(){ sizeKey=innerWidth+'x'+innerHeight; S=Math.max(2,Math.floor(scene===world?Math.min(innerWidth/400,innerHeight/270):Math.min(innerWidth/(scene.W*T),(innerHeight-(jam.on?170:0))/(scene.H*T)))); VW=Math.ceil(innerWidth/S);VH=Math.ceil(innerHeight/S);cv.width=lm.width=VW;cv.height=lm.height=VH;cv.style.width=VW*S+'px';cv.style.height=VH*S+'px'; } addEventListener('resize',resize); resize();
+let sizeKey='';
+function resize(){
+  sizeKey=innerWidth+'x'+innerHeight;
+  const fit=scene===world?Math.min(innerWidth/400,innerHeight/270):Math.min(innerWidth/(scene.W*T),(innerHeight-(jam.on?170:0))/(scene.H*T));
+  // 작은 화면의 실내는 방 전체가 보이게 맞추고, 지도와 데스크탑의 픽셀 배율은 유지한다.
+  S=scene!==world&&innerWidth<=640?Math.max(.75,fit):Math.max(2,Math.floor(fit));
+  VW=Math.ceil(innerWidth/S);VH=Math.ceil(innerHeight/S);
+  cv.width=lm.width=VW;cv.height=lm.height=VH;
+  cv.style.width=VW*S+'px';cv.style.height=VH*S+'px';
+}
+addEventListener('resize',resize); resize();
 const labels=[]; const addLabel=(name,x,y,hot)=>{const e=document.createElement('div');e.className='label'+(hot?' hot':'');e.textContent=name;e.style.display='none';layer.append(e);labels.push({x,y,el:e,on:false});};
 B.forEach(b=>{ if(!b.n||b.k==='N')return; if(b.k==='u')addLabel(b.n,(b.x0+b.x1)/2,(b.y0+b.y1)/2-b.h); else if(b.k!=='K'||b.x1-b.x0>60)addLabel(b.n,(b.x0+b.x1)/2,b.k==='V'?(b.y0+b.y1)/2:b.y1+16); });
 setupPlazaBoard();
@@ -138,6 +148,12 @@ addEventListener('keydown',e=>{ if(!title.hidden&&!panel.classList.contains('on'
 addEventListener('keyup',e=>{run=e.shiftKey;const i=keys.indexOf(KEYMAP[e.code]);if(i>=0)keys.splice(i,1);}); addEventListener('blur',()=>{keys.length=0;});
 cv.addEventListener('pointerdown',e=>{document.activeElement?.blur();if(uiOpen()||jam.on||!title.hidden)return;const x=Math.floor((e.clientX/S+cx)/T),y=Math.floor((e.clientY/S+cy)/T),f=find(x,y);if(f){route=f.r;after=f.hit;}});
 document.getElementById('bClose').onclick=hide; document.getElementById('bMenu').onclick=()=>openMenu(); document.getElementById('bHome').onclick=()=>goHub();
+const hud=document.getElementById('hud'), bMore=document.getElementById('bMore');
+function mobileMenu(open){hud.classList.toggle('expanded',open);bMore.setAttribute('aria-expanded',String(open));bMore.setAttribute('aria-label',open?'추가 조작 닫기':'추가 조작 열기');}
+bMore.onclick=()=>mobileMenu(!hud.classList.contains('expanded'));
+hud.addEventListener('click',e=>{if(innerWidth<=640&&e.target.closest('button:not(#bMore)'))mobileMenu(false);});
+document.addEventListener('pointerdown',e=>{if(innerWidth<=640&&!hud.contains(e.target))mobileMenu(false);});
+addEventListener('resize',()=>{if(innerWidth>640)mobileMenu(false);});
 const bR=document.getElementById('bRide'); bR.onclick=()=>{ride=!ride;bR.textContent=ride?'걷기':'스쿠터';bR.blur();};
 const bN=document.getElementById('bNight'); bN.onclick=()=>{night=!night;bN.textContent=night?'낮으로':'밤으로';bN.blur();};
 /* 휴대폰: 키보드나 주소창 때문에 실제로 보이는 높이가 바뀌면 창이 그 안에 들어오게 한다 */
