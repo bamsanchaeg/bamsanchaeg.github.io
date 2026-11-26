@@ -18,3 +18,5 @@ __pycache__/
 # 지도 원본 (README 의 주소에서 다시 받을 수 있음)
 osm*.json
 skku.json
+# 운영 자료(SQL, 서버 설정)는 비공개 저장소에 둔다. 실수로 다시 올리지 않게
+supabase/

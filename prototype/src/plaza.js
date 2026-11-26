@@ -1,5 +1,5 @@
 /* ===== 광장(공지·공연·지난 공연), 편지, 공연 초대장, 가입 초대장 =====
-   권한은 supabase/migrations/20261126030000_plaza_letters.sql 이 막고, 여기서는 보여 주고 안내만 한다.
+   권한은 서버(데이터베이스)가 막고, 여기서는 보여 주고 안내만 한다.
    공지는 리더만, 공연은 부원 누구나. 편지는 보낸 사람과 받는 사람만 읽는다. */
 const CAST_PARTS=[...PARTS,'트럼펫','트롬본','기타 악기','스태프'];
 const DOW='일월화수목금토';
@@ -8,7 +8,7 @@ const fmtDate=d=>{ const [y,m,dd]=String(d).split('-').map(Number); if(!dd)retur
 const fmtAt=t=>{ const d=new Date(new Date(t).getTime()+9*3600e3); return `${d.getUTCMonth()+1}.${d.getUTCDate()} ${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}`; };
 const lines_=(v,max,len)=>v.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,max).map(x=>x.slice(0,len));
 const baseUrl=()=>location.origin+location.pathname;
-const plazaOff=()=>cloud.noPlaza?el('div',{cls:'warn',textContent:'서버에 다섯 번째 SQL(광장·편지)이 아직 적용되지 않았어요.'}):null;
+const plazaOff=()=>cloud.noPlaza?el('div',{cls:'warn',textContent:'광장과 편지는 서버 준비가 끝나면 열려요.'}):null;
 async function copyText(t,msg){ try{ await navigator.clipboard.writeText(t); msg.textContent='복사했어요.'; }catch(e){ msg.textContent='복사하지 못했어요. 길게 눌러 직접 복사해 주세요.'; } }
 
 /* NPC 가 이야기할 다가올 공연: 부원은 광장의 공연, 방문자는 초대장이 있는 공연 */

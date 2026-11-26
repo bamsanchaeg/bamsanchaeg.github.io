@@ -1,4 +1,4 @@
-/* ===== 로그인과 서버 저장 (Supabase). 권한은 supabase/migrations 의 RLS 가 막고, 여기서는 안내만 한다 ===== */
+/* ===== 로그인과 서버 저장 (Supabase). 권한은 서버(데이터베이스)가 막고, 여기서는 안내만 한다 ===== */
 const cloud={pubShows:[],joins:[],noPlaza:false,state:'off',note:'',sb:null,uid:null,profile:null,people:[],infos:[],info:null,email:'',noInfoTable:false,rooms:[],room:null,busy:false,sentAt:0,back:null,pub:null,pubOk:false,pubAt:0,get member(){return this.state==='member';},get leader(){return this.member&&this.profile.role==='leader';}};
 const SDK={src:'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js',sri:'sha384-uteMfOloLDGt042uDz+xHGF3ym63/WQ6rFq7murQRG8Ih7QrXGEGNtWd8688sb4O'};
 function badKey(k){ if(/^sb_secret_/.test(k))return true; try{return JSON.parse(unb64(k.split('.')[1])).role==='service_role';}catch(e){return false;} }
@@ -36,7 +36,7 @@ async function session_(){ try{ const {data}=await cloud.sb.auth.getSession(); c
     cloud.uid=u.id; cloud.email=u.email||''; cloud.profile=must(await cloud.sb.from('profiles').select('*').eq('id',u.id).maybeSingle());
     const inf=await cloud.sb.from('member_info').select('*').eq('id',u.id).maybeSingle(); cloud.noInfoTable=!!(inf.error&&/PGRST205|42P01/.test(inf.error.code||'')); if(inf.error&&!cloud.noInfoTable)throw inf.error; cloud.info=inf.data||null;
     const st=cloud.profile&&cloud.profile.status; cloud.state=st==='approved'?'member':st==='blocked'?'blocked':cloud.noInfoTable||cloud.info?'pending':'setup';
-    if(cloud.member)await pull();else db=cloudEmpty(); loadPub(); cloud.note=cloud.noInfoTable?'서버에 두 번째 SQL(가입·방 정책)이 아직 적용되지 않았어요.':''; }catch(e){ cloud.note=errMsg(e); cloud.state=cloud.state==='loading'?'out':cloud.state; } hudAcct(); }
+    if(cloud.member)await pull();else db=cloudEmpty(); loadPub(); cloud.note=cloud.noInfoTable?'서버 준비가 아직 끝나지 않았어요. 리더에게 알려 주세요.':''; }catch(e){ cloud.note=errMsg(e); cloud.state=cloud.state==='loading'?'out':cloud.state; } hudAcct(); }
 /* '연결하는 중' 다음에는 연결됐다고 알려 준다. 첫 화면이면 안내 줄에, 게임 안이면 위쪽 알림으로 */
 function connected(was){ if(was!=='loading'||cloud.state==='loading')return; cloud.connectedAt=Date.now(); setTimeout(titleMenu,5200); if(title.hidden)toast(cloud.note||(cloud.member?`연결됐어요. ${cloud.profile.nick}님 어서 와요.`:'서버에 연결됐어요.')); }
 /* 로그인하지 않아도 보이는 잼 요약 (이름과 id 없음). 무엇을 내보낼지는 서버의 public_jams 가 정한다 */

@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-y+NCP1NNb7iTSHMT5tgs61SkbBmHmHvieMaBg6z/sXY=' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js; style-src 'sha256-dJgazhA1vG+TDl3y2OOSzZdnvLqZYvFAGLG0zV9s5+g=' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://cncshhbsfkugqwgvkgwk.supabase.co; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-AzSQWtRTXjEm7DZZGFm+4fo6eAFr+gmWScFSTq/MgV0=' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js; style-src 'sha256-dJgazhA1vG+TDl3y2OOSzZdnvLqZYvFAGLG0zV9s5+g=' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://cncshhbsfkugqwgvkgwk.supabase.co; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Groov</title>
@@ -914,7 +914,7 @@ function openDecor(){ const m=mine(),[sh0,sc0]=shelfOf(m),n=input(m.nick,12,{req
   const noShelf=cloud.member&&cloud.profile.shelf_shape===undefined; sh.disabled=sc.disabled=noShelf;
   show('방 꾸미기',el('form',{onsubmit:e=>{e.preventDefault();const v={nick:n.value.trim()||m.nick,title:t.value.trim()||m.title,theme:th.value,open:op.value==='1',shelf:[sh.value,sc.value]},done=()=>{if(scene.owner==='me')enterRoom(myRoom());openRoom(myRoom());};
     if(cloud.member){asMember(async()=>must(await cloud.sb.from('profiles').update({nick:v.nick,room_title:v.title,room_theme:v.theme,room_open:v.open,...(noShelf?{}:{shelf_shape:v.shelf[0],shelf_color:v.shelf[1]})}).eq('id',cloud.uid)),done);return;}
-    Object.assign(m,v);save();done();}},field('이름',n),field('방 이름',t),field('벽 색',th),field('공개',op),h2('책장'),noShelf?el('div',{cls:'warn',textContent:'서버에 네 번째 SQL(책장)이 아직 적용되지 않아 책장은 바꿀 수 없어요.'}):null,el('div',{cls:'row'},view,el('div',{cls:'grow'},field('모양',sh),field('색',sc))),el('button',{cls:'btn',textContent:'이대로 꾸미기'}),btn('상자 정리',openCrates),btn('취소',()=>openRoom(myRoom())))); }
+    Object.assign(m,v);save();done();}},field('이름',n),field('방 이름',t),field('벽 색',th),field('공개',op),h2('책장'),noShelf?el('div',{cls:'warn',textContent:'책장은 서버 준비가 끝나면 바꿀 수 있어요.'}):null,el('div',{cls:'row'},view,el('div',{cls:'grow'},field('모양',sh),field('색',sc))),el('button',{cls:'btn',textContent:'이대로 꾸미기'}),btn('상자 정리',openCrates),btn('취소',()=>openRoom(myRoom())))); }
 /* 상자: 이름을 바꾸거나 지우면 안에 든 곡도 함께 옮긴다. 곡부터 옮겨서 중간에 끊겨도 곡을 잃지 않는다 */
 const crateList=()=>[...new Set([...mine().crates,...mine().songs.map(s=>s.crate).filter(Boolean)])];
 function putCrates(list,from,to){ const m=mine(); if(cloud.member)return asMember(async()=>{ if(from)must(await cloud.sb.from('room_songs').update({crate:to}).eq('user_id',cloud.uid).eq('crate',from)); must(await cloud.sb.from('profiles').update({crates:list}).eq('id',cloud.uid)); },openCrates); if(from)m.songs.forEach(x=>{if(x.crate===from)x.crate=to;}); m.crates=list; save(); openCrates(); }
@@ -951,7 +951,7 @@ talk.onclick=nextLine;
 /* 잠깐 떴다 사라지는 알림 (연결됨, 새 편지 등) */
 let toastT=0; function toast(t,ms=3200){ const e=document.getElementById('toast'); e.textContent=t; e.classList.add('on'); clearTimeout(toastT); toastT=setTimeout(()=>e.classList.remove('on'),ms); }
 
-/* ===== 로그인과 서버 저장 (Supabase). 권한은 supabase/migrations 의 RLS 가 막고, 여기서는 안내만 한다 ===== */
+/* ===== 로그인과 서버 저장 (Supabase). 권한은 서버(데이터베이스)가 막고, 여기서는 안내만 한다 ===== */
 const cloud={pubShows:[],joins:[],noPlaza:false,state:'off',note:'',sb:null,uid:null,profile:null,people:[],infos:[],info:null,email:'',noInfoTable:false,rooms:[],room:null,busy:false,sentAt:0,back:null,pub:null,pubOk:false,pubAt:0,get member(){return this.state==='member';},get leader(){return this.member&&this.profile.role==='leader';}};
 const SDK={src:'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js',sri:'sha384-uteMfOloLDGt042uDz+xHGF3ym63/WQ6rFq7murQRG8Ih7QrXGEGNtWd8688sb4O'};
 function badKey(k){ if(/^sb_secret_/.test(k))return true; try{return JSON.parse(unb64(k.split('.')[1])).role==='service_role';}catch(e){return false;} }
@@ -989,7 +989,7 @@ async function session_(){ try{ const {data}=await cloud.sb.auth.getSession(); c
     cloud.uid=u.id; cloud.email=u.email||''; cloud.profile=must(await cloud.sb.from('profiles').select('*').eq('id',u.id).maybeSingle());
     const inf=await cloud.sb.from('member_info').select('*').eq('id',u.id).maybeSingle(); cloud.noInfoTable=!!(inf.error&&/PGRST205|42P01/.test(inf.error.code||'')); if(inf.error&&!cloud.noInfoTable)throw inf.error; cloud.info=inf.data||null;
     const st=cloud.profile&&cloud.profile.status; cloud.state=st==='approved'?'member':st==='blocked'?'blocked':cloud.noInfoTable||cloud.info?'pending':'setup';
-    if(cloud.member)await pull();else db=cloudEmpty(); loadPub(); cloud.note=cloud.noInfoTable?'서버에 두 번째 SQL(가입·방 정책)이 아직 적용되지 않았어요.':''; }catch(e){ cloud.note=errMsg(e); cloud.state=cloud.state==='loading'?'out':cloud.state; } hudAcct(); }
+    if(cloud.member)await pull();else db=cloudEmpty(); loadPub(); cloud.note=cloud.noInfoTable?'서버 준비가 아직 끝나지 않았어요. 리더에게 알려 주세요.':''; }catch(e){ cloud.note=errMsg(e); cloud.state=cloud.state==='loading'?'out':cloud.state; } hudAcct(); }
 /* '연결하는 중' 다음에는 연결됐다고 알려 준다. 첫 화면이면 안내 줄에, 게임 안이면 위쪽 알림으로 */
 function connected(was){ if(was!=='loading'||cloud.state==='loading')return; cloud.connectedAt=Date.now(); setTimeout(titleMenu,5200); if(title.hidden)toast(cloud.note||(cloud.member?`연결됐어요. ${cloud.profile.nick}님 어서 와요.`:'서버에 연결됐어요.')); }
 /* 로그인하지 않아도 보이는 잼 요약 (이름과 id 없음). 무엇을 내보낼지는 서버의 public_jams 가 정한다 */
@@ -1051,7 +1051,7 @@ function memberRows(){ const set=(p,s)=>asMember(()=>rpc('set_member_status',{p_
   const o={pending:0,approved:1,blocked:2}; return [h2('부원 관리'),...cloud.people.slice().sort((a,b)=>o[a.status]-o[b.status]).map(row)]; }
 
 /* ===== 광장(공지·공연·지난 공연), 편지, 공연 초대장, 가입 초대장 =====
-   권한은 supabase/migrations/20261126030000_plaza_letters.sql 이 막고, 여기서는 보여 주고 안내만 한다.
+   권한은 서버(데이터베이스)가 막고, 여기서는 보여 주고 안내만 한다.
    공지는 리더만, 공연은 부원 누구나. 편지는 보낸 사람과 받는 사람만 읽는다. */
 const CAST_PARTS=[...PARTS,'트럼펫','트롬본','기타 악기','스태프'];
 const DOW='일월화수목금토';
@@ -1060,7 +1060,7 @@ const fmtDate=d=>{ const [y,m,dd]=String(d).split('-').map(Number); if(!dd)retur
 const fmtAt=t=>{ const d=new Date(new Date(t).getTime()+9*3600e3); return `${d.getUTCMonth()+1}.${d.getUTCDate()} ${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}`; };
 const lines_=(v,max,len)=>v.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,max).map(x=>x.slice(0,len));
 const baseUrl=()=>location.origin+location.pathname;
-const plazaOff=()=>cloud.noPlaza?el('div',{cls:'warn',textContent:'서버에 다섯 번째 SQL(광장·편지)이 아직 적용되지 않았어요.'}):null;
+const plazaOff=()=>cloud.noPlaza?el('div',{cls:'warn',textContent:'광장과 편지는 서버 준비가 끝나면 열려요.'}):null;
 async function copyText(t,msg){ try{ await navigator.clipboard.writeText(t); msg.textContent='복사했어요.'; }catch(e){ msg.textContent='복사하지 못했어요. 길게 눌러 직접 복사해 주세요.'; } }
 
 /* NPC 가 이야기할 다가올 공연: 부원은 광장의 공연, 방문자는 초대장이 있는 공연 */
