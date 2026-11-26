@@ -1,4 +1,4 @@
-# main 에 올리면 게임 파일(village.html → index.html)과 배경음악(audio/)만 GitHub Pages 에 배포한다
+# main 에 올리면 게임 파일(village.html → index.html)과 배경음악(audio/)만 GitHub Pages 에 배포한다 (사이트 이름: Cabinet)
 name: Deploy to Pages
 on:
   push:
@@ -30,7 +30,7 @@ jobs:
           mkdir _site
           cp prototype/village.html _site/index.html
           mkdir _site/audio
-          cp prototype/audio/*.mp3 _site/audio/
+          cp prototype/audio/*.mp3 prototype/audio/*.m4a _site/audio/
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:

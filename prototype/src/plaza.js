@@ -82,7 +82,7 @@ function saveIcs(c){ const esc=t=>String(t||'').replace(/[\\;,]/g,m=>'\\'+m).rep
   const a=el('a',{href:URL.createObjectURL(new Blob([ics],{type:'text/calendar'})),download:'groov.ics'}); document.body.append(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000); }
 /* 주소의 #show= 로 들어온 사람: 로그인 없이 초대장을 본다 */
 async function openShowFromHash(){ const m=/[#&]show=([0-9a-f]{32})/.exec(location.hash||''); if(!m||!cloud.sb)return false; let c=null; try{ c=must(await cloud.sb.rpc('show_invite',{p_token:m[1]})); }catch(e){ c=null; }
-  const go=btn(title.hidden?'닫기':'Groov 둘러보기',()=>{ hide(); if(!title.hidden)return; browse(); });
+  const go=btn(title.hidden?'닫기':'Cabinet 둘러보기',()=>{ hide(); if(!title.hidden)return; browse(); });
   if(!c||typeof c!=='object'){ show('공연 초대장',sub('닫혔거나 없는 초대장이에요. 보낸 사람에게 새 주소를 받아 주세요.'),acts(go)); return true; }
   show('공연 초대장',inviteCard(c),c.past?el('div',{cls:'warn',textContent:'이미 끝난 공연이에요.'}):null,acts(c.past?null:btn('달력 파일',()=>saveIcs(c)),/낫컴플리트/.test(String(c.place))?btn('낫컴플리트 가는 길',()=>{ hide(); startGame(); const [x,y]=MAP.doors.nc.door; warp(world,x,y+1,3); say('낫컴플리트',['성균관로 골목의 카페, 2층이 무대예요.']); }):null,go)); return true; }
 

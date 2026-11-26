@@ -42,7 +42,7 @@ function find(gx,gy){ const s=scene, w=s.W, ix=(x,y)=>y*w+x; if(gx<0||gy<0||gx>=
   const prev=new Int32Array(s.W*s.H).fill(-1), st=ix(me.tx,me.ty), q=[st]; prev[st]=st;
   for(let h=0;h<q.length&&h<24000;h++){ const i=q[h],x=i%w,y=i/w|0; if(goal.has(i)){ const r=[]; let c=i; while(c!==st){const p=prev[c];r.unshift(Object.keys(DIR).find(k=>DIR[k][0]===c%w-p%w&&DIR[k][1]===(c/w|0)-(p/w|0)));c=p;} return {r,hit:goal.get(i)}; }
     for(const [a,b] of Object.values(DIR)) if(!solidAt(s,x+a,y+b)){const j=ix(x+a,y+b); if(prev[j]<0&&!busy(x+a,y+b,me)){prev[j]=i;q.push(j);}} } return null; }
-function warp(s,x,y,dir){ endTalk(); const ch=scene!==s; scene=s; if(ch)resize(); [me.tx,me.ty]=[x,y]; me.px=x*T;me.py=y*T;me.moving=false;route=[];after=null;keys.length=0; if(dir!==undefined)me.dir=dir; if(jam.on&&s!==cafe)stopJam(); fade=1; }
+function warp(s,x,y,dir){ endTalk(); const ch=scene!==s; scene=s; if(ch){resize();bgmSync();} [me.tx,me.ty]=[x,y]; me.px=x*T;me.py=y*T;me.moving=false;route=[];after=null;keys.length=0; if(dir!==undefined)me.dir=dir; if(jam.on&&s!==cafe)stopJam(); fade=1; }
 let fade=0;
 function advance(a,dt,v){ const gx=a.tx*T,gy=a.ty*T,m=v*dt; a.px+=Math.sign(gx-a.px)*Math.min(m,Math.abs(gx-a.px)); a.py+=Math.sign(gy-a.py)*Math.min(m,Math.abs(gy-a.py)); a.step+=dt*(v>120?12:8); if(a.px===gx&&a.py===gy){a.moving=false;return true;} }
 const uiOpen=()=>panel.classList.contains('on')||talk.classList.contains('on');
@@ -94,13 +94,28 @@ function drawWorld(){ built=0; frameNo++; const x0=Math.max(0,Math.floor(cx/CP))
 let last=0; function loop(t){const dt=Math.min(.05,(t-last)/1000||0);last=t;clock+=dt;if(sizeKey!==innerWidth+'x'+innerHeight)resize();update(dt);draw();requestAnimationFrame(loop);}
 /* ---------- 입력 ---------- */
 const KEYMAP={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',KeyW:'up',KeyS:'down',KeyA:'left',KeyD:'right'};
-/* 배경음악: 브라우저는 누르기 전엔 소리를 막으므로 첫 화면 버튼을 누를 때 작게 시작한다. 끄면 이 브라우저에 기억하고, 다른 탭으로 가면 멈춘다 */
-const bgm={el:null,on:true}; try{ bgm.on=localStorage.getItem('groov.bgm')!=='off'; }catch(e){}
-function bgmPlay(){ if(!bgm.on||document.hidden)return; if(!bgm.el){ bgm.el=new Audio('audio/our_little_clubroom.mp3'); bgm.el.loop=true; bgm.el.volume=.3; bgm.el.preload='auto'; } bgm.el.play().catch(()=>{}); }
+/* 배경음악: 장소마다 다른 곡을 끊김 없이 반복한다 (Web Audio).
+   동아리방(푸른방)·각자의 방 = 동아리방 곡, 지도 = 체크포인트 곡, 낫컴플리트 = 음악 없음. 장소를 옮기면 서서히 바꿔 튼다.
+   브라우저는 누르기 전엔 소리를 막으므로 첫 화면 버튼을 누를 때 시작한다. 끄면 기억하고, 탭을 떠나거나 다른 창이 틀면 멈춘다 */
+const TRACKS={club:'audio/our_little_clubroom_8bit.mp3',walk:'audio/checkpoint_loop_jazz.m4a'}, VOL={club:.3,walk:.28};
+const bgm={on:true,ctx:null,want:null,cur:null,buf:{},loading:{},src:null,gain:null}; try{ bgm.on=localStorage.getItem('groov.bgm')!=='off'; }catch(e){}
+const bgmTrack=s=>s===cafe?null:s===world?'walk':'club';
+function bgmLoad(k){ if(bgm.buf[k])return Promise.resolve(bgm.buf[k]);
+  return bgm.loading[k]||(bgm.loading[k]=fetch(TRACKS[k]).then(r=>{ if(!r.ok)throw new Error('bgm '+r.status); return r.arrayBuffer(); }).then(a=>new Promise((ok,no)=>bgm.ctx.decodeAudioData(a,ok,no))).then(b=>bgm.buf[k]=b,e=>{ bgm.loading[k]=null; throw e; })); }
+function bgmStop(fade=.6){ if(!bgm.src)return; const {src,gain}=bgm, t=bgm.ctx.currentTime; gain.gain.cancelScheduledValues(t); gain.gain.setValueAtTime(gain.gain.value,t); gain.gain.linearRampToValueAtTime(0,t+fade); try{ src.stop(t+fade+.05); }catch(e){} Object.assign(bgm,{src:null,gain:null,cur:null}); }
+function bgmSync(){ const k=bgm.on&&title.hidden&&!document.hidden?bgmTrack(scene):null; bgm.want=k; if(!k){ bgmStop(); return; } if(bgm.cur===k&&bgm.src)return;
+  if(!bgm.ctx){ const AC=window.AudioContext||window.webkitAudioContext; if(!AC)return; bgm.ctx=new AC(); }   // 누른 순간에 만들어야 소리가 난다
+  if(bgm.ctx.state!=='running')bgm.ctx.resume().catch(()=>{});
+  bgmLoad(k).then(b=>{ if(bgm.want!==k||(bgm.cur===k&&bgm.src))return;   // 받는 사이에 장소가 바뀌었으면 그만
+    bgmStop(); const src=bgm.ctx.createBufferSource(), gain=bgm.ctx.createGain(), t=bgm.ctx.currentTime; src.buffer=b; src.loop=true;
+    gain.gain.setValueAtTime(0,t); gain.gain.linearRampToValueAtTime(VOL[k],t+.8); src.connect(gain).connect(bgm.ctx.destination); src.start(t);
+    Object.assign(bgm,{src,gain,cur:k}); if(bgmBus)bgmBus.postMessage('play'); },()=>{}); }
+/* 게임을 창 여러 개에 열어도 음악은 한 곳에서만: 한 창이 틀면 다른 창은 멈춘다 (그 창에서 장소를 옮기면 다시 그 창이 튼다) */
+const bgmBus=typeof BroadcastChannel==='function'?new BroadcastChannel('groov-bgm'):null; if(bgmBus)bgmBus.onmessage=e=>{ if(e.data==='play')bgmStop(.3); };
 function bgmShow(){ const b=document.getElementById('bMusic'); b.classList.toggle('off',!bgm.on); b.ariaPressed=String(bgm.on); b.ariaLabel=bgm.on?'배경음악 끄기':'배경음악 켜기'; b.title=b.ariaLabel; }
-function bgmToggle(){ bgm.on=!bgm.on; try{ localStorage.setItem('groov.bgm',bgm.on?'on':'off'); }catch(e){} if(bgm.on)bgmPlay(); else if(bgm.el)bgm.el.pause(); bgmShow(); }
-document.addEventListener('visibilitychange',()=>{ if(document.hidden){ if(bgm.el)bgm.el.pause(); } else if(title.hidden)bgmPlay(); });
-const title=document.getElementById('title'); const startGame=()=>{ if(title.hidden)return; title.hidden=true; bgmPlay(); document.activeElement?.blur(); const r=/room=(GROOV1\.[\w-]+)/.exec(location.hash||''), o=r&&readCode(r[1]); if(o){addFriend(o);enterRoom(o);} }; 
+function bgmToggle(){ bgm.on=!bgm.on; try{ localStorage.setItem('groov.bgm',bgm.on?'on':'off'); }catch(e){} bgmSync(); bgmShow(); }
+document.addEventListener('visibilitychange',()=>bgmSync());
+const title=document.getElementById('title'); const startGame=()=>{ if(title.hidden)return; title.hidden=true; bgmSync(); document.activeElement?.blur(); const r=/room=(GROOV1\.[\w-]+)/.exec(location.hash||''), o=r&&readCode(r[1]); if(o){addFriend(o);enterRoom(o);} }; 
 /* 첫 화면 메뉴: 로그인 상태에 따라 버튼이 바뀐다. 둘러보기는 언제나 할 수 있다 */
 let titleKey=''; const goBox=document.getElementById('go');
 const browse=()=>{ startGame(); if(scene===hub&&!cloud.member)say('익명의 유령',['둘러보는 중이구나. 천천히 걸어 봐.',...(cloud.pub?['게시판에서는 어떤 잼이 열리는지 이름 없이 볼 수 있어.']:[]),'추천곡과 사람들의 방은 로그인하고 승인받으면 열려. 오른쪽 위에서 언제든 할 수 있어.']); };

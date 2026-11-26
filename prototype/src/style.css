@@ -44,10 +44,11 @@ button,input,select,textarea { font:inherit; color:inherit; }
 .song { display:flex; flex-wrap:wrap; gap:14px; align-items:center; }
 .sheet { position:relative; border:1.5px solid var(--ink); padding:14px 12px 12px; margin:16px 0 10px; background:#fff; }
 .sheet::before { content:''; position:absolute; top:-9px; left:24px; width:64px; height:17px; background:rgba(240,197,60,.75); border-left:1.5px dashed var(--paper); border-right:1.5px dashed var(--paper); transform:rotate(-3deg); }
-.slots { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:6px; margin-top:10px; }
+.slots { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(240px,100%),1fr)); gap:6px; margin-top:10px; }
 .slot { display:flex; flex-wrap:wrap; gap:8px; align-items:center; border:1.5px solid var(--mid); padding:4px 8px; min-height:46px; }
 .slot.free { border-style:dashed; background:#fff6d6; }
 .slot b { flex:none; min-width:52px; }
+.slot .btn { min-height:30px; padding:2px 10px; }
 .stamp { border:2px solid var(--ink); padding:1px 8px; transform:rotate(-4deg); background:var(--yel); }
 .stamp.off { background:none; color:var(--mid); border-color:var(--mid); }
 .row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px 0; border-bottom:1px dashed var(--mid); }
@@ -63,17 +64,20 @@ input.code { font-size:26px; letter-spacing:.35em; text-align:center; }
 form .warn:empty { min-height:0; }
 form { display:grid; gap:18px; margin-top:14px; }
 form > h2:first-child { margin-top:4px; }
-#body form h2 { margin:10px 0 -6px; }
+#body form > h2 { margin:10px 0 -6px; }
+.sheet h2 { margin:18px 0 4px; }
+.sheet > .three { margin-top:14px; }
 label { display:grid; gap:6px; font-size:14px; }
 label.field .lt { display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 10px; }
 label.field .lt b { font-weight:700; color:var(--deep); font-size:14.5px; }
 label.field .hint { color:var(--grey); font-size:13px; }
 .grow > label.field + label.field { margin-top:14px; }
 /* 양식의 제출 버튼은 채운 단추로, 나머지 단추와 구분한다 */
-form > button.btn:not([type=button]) { background:var(--ink); color:var(--paper); min-height:46px; font-weight:700; letter-spacing:.04em; margin-top:2px; }
-form > button.btn:not([type=button]):hover,form > button.btn:not([type=button]):focus-visible { background:var(--deep); outline:2px solid var(--yel); outline-offset:2px; }
-@media (min-width:641px) { form > .btn { justify-self:start; min-width:200px; } }
-.three { display:grid; grid-template-columns:2fr 2fr 1fr; gap:8px; }
+form:not(.row):not(.find) > button.btn:not([type=button]) { background:var(--ink); color:var(--paper); min-height:46px; font-weight:700; letter-spacing:.04em; margin-top:2px; }
+form:not(.row):not(.find) > button.btn:not([type=button]):hover,form:not(.row):not(.find) > button.btn:not([type=button]):focus-visible { background:var(--deep); outline:2px solid var(--yel); outline-offset:2px; }
+@media (min-width:641px) { form:not(.row):not(.find) > .btn { justify-self:start; min-width:200px; } }
+form.row { gap:8px; margin-top:0; }
+.three { display:grid; grid-template-columns:2fr 2fr 1fr; gap:18px 12px; }
 input,select,textarea { background:#fff; border:1.5px solid var(--mid); padding:8px 10px; min-width:0; width:100%; min-height:42px; border-radius:0; }
 input::placeholder,textarea::placeholder { color:#9aa0b4; }
 textarea { resize:vertical; overflow-wrap:anywhere; }
@@ -82,7 +86,7 @@ input:disabled { background:var(--pale); }
 .part { display:grid; grid-template-columns:64px 1fr 1fr; gap:8px; align-items:center; margin-bottom:6px; }
 .menu { display:grid; gap:6px; }
 .menu .btn { justify-content:start; text-align:left; }
-form.find { display:flex; gap:8px; margin:6px 0 4px; } form.find input { flex:1; } form.find .btn { min-width:0; margin:0; background:var(--paper); color:var(--deep); font-weight:400; min-height:42px; }
+form.find { display:flex; gap:8px; margin:6px 0 4px; } form.find input { flex:1; } form.find { margin-top:6px; } form.find .btn { min-width:0; min-height:42px; }
 .acts { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
 #talk { position:fixed; left:50%; bottom:calc(16px + var(--sb)); transform:translateX(-50%); width:min(640px,calc(100vw - 24px - var(--sl) - var(--sr))); user-select:none; -webkit-user-select:none; min-height:106px; padding:12px 18px; display:none; cursor:pointer; z-index:11; }
 #talk.on { display:block; }
@@ -128,7 +132,7 @@ form.find { display:flex; gap:8px; margin:6px 0 4px; } form.find input { flex:1;
 /* 광장, 편지, 초대장 */
 .letter,.prev { color:var(--deep); -webkit-text-stroke:.35px currentColor; }
 .letter { white-space:pre-wrap; overflow-wrap:anywhere; margin:6px 0; font-size:15px; }
-.letter.paper { background:repeating-linear-gradient(#fff 0 27px,var(--pale) 27px 28px); border:1.5px solid var(--ink); padding:12px 14px; line-height:28px; min-height:120px; }
+.letter.paper { background:repeating-linear-gradient(#fff 0 27px,var(--pale) 27px 28px) 0 12px / 100% 28px,#fff; border:1.5px solid var(--ink); padding:12px 14px 13px; line-height:28px; min-height:120px; }
 .card.new { border-width:2.5px; background:#fff6d6; }
 .card.notice.pin { border-width:2.5px; }
 .code { font-size:20px; letter-spacing:.18em; font-weight:700; }
@@ -144,4 +148,4 @@ form.find { display:flex; gap:8px; margin:6px 0 4px; } form.find input { flex:1;
 #title .gobtns .main { background:var(--ink); color:var(--paper); min-width:180px; }
 #title .gobtns .main:hover,#title .gobtns .btn:focus-visible { outline:2px solid var(--yel); outline-offset:2px; }
 #title .tip { min-height:22px; font-size:14px; color:var(--grey); text-align:center; }
-@media (max-width:640px) { #hint { display:none; } #who0 { font-size:14px; padding-right:10px; } #who0 canvas { width:36px; height:36px; } #hud { top:calc(64px + var(--st)); left:calc(12px + var(--sl)); justify-content:flex-start; } #hud .btn { padding:2px 8px; } .bars { grid-template-columns:repeat(4,1fr); } .three { grid-template-columns:1fr; } .mark { display:none; } .tab { padding:5px 10px; } }
+@media (max-width:640px) { .part { grid-template-columns:60px 1fr; } .part select:disabled { display:none; } .part select + select { grid-column:2; } #hint { display:none; } #who0 { font-size:14px; padding-right:10px; } #who0 canvas { width:36px; height:36px; } #hud { top:calc(64px + var(--st)); left:calc(12px + var(--sl)); justify-content:flex-start; } #hud .btn { padding:2px 8px; } .bars { grid-template-columns:repeat(4,1fr); } .three { grid-template-columns:1fr; } .mark { display:none; } .tab { padding:5px 10px; } }
