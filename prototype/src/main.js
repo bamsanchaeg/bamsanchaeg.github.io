@@ -122,6 +122,6 @@ const bN=document.getElementById('bNight'); bN.onclick=()=>{night=!night;bN.text
 /* 휴대폰: 키보드나 주소창 때문에 실제로 보이는 높이가 바뀌면 창이 그 안에 들어오게 한다 */
 { const vv=window.visualViewport, root=document.documentElement.style, fit=()=>{ root.setProperty('--vh',vv.height+'px'); root.setProperty('--vt',vv.offsetTop+'px'); }; if(vv){ vv.addEventListener('resize',fit); vv.addEventListener('scroll',fit); fit(); } }
 if(matchMedia('(pointer: coarse)').matches||innerWidth<768)document.getElementById('hint').textContent='가고 싶은 곳이나 사람을 눌러 보세요';
-titleMenu(); cloudInit(); document.getElementById('bAcct').onclick=()=>needLogin();
+titleMenu(); cloudInit(); document.getElementById('bAcct').onclick=()=>needLogin(); document.getElementById('bMail').onclick=e=>{e.currentTarget.blur();openMailbox();};
 me.dir=0;
 requestAnimationFrame(loop);

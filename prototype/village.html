@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-sYOmcBJqArLElsOITcqzqN85Km092vd/yjQljvDrJg4=' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js; style-src 'sha256-mRHW/hy0yRQgoI0S8gUg8VRfbV3tiDPsEA96U+otv2w=' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://cncshhbsfkugqwgvkgwk.supabase.co; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-AoBjKSWmUKoKzkFw0RwB6/sVyDFxisX4L1yA1dhu3ag=' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js; style-src 'sha256-XgOd9MefvVCOCN/FEXH8gGTZu/BShg3tlAPLkfOcYz4=' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://cncshhbsfkugqwgvkgwk.supabase.co; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Groov</title>
@@ -125,6 +125,10 @@ input:disabled { background:var(--pale); }
 @media (max-width:640px) { #toast { top:calc(108px + var(--st)); } }
 .badge { display:inline-block; min-width:1.4em; padding:0 5px; margin-left:4px; background:var(--yel); color:var(--deep); border:1.5px solid var(--ink); font-size:12px; line-height:1.3; }
 #title[hidden] { display:none; }
+.btn[hidden] { display:none; }
+#bMail { display:inline-flex; align-items:center; gap:2px; }
+#bMail[hidden] { display:none; }
+#bMail .badge { margin-left:4px; }
 #title .edge { width:100%; display:flex; justify-content:space-between; gap:16px; font-size:clamp(15px,2.2vw,24px); }
 #title img { min-height:0; height:100%; max-width:100%; object-fit:contain; padding:14px 0; }
 @media (prefers-reduced-motion:reduce) { .cov { transition:none; } #toast { transition:none; } }
@@ -155,7 +159,7 @@ input:disabled { background:var(--pale); }
 <canvas id="cv"></canvas>
 <div id="labels"></div>
 <div id="who0" class="win"><span id="place"></span></div>
-<div id="hud"><button class="btn" id="bHome">푸른방</button><button class="btn" id="bMenu">지도</button><button class="btn" id="bRide">스쿠터</button><button class="btn" id="bNight">밤으로</button><button class="btn" id="bAcct">로그인</button></div>
+<div id="hud"><button class="btn" id="bHome">푸른방</button><button class="btn" id="bMenu">지도</button><button class="btn" id="bRide">스쿠터</button><button class="btn" id="bNight">밤으로</button><button class="btn" id="bMail" hidden>우편함</button><button class="btn" id="bAcct">로그인</button></div>
 <div id="hint">방향키·클릭 이동 / Shift 스쿠터 / Enter 조사 / R 푸른방 / M 지도 / C 아카이브 / P 광장 / L 우편함</div>
 <a id="osm" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>
 <div id="jam" class="win"></div>
@@ -1013,7 +1017,8 @@ async function pullPlaza(){ const none={notices:[],shows:[],letters:[],joins:[]}
   const r=await Promise.all([S_b.from('notices').select('*').order('pinned',{ascending:false}).order('created_at',{ascending:false}).limit(50),S_b.from('shows').select('*,show_cast(user_id,part)').order('show_on',{ascending:false}).limit(200),S_b.from('letters').select('*').order('created_at',{ascending:false}).limit(300),S_b.from('join_invites').select('*').order('created_at',{ascending:false}).limit(300)]);
   if(r.some(x=>x.error&&/PGRST20[05]|42P01/.test(x.error.code||''))){cloud.noPlaza=true;return none;} const [notices,shows,letters,joins]=r.map(must); return {notices,shows,letters,joins}; }
 const invites=()=>db.jams.filter(j=>!j.closed).flatMap(j=>j.songs.flatMap(s=>s.slots.filter(x=>x.invited===ME).map(x=>({j,s,x}))));
-function hudAcct(){ const b=document.getElementById('bAcct'); const n=cloud.member?invites().length:0, u=unread(); b.textContent=cloud.member?`${cloud.profile.nick}${u?` · 편지 ${u}`:''}${n?` · 초대 ${n}`:''}`:cloud.state==='pending'?'승인 대기':cloud.state==='setup'?'가입 마무리':'로그인'; titleMenu(); }
+function hudAcct(){ const b=document.getElementById('bAcct'); const n=cloud.member?invites().length:0, u=unread(); const mb=document.getElementById('bMail'); mb.hidden=!cloud.member||cloud.noPlaza; mb.replaceChildren('우편함',...(u?[el('span',{cls:'badge',textContent:u})]:[])); mb.ariaLabel=u?`우편함, 안 읽은 편지 ${u}통`:'우편함';
+  b.textContent=cloud.member?`${cloud.profile.nick}${n?` · 초대 ${n}`:''}`:cloud.state==='pending'?'승인 대기':cloud.state==='setup'?'가입 마무리':'로그인'; titleMenu(); }
 async function session(){ const was=cloud.state; keepJoinCode(); await session_(); if(cloud.state==='pending'&&joinCode())await useJoinCode(joinCode()); connected(was); hudAcct(); }
 async function session_(){ try{ const {data}=await cloud.sb.auth.getSession(); const u=data.session&&data.session.user; if(!u){Object.assign(cloud,{uid:null,profile:null,info:null,infos:[],email:'',state:'out'});db=cloudEmpty();hudAcct();loadPub();return;}
     cloud.uid=u.id; cloud.email=u.email||''; cloud.profile=must(await cloud.sb.from('profiles').select('*').eq('id',u.id).maybeSingle());
@@ -1561,7 +1566,7 @@ const bN=document.getElementById('bNight'); bN.onclick=()=>{night=!night;bN.text
 /* 휴대폰: 키보드나 주소창 때문에 실제로 보이는 높이가 바뀌면 창이 그 안에 들어오게 한다 */
 { const vv=window.visualViewport, root=document.documentElement.style, fit=()=>{ root.setProperty('--vh',vv.height+'px'); root.setProperty('--vt',vv.offsetTop+'px'); }; if(vv){ vv.addEventListener('resize',fit); vv.addEventListener('scroll',fit); fit(); } }
 if(matchMedia('(pointer: coarse)').matches||innerWidth<768)document.getElementById('hint').textContent='가고 싶은 곳이나 사람을 눌러 보세요';
-titleMenu(); cloudInit(); document.getElementById('bAcct').onclick=()=>needLogin();
+titleMenu(); cloudInit(); document.getElementById('bAcct').onclick=()=>needLogin(); document.getElementById('bMail').onclick=e=>{e.currentTarget.blur();openMailbox();};
 me.dir=0;
 requestAnimationFrame(loop);
 
