@@ -28,7 +28,7 @@ const panel=document.getElementById('panel'), body=document.getElementById('body
 function el(tag,props={},...kids){ const n=document.createElement(tag); for(const [k,v] of Object.entries(props)){ if(k==='cls')n.className=v; else if(k==='css')n.style.cssText=v; else n[k]=v; } n.append(...kids.filter(k=>k!==null&&k!==false&&k!==undefined)); return n; }
 function show(title,...kids){ if(talkFromWorld)endTalk(); keys.length=0; route=[]; after=null; pt.textContent=title; body.replaceChildren(...kids.filter(k=>k)); panel.classList.add('on'); body.scrollTop=0; (body.querySelector('.menu .btn')||document.getElementById('bClose')).focus({preventScroll:true}); }
 function hide(){ panel.classList.remove('on'); document.activeElement?.blur(); }
-const btn=(t,f,dis)=>el('button',{cls:'btn',type:'button',textContent:t,onclick:f,disabled:!!dis}), field=(t,n)=>el('label',{},t,n), sub=t=>el('div',{cls:'sub',textContent:t}), h2=t=>el('h2',{textContent:t}), acts=(...k)=>el('div',{cls:'acts'},...k);
+const btn=(t,f,dis)=>el('button',{cls:'btn',type:'button',textContent:t,onclick:f,disabled:!!dis}), field=(t,n)=>{ const [a,...b]=String(t).split(' — '); return el('label',{cls:'field'},el('span',{cls:'lt'},el('b',{textContent:a}),b.length?el('span',{cls:'hint',textContent:b.join(' — ')}):null),n); }, sub=t=>el('div',{cls:'sub',textContent:t}), h2=t=>el('h2',{textContent:t}), acts=(...k)=>el('div',{cls:'acts'},...k);
 const input=(v,max,x={})=>el('input',{value:v||'',maxLength:max,...x}), select=(o,v,x={})=>el('select',x,...o.map(t=>{const [a,b]=Array.isArray(t)?t:[t,t];return el('option',{value:a,textContent:b,selected:a===v});}));
 const sticker=t=>el('span',{cls:'sticker',textContent:t});
 /* 곡마다 정해지는 도트 커버 */
@@ -62,7 +62,23 @@ function openArchive(tab){ if(tab)arch.tab=tab; const tabs=el('div',{cls:'tabs',
   const chips=arch.tab==='rec'&&el('div',{cls:'chips'},...['',...TAGS].map(t=>el('button',{cls:'chip'+(arch.tag===t?' on':''),type:'button',textContent:t||'전체',onclick:()=>{arch.tag=t;openArchive();}})));
   const inv=arch.tab==='jam'&&cloud.member?invites():[];
   show('Groov 아카이브',tabs,gate(),q,chips,acts(arch.tab==='rec'?btn('곡 추천하기',()=>cloud.member?openSongForm('rec'):needLogin(()=>openSongForm('rec'))):arch.tab==='jam'?btn('새 잼 열기',()=>openNewJam()):null,btn('내 방',()=>openRoom(myRoom()))),...(inv.length?[h2('받은 초대'),...inv.map(inviteRow)]:[]),list); draw_(); if(arch.tab==='jam'&&db.locked&&cloud.state!=='loading'&&Date.now()-cloud.pubAt>15000){const had=!!cloud.pub;loadPub().then(()=>{if(list.isConnected)had===!!cloud.pub?draw_():openArchive();});} }
-const empty=t=>el('div',{cls:'empty'},el('img',{src:TITLE_PNG,alt:''}),el('span',{textContent:t}));
+/* 빈 화면 마크: '참 잘했어요' 도장처럼 찍힌, 눈물 찔끔 흘리는 유령.
+   게임 속 유령 앞모습의 얼굴(헬멧·고글·점 눈)에서 진한 선만 잉크로 옮기고, 오른쪽 눈 밑에 눈물을 더한다. 잉크 한 가지 색.
+   얼굴은 도트를 네 배로, 테와 글씨는 화면 해상도로 그린다 (캔버스 192px 를 화면 96px 로 보여 준다). 2026-11-26 이 모양으로 확정 */
+const tearStamp=(()=>{ let c=null; return ()=>{ if(!c){ const N=192, K=4, INK='#4658a3', s=ghostCell(0,0), p=px(s), w=s.width, h=s.height, at=(x,y)=>p.b[y*w+x];
+    let x0=w,y0=h,x1=0; for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(at(x,y)>>>24){x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);}
+    c=mk(N,N); const g=c.getContext('2d'), hw=x1-x0+1, HH=38-y0, ox=Math.round(N/2-hw*K/2), oy=34;
+    for(let y=0;y<HH;y++)for(let x=0;x<hw;x++){ const v=at(x0+x,y0+y); if((v>>>24)&&(v&255)+(v>>8&255)+(v>>16&255)<470)R(g,INK,ox+x*K,oy+y*K,K,K); }   // 진한 선만
+    // 눈물: 오른쪽 눈(앞모습 x 19~22, y 26~30) 밑에서 한 방울, 조금 아래 작은 방울
+    const ex=ox+(21-x0)*K, ey=oy+(31-y0)*K+2; g.fillStyle=INK; g.beginPath(); g.moveTo(ex,ey); g.bezierCurveTo(ex+5,ey+9,ex+8,ey+14,ex,ey+18); g.bezierCurveTo(ex-8,ey+14,ex-5,ey+9,ex,ey); g.fill(); g.beginPath(); g.arc(ex+9,ey+26,3.2,0,7); g.fill();
+    // 도장 테: 굵은 바깥 원과 가는 안쪽 원
+    g.strokeStyle=INK; g.lineWidth=9; g.beginPath(); g.arc(N/2,N/2,N/2-6,0,7); g.stroke(); g.lineWidth=3; g.beginPath(); g.arc(N/2,N/2,N/2-19,0,7); g.stroke();
+    // 아래쪽 글씨
+    g.font='700 25px "Nanum Gothic Coding","Apple SD Gothic Neo",sans-serif'; g.textAlign='center'; g.textBaseline='alphabetic'; g.fillText('아직이에요',N/2,N-42);
+    // 잉크가 덜 묻은 자리: 늘 같은 자리가 비게, 2px 덩어리로 해시를 써서 지운다
+    g.globalCompositeOperation='destination-out'; for(let y=0;y<N;y+=2)for(let x=0;x<N;x+=2)if(hash(x,y,7)<.11)g.fillRect(x,y,2,2); g.globalCompositeOperation='source-over'; }
+  const o=mk(c.width,c.height); o.getContext('2d').drawImage(c,0,0); o.className='stampmark'; o.style.width=c.width/2+'px'; o.setAttribute('aria-hidden','true'); return o; }; })();
+const empty=t=>el('div',{cls:'empty'},tearStamp(),el('span',{textContent:t}));
 const like=s=>asMember(async()=>must(s.liked?await cloud.sb.from('rec_likes').delete().eq('rec_id',s.id).eq('user_id',cloud.uid):await cloud.sb.from('rec_likes').insert({rec_id:s.id})),()=>openArchive());
 function songCard(s,owner){ return el('article',{cls:'card'},cover(s),el('div',{cls:'grow'},el('div',{cls:'ttl',textContent:s.title}),sub(`${s.artist}${s.key?` · ${s.key}`:''}${owner?'':` · ${nm(s.by)}`}`),s.memo?el('div',{cls:'memo',textContent:`“${s.memo}”`}):null,el('div',{cls:'chips'},...(s.tags||[]).map(sticker))),el('div',{cls:'side'},owner?null:btn(`${s.liked?'♥':'♡'} ${s.likes}`,()=>like(s)),btn('펼치기',()=>openSong(s,owner)))); }
 function recList(hit){ const l=db.recs.filter(s=>(!arch.tag||(s.tags||[]).includes(arch.tag))&&hit(s.title,s.artist,nm(s.by),s.memo)); return l.length?l.map(s=>songCard(s)):[db.locked?'':empty('찾는 곡이 아직 없어요. 첫 번째로 추천해 보세요.')]; }
@@ -114,7 +130,7 @@ function openDecor(){ const m=mine(),[sh0,sc0]=shelfOf(m),n=input(m.nick,12,{req
   const noShelf=cloud.member&&cloud.profile.shelf_shape===undefined; sh.disabled=sc.disabled=noShelf;
   show('방 꾸미기',el('form',{onsubmit:e=>{e.preventDefault();const v={nick:n.value.trim()||m.nick,title:t.value.trim()||m.title,theme:th.value,open:op.value==='1',shelf:[sh.value,sc.value]},done=()=>{if(scene.owner==='me')enterRoom(myRoom());openRoom(myRoom());};
     if(cloud.member){asMember(async()=>must(await cloud.sb.from('profiles').update({nick:v.nick,room_title:v.title,room_theme:v.theme,room_open:v.open,...(noShelf?{}:{shelf_shape:v.shelf[0],shelf_color:v.shelf[1]})}).eq('id',cloud.uid)),done);return;}
-    Object.assign(m,v);save();done();}},field('이름',n),field('방 이름',t),field('벽 색',th),field('공개',op),h2('책장'),noShelf?el('div',{cls:'warn',textContent:'책장은 서버 준비가 끝나면 바꿀 수 있어요.'}):null,el('div',{cls:'row'},view,el('div',{cls:'grow'},field('모양',sh),field('색',sc))),el('button',{cls:'btn',textContent:'이대로 꾸미기'}),btn('상자 정리',openCrates),btn('취소',()=>openRoom(myRoom())))); }
+    Object.assign(m,v);save();done();}},field('별명',n),field('방 이름',t),field('벽 색',th),field('공개',op),h2('책장'),noShelf?el('div',{cls:'warn',textContent:'책장은 서버 준비가 끝나면 바꿀 수 있어요.'}):null,el('div',{cls:'row'},view,el('div',{cls:'grow'},field('모양',sh),field('색',sc))),el('button',{cls:'btn',textContent:'이대로 꾸미기'}),btn('상자 정리',openCrates),btn('취소',()=>openRoom(myRoom())))); }
 /* 상자: 이름을 바꾸거나 지우면 안에 든 곡도 함께 옮긴다. 곡부터 옮겨서 중간에 끊겨도 곡을 잃지 않는다 */
 const crateList=()=>[...new Set([...mine().crates,...mine().songs.map(s=>s.crate).filter(Boolean)])];
 function putCrates(list,from,to){ const m=mine(); if(cloud.member)return asMember(async()=>{ if(from)must(await cloud.sb.from('room_songs').update({crate:to}).eq('user_id',cloud.uid).eq('crate',from)); must(await cloud.sb.from('profiles').update({crates:list}).eq('id',cloud.uid)); },openCrates); if(from)m.songs.forEach(x=>{if(x.crate===from)x.crate=to;}); m.crates=list; save(); openCrates(); }
@@ -142,11 +158,11 @@ function openMenu(){ const c=mk(W,H); c.getContext('2d').drawImage(Q(miniImg),0,
   const spot=scene===world?[me.tx,me.ty]:scene===cafe?MAP.doors.nc.door:MAP.doors.hub.door;
   show('성균관 · 대명거리 지도',el('div',{cls:'mapwrap'},el('div',{cls:'miniwrap'},el('div',{cls:'mini'},c,dot(...MAP.doors.hub.door,'#4658a3'),dot(...MAP.doors.nc.door,'#f0c53c'),dot(...spot,'#e0483c')),sub('빨강 나 · 파랑 푸른방 · 노랑 낫컴플리트. 지도를 누르면 그곳으로 가요.')),
     el('div',{cls:'menu'},btn('푸른방으로 돌아가기',()=>goHub()),btn('낫컴플리트 — 잼',()=>{hide();warp(cafe,...cafe.start,3);}),btn('Groov 광장 — 공지·공연',()=>openPlaza()),cloud.member?btn(`우편함${unread()?` (${unread()})`:''}`,()=>openMailbox()):null,btn('내 방',()=>enterRoom(myRoom())),btn('사람들의 방',openRooms),btn('Groov 아카이브',()=>openArchive('rec')),h2('동네'),...['명륜당 은행나무','대성전','금잔디광장','정문 앞','대명사거리','대명거리','혜화역 앞'].map(n=>btn(n,()=>{warp(world,...near(...placeAt(n)));hide();}))))); }
-let queue=[],full='',timer=0,talkFromWorld=false; const fast=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let queue=[],full='',timer=0,talkFromWorld=false,talkDone=null; const fast=matchMedia('(prefers-reduced-motion: reduce)').matches;
 /* 대화창 닫기. 장소를 옮기거나, 걷다가 나온 대화 위로 창을 열면 닫는다 (창 안에서 띄운 안내는 남긴다) */
-function endTalk(){ clearInterval(timer); queue=[]; full=''; talkFromWorld=false; talk.classList.remove('on'); document.getElementById('line').textContent=''; }
-function say(name,lines){ talkFromWorld=!panel.classList.contains('on'); keys.length=0;route=[];after=null; document.getElementById('who').textContent=name; queue=[...lines]; full=''; document.getElementById('line').textContent=''; talk.classList.add('on'); nextLine(); }
-function nextLine(){ const line=document.getElementById('line'); if(line.textContent.length<full.length){clearInterval(timer);line.textContent=full;return;} if(!queue.length){endTalk();return;} full=queue.shift(); let i=0; line.textContent=fast?full:''; clearInterval(timer); if(!fast)timer=setInterval(()=>{line.textContent=full.slice(0,++i);if(i>=full.length)clearInterval(timer);},30); }
+function endTalk(){ clearInterval(timer); queue=[]; full=''; talkFromWorld=false; talkDone=null; talk.classList.remove('on'); document.getElementById('line').textContent=''; }
+function say(name,lines,done){ talkFromWorld=!panel.classList.contains('on'); talkDone=done||null; keys.length=0;route=[];after=null; document.getElementById('who').textContent=name; queue=[...lines]; full=''; document.getElementById('line').textContent=''; talk.classList.add('on'); nextLine(); }
+function nextLine(){ const line=document.getElementById('line'); if(line.textContent.length<full.length){clearInterval(timer);line.textContent=full;return;} if(!queue.length){const d=talkDone;endTalk();if(d)d();return;} full=queue.shift(); let i=0; line.textContent=fast?full:''; clearInterval(timer); if(!fast)timer=setInterval(()=>{line.textContent=full.slice(0,++i);if(i>=full.length)clearInterval(timer);},30); }
 talk.onclick=nextLine;
 /* 잠깐 떴다 사라지는 알림 (연결됨, 새 편지 등) */
 let toastT=0; function toast(t,ms=3200){ const e=document.getElementById('toast'); e.textContent=t; e.classList.add('on'); clearTimeout(toastT); toastT=setTimeout(()=>e.classList.remove('on'),ms); }

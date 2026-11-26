@@ -27,14 +27,14 @@ for(const n in MAP.exits)world.spots[MAP.exits[n].join()]={name:'출구',run:()=
 for(const k of ['hub','nc']){ const [x,y]=MAP.doors[k].door; world.spots[x+','+y]={door:true,name:k==='hub'?'푸른방':'낫컴플리트',run:()=>k==='hub'?goHub():(hide(),warp(cafe,...cafe.start,3))}; }
 const doorOf={}; for(const k of ['hub','nc']) doorOf[MAP.doors[k].id]=MAP.doors[k].door;
 function leaveHub(){ const [x,y]=MAP.doors.hub.door; warp(world,x,y+1,0); } function leaveCafe(){ const [x,y]=MAP.doors.nc.door; warp(world,x,y+1,0); }
-function goHub(){ hide(); warp(hub,...hub.start,3); }
+function goHub(){ hide(); warp(hub,...hub.start,3); tellNews(); }
 const INFO={ '명륜당':['유생들이 글을 배우던 강당. 가운데 채 양옆으로 낮은 날개채가 붙어 있다.','앞뜰의 두 은행나무는 천연기념물이다.'],'대성전':['문묘의 중심 건물. 정면 다섯 칸, 팔작지붕이 당당하다.'],'동재':['유생들의 기숙사. 서재와 마주 보고 서 있다.'],'서재':['유생들의 기숙사. 동재와 마주 보고 서 있다.'],'동무':['대성전 앞뜰 동쪽을 두른 긴 집채.'],'서무':['대성전 앞뜰 서쪽을 두른 긴 집채.'],'신삼문':['대성전으로 드는 남쪽 문. 태극 무늬가 그려져 있다.'],'비천당':['명륜당 서북쪽에 자리한 건물.'],'학생회관':['동아리방이 모여 있는 건물. 103호 파란 문이 푸른방이다.'],'중앙학술정보관':['시험 기간이면 불이 꺼지지 않는다.'],'600주년기념관':['언덕 위로 우뚝 선 기념관.'],'낫컴플리트':['성균관로 골목의 카페. 문으로 들어가 보자.'] };
 const solidAt=(s,x,y)=>x<0||y<0||x>=s.W||y>=s.H||s.solid[y*s.W+x];
 const busy=(x,y,self)=>(me!==self&&me.tx===x&&me.ty===y)||scene.npcs.some(a=>a!==self&&a.tx===x&&a.ty===y);
 const free=(x,y,self)=>!solidAt(scene,x,y)&&!busy(x,y,self);
 function go(a,name){ const [dx,dy,r]=DIR[name]; a.dir=r; if(!free(a.tx+dx,a.ty+dy,a))return false; a.tx+=dx;a.ty+=dy;a.moving=true;return true; }
 const face=()=>{const d=Object.values(DIR).find(v=>v[2]===me.dir);return [me.tx+d[0],me.ty+d[1]];};
-function interact(x,y){ const n=scene.npcs.find(n=>n.tx===x&&n.ty===y); if(n){ if(!n.moving&&!n.stage)n.dir=[3,2,1,0][me.dir]; say(n.name,typeof n.lines==='function'?n.lines(n):n.lines); return; }
+function interact(x,y){ const n=scene.npcs.find(n=>n.tx===x&&n.ty===y); if(n){ if(!n.moving&&!n.stage)n.dir=[3,2,1,0][me.dir]; const l=typeof n.lines==='function'?n.lines(n):n.lines; say(n.name,l,n.onDone); n.onDone=null; return; }
   const s=scene.spots[x+','+y]; if(s){s.run();return;} if(scene!==world)return; const b=bid(x,y)&&MAP.B[bid(x,y)-1]; if(b&&b[2]){say(b[2],INFO[b[2]]||['지금은 들어갈 수 없다.']);return;}
   if(giants.some(q=>Math.abs(q.cx/16-x)<3&&Math.abs(q.by/16-y)<3)) say('명륜당 은행나무',['수백 년을 살아온 천연기념물 은행나무.','굵은 가지 밑으로 유주가 고드름처럼 자라 있고, 발밑은 온통 노랗다.']); }
 function find(gx,gy){ const s=scene, w=s.W, ix=(x,y)=>y*w+x; if(gx<0||gy<0||gx>=s.W||gy>=s.H)return null; const goal=new Map(), around=(x,y,hit)=>Object.values(DIR).forEach(([a,b])=>{if(x+a>=0&&y+b>=0&&x+a<s.W&&y+b<s.H)goal.set(ix(x+a,y+b),hit);});
@@ -98,7 +98,9 @@ const title=document.getElementById('title'); const startGame=()=>{ if(title.hid
 /* 첫 화면 메뉴: 로그인 상태에 따라 버튼이 바뀐다. 둘러보기는 언제나 할 수 있다 */
 let titleKey=''; const goBox=document.getElementById('go');
 const browse=()=>{ startGame(); if(scene===hub&&!cloud.member)say('익명의 유령',['둘러보는 중이구나. 천천히 걸어 봐.',...(cloud.pub?['게시판에서는 어떤 잼이 열리는지 이름 없이 볼 수 있어.']:[]),'추천곡과 사람들의 방은 로그인하고 승인받으면 열려. 오른쪽 위에서 언제든 할 수 있어.']); };
-const enterMember=()=>{ startGame(); const n=invites().length; if(scene===hub&&n)say('익명의 유령',[`잼 초대가 ${n}개 와 있어. 오른쪽 위 이름을 눌러 봐.`]); };
+const enterMember=()=>{ startGame(); tellNews(); };
+/* 푸른방에 있을 때 새로 생긴 소식이 있으면 익명의 유령이 먼저 말을 건다 */
+function tellNews(){ if(scene!==hub||!cloud.member)return; const g=ghostNews(false); if(g)say('익명의 유령',g.lines,g.done); }
 function titleMenu(){ if(title.hidden)return; const st=cloud.state, shared=/room=GROOV1\./.test(location.hash||''), key=[st,cloud.note,cloud.profile&&cloud.profile.nick,shared,Date.now()-(cloud.connectedAt||0)<5000].join('|'); if(key===titleKey)return; titleKey=key;
   const login=btn('로그인',()=>needLogin()), look=btn('둘러보기',browse), visit=btn('놀러 가기',startGame), other=btn('다른 계정으로',async()=>{await cloud.sb.auth.signOut({scope:'local'});await session();needLogin();}), tell=el('div',{cls:'tip',role:'status'});
   const check=btn('승인됐는지 확인',async()=>{await session();if(cloud.member)return;tell.textContent='아직 승인 전이에요. 조금 뒤에 다시 확인해 주세요.';});

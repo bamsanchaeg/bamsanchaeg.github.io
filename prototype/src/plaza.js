@@ -92,7 +92,7 @@ const mail={box:'in'};
 function openMailbox(box){ if(!cloud.member){needLogin(()=>openMailbox(box));return;} if(box)mail.box=box; const l=(db.letters||[]).filter(x=>mail.box==='in'?x.inbox:!x.inbox);
   const tabs=el('div',{cls:'tabs',role:'tablist'},...[['in',`받은 편지${unread()?` (${unread()})`:''}`],['out','보낸 편지']].map(([k,t])=>el('button',{cls:'tab'+(mail.box===k?' on':''),type:'button',role:'tab',textContent:t,onclick:()=>openMailbox(k)})));
   show('우편함',tabs,plazaOff(),sub('편지는 보낸 사람과 받는 사람만 읽어요. 리더도 볼 수 없어요.'),acts(btn('편지 쓰기',()=>openWrite())),
-    ...(l.length?l.map(x=>el('article',{cls:'card'+(x.inbox&&!x.read?' new':'')},el('div',{cls:'grow'},el('div',{cls:'ttl',textContent:`${x.inbox?nm(x.from):`${nm(x.to)}에게`}${x.inbox&&!x.read?' · 새 편지':''}`}),sub(`${fmtAt(x.at)}${!x.inbox&&x.read?' · 읽음':''}`),el('div',{textContent:x.body.length>40?x.body.slice(0,40)+'…':x.body})),btn('열기',()=>openLetter(x)))):[empty(mail.box==='in'?'아직 받은 편지가 없어요.':'아직 보낸 편지가 없어요.')])); }
+    ...(l.length?l.map(x=>el('article',{cls:'card'+(x.inbox&&!x.read?' new':'')},el('div',{cls:'grow'},el('div',{cls:'ttl',textContent:`${x.inbox?nm(x.from):`${nm(x.to)}에게`}${x.inbox&&!x.read?' · 새 편지':''}`}),sub(`${fmtAt(x.at)}${!x.inbox&&x.read?' · 읽음':''}`),el('div',{cls:'prev',textContent:x.body.length>40?x.body.slice(0,40)+'…':x.body})),btn('열기',()=>openLetter(x)))):[empty(mail.box==='in'?'아직 받은 편지가 없어요.':'아직 보낸 편지가 없어요.')])); }
 async function openLetter(x){ if(x.inbox&&!x.read){ try{ await rpc('read_letter',{p_id:x.id}); x.read=true; hudAcct(); }catch(e){} }
   show(x.inbox?`${nm(x.from)}의 편지`:`${nm(x.to)}에게 보낸 편지`,sub(fmtAt(x.at)),el('div',{cls:'letter paper',textContent:x.body}),
     acts(x.inbox&&x.fromId&&cloud.people.some(p=>p.id===x.fromId&&p.status==='approved')?btn('답장',()=>openWrite(x.fromId)):null,btn('편지함에서 빼기',()=>asMember(async()=>{ await rpc('drop_letter',{p_id:x.id}); },()=>openMailbox())),btn('뒤로',()=>openMailbox()))); }
@@ -122,3 +122,42 @@ function setupPlazaBoard(){ const [x,y]=near(...placeAt('금잔디광장').map((
   R(g,'#5d3b28',3,10,3,22); R(g,'#5d3b28',18,10,3,22); R(g,'#8a5a34',1,2,22,16); R(g,'#c08a54',1,2,22,2); R(g,'#fbfaf5',3,5,8,9); R(g,'#f0c53c',13,6,8,7); R(g,'#4658a3',4,7,6,1); R(g,'#4658a3',4,9,5,1); R(g,'#4658a3',4,11,6,1); R(g,'#c8453a',16,5,2,2);
   const img=edge(c,.4), cx=x*16+8, by=y*16+15; bucket(x,y).things.push({x:cx-12,y:by-31,img,base:by,sh:[SH.t,cx-8,by-4]}); solid[I(x,y)]=1;
   world.spots[x+','+y]={name:'광장 게시판',run:()=>openPlaza()}; addLabel('Groov 광장 게시판',cx,by-38,1); }
+
+/* ---------- 새 소식: 익명의 유령이 모아서 알려 준다 ----------
+   '지난번에 들은 때' 이후 새로 생긴 공지·잼·공연·추천곡·내 방 방명록·편지와, 아직 남아 있는 편지·잼 초대·승인 대기를 모은다.
+   들은 때는 서버가 준 글 시각으로, 이 브라우저에 사람마다 저장한다 (처음이면 최근 7일) */
+const NEWS_KEY=()=>`groov.news.${cloud.uid}`;
+function newsSeen(){ try{ const v=localStorage.getItem(NEWS_KEY()); if(v)return v; }catch(e){} return new Date(Date.now()-7*864e5).toISOString(); }
+function markNews(){ const all=[...Object.values(cloud.newest||{}),...(db.letters||[]).map(l=>l.at),...((cloud.room&&cloud.room.guest)||[]).map(n=>n.at)].filter(Boolean), top=all.reduce((m,x)=>x>m?x:m,'');
+  if(top&&top>newsSeen())try{ localStorage.setItem(NEWS_KEY(),top); }catch(e){}
+  const told=cloud.toldInv||(cloud.toldInv=new Set()); invites().forEach(i=>told.add(i.x.id)); }
+function newsState(){ if(!cloud.member||!db.jams)return null; const seen=newsSeen(), after=x=>!!x.at&&x.at>seen, told=cloud.toldInv||new Set();
+  const n={ notices:(db.notices||[]).filter(after), jams:db.jams.filter(j=>after(j)&&j.host!==ME&&!j.closed), shows:(db.shows||[]).filter(s=>after(s)&&!s.mine),
+    recs:(db.recs||[]).filter(r=>after(r)&&r.by!==ME), notes:((cloud.room&&cloud.room.guest)||[]).filter(x=>after(x)&&!x.own),
+    letters:(db.letters||[]).filter(l=>l.inbox&&!l.read), inv:invites(), pending:cloud.leader?cloud.people.filter(p=>p.status==='pending'):[] };
+  n.fresh=n.notices.length+n.jams.length+n.shows.length+n.recs.length+n.notes.length+n.letters.filter(after).length+n.inv.filter(i=>!told.has(i.x.id)).length;
+  n.total=n.notices.length+n.jams.length+n.shows.length+n.recs.length+n.notes.length+n.letters.length+n.inv.length+n.pending.length; return n; }
+const newsCount=freshOnly=>{ const n=newsState(); return n?(freshOnly?n.fresh:n.total):0; };
+/* 유령의 말. all 이면 쌓인 것을 모두(말을 걸었을 때), 아니면 새로 생긴 게 있을 때만(푸른방에 들어올 때) */
+function ghostNews(all){ const n=newsState(); if(!n||!(all?n.total:n.fresh))return null; const more=(k,t)=>k>1?` 말고도 ${k-1}${t} 더`:'', L=[`…${cloud.profile.nick}, 새 소식이 있어.`];
+  if(n.notices.length) L.push(`공지가 올라왔어. ‘${n.notices[0].title}’${more(n.notices.length,'개')}.`);
+  if(n.jams.length){ const j=n.jams[0], open=[...new Set(j.songs.flatMap(s=>s.slots.filter(x=>!x.who&&!x.invited).map(x=>x.part)))]; L.push(`새 잼이 열렸어. ${j.title}${j.when?`(${j.when})`:''}${open.length?`, 빈자리는 ${open.slice(0,3).join('·')}`:''}${more(n.jams.length,'개')}.`); }
+  if(n.inv.length){ const {s,x}=n.inv[0]; L.push(`잼 초대가 ${n.inv.length}개 와 있어. ${s.title} ${x.part} 자리야.`); }
+  if(n.letters.length){ const k=n.letters.length; L.push(`편지가 ${k}통 기다려. ${nm(n.letters[0].from)}${k>1?' 말고도 더 있어':'한테서 왔어'}.`); }
+  if(n.shows.length) L.push(`공연 소식도 왔어. ${n.shows[0].title}, ${fmtDate(n.shows[0].date)}${more(n.shows.length,'개')}.`);
+  if(n.notes.length) L.push(`네 방 방명록에 글이 ${n.notes.length}개 남았어.`);
+  if(n.recs.length) L.push(`추천곡이 ${n.recs.length}곡 늘었어. ${n.recs[0].title} 같은 거.`);
+  if(n.pending.length) L.push(`승인을 기다리는 사람이 ${n.pending.length}명 있어.`);
+  if(L.length>7)L.splice(7); L.push('한눈에 보이게 정리해 둘게.');
+  return {lines:L, done:()=>openNews(n)}; }
+function openNews(n){ if(!cloud.member){openAccount();return;} n=n||newsState(); markNews(); hudAcct();
+  const row=(t,s,b)=>el('div',{cls:'row'},el('div',{cls:'grow'},el('div',{textContent:t}),s?sub(s):null),b), part=(t,l)=>l.length?[h2(t),...l]:[];
+  const items=[...part('공지',n.notices.map(x=>row(x.title,`${nm(x.by)} · ${fmtAt(x.at)}`,btn('보기',()=>openPlaza('notice'))))),
+    ...part('받은 잼 초대',n.inv.map(inviteRow)),
+    ...part('새 잼',n.jams.map(j=>row(j.title,`${j.when||'시간 미정'} · 주최 ${nm(j.host)}`,btn('보기',()=>openJam(j))))),
+    ...part('편지',n.letters.map(l=>row(`${nm(l.from)}의 편지`,l.body.length>30?l.body.slice(0,30)+'…':l.body,btn('열기',()=>openLetter(l))))),
+    ...part('공연',n.shows.map(s=>row(s.title,`${fmtDate(s.date)}${s.time?` ${s.time}`:''} · ${s.place}`,btn('보기',()=>openPlaza('show'))))),
+    ...part('내 방 방명록',n.notes.map(x=>row(x.text,nm(x.by),btn('내 방',()=>openRoom(myRoom()))))),
+    ...part('새 추천곡',n.recs.map(r=>row(`${r.title} — ${r.artist}`,`추천 ${nm(r.by)}`,btn('펼치기',()=>openSong(r))))),
+    ...part('승인 대기',n.pending.map(p=>row(p.nick,'리더의 승인을 기다려요',btn('부원 관리',openAccount))))];
+  show('새 소식',sub('익명의 유령이 지난번 이후 소식을 모아 뒀어요. 푸른방의 유령에게 말을 걸면 다시 들을 수 있어요.'),...(items.length?items:[empty('새 소식이 없어요.')])); }

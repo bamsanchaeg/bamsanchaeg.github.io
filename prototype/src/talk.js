@@ -184,6 +184,7 @@ const VOICE={
 
 /* 말을 건 횟수에 따라: 처음엔 안내, 그다음부터는 수다와 화제 */
 function npcTalk(kind){ const v=VOICE[kind]; return n=>{ n.talks=(n.talks||0)+1;
+  if(kind==='ghost'&&typeof ghostNews==='function'){ const g=ghostNews(true); if(g){ n.onDone=g.done; return g.lines; } }   // 새 소식이 있으면 그것부터
   if(v.guide&&n.talks===1) return kind==='ghost'?v.guide:[fresh(n,'l',v.lines),...v.guide];
   const out=[fresh(n,'l',v.lines)], t=topical(n,v); if(t)out.push(t);
   else if(v.guide&&Math.random()<.5) out.push(fresh(n,'g',v.guide));
