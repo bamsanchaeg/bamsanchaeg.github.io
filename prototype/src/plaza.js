@@ -26,7 +26,7 @@ function openPlaza(tab){ if(tab)plaza.tab=tab; const T_=[['notice','공지'],['s
   const today=todayStr(), shows=db.shows||[], up=shows.filter(s=>s.date>=today).sort((a,b)=>a.date<b.date?-1:1), past=shows.filter(s=>s.date<today);
   const body_=plaza.tab==='notice'?noticeList():plaza.tab==='show'?(up.length?up.map(showCard):[empty('다가올 공연이 없어요. 공연을 올려 보세요.')]):(past.length?past.map(showCard):[empty('아직 지난 공연 기록이 없어요.')]);
   const add=plaza.tab==='notice'?(cloud.leader?btn('공지 쓰기',()=>openNoticeForm()):null):plaza.tab==='show'?btn('공연 올리기',()=>openShowForm()):null;
-  show('Groov 광장',tabs,plazaOff(),plaza.tab==='past'?sub('끝난 공연이 셋리스트, 출연진, 후기와 함께 남아요.'):null,acts(add,btn('우편함',()=>openMailbox()),btn('아카이브',()=>openArchive())),...body_); }
+  show('Groov 광장',tabs,plazaOff(),plaza.tab==='past'?sub('끝난 공연이 셋리스트, 출연진, 후기와 함께 남아요. 아카이브의 공연 연혁에서 해마다 모아 볼 수 있어요.'):null,acts(add,btn('우편함',()=>openMailbox()),btn(plaza.tab==='past'?'공연 연혁 보기':'아카이브',()=>openArchive(plaza.tab==='past'?'show':'rec'))),...body_); }
 
 function noticeList(){ const l=db.notices||[]; if(!l.length)return [empty('아직 공지가 없어요.')];
   return l.map(n=>el('article',{cls:'card notice'+(n.pinned?' pin':'')},el('div',{cls:'grow'},el('div',{cls:'ttl',textContent:`${n.pinned?'[고정] ':''}${n.title}`}),sub(`${nm(n.by)} · ${fmtAt(n.at)}`),n.body?el('div',{cls:'letter',textContent:n.body}):null),
@@ -63,6 +63,12 @@ function openShowForm(s){ const past=!!s&&s.date<todayStr(), t=input(s&&s.title,
     s?h2('지난 공연 기록'):null,s?sub(past?'끝난 공연의 후기와 사진·영상 주소를 남겨요.':'공연이 끝나면 여기에 후기를 남겨요.'):null,s?field('후기',rc):null,s?field('사진·영상',lk):null,
     el('button',{cls:'btn',textContent:s?'저장하기':'올리기'}),msg);
   show(s?(past?'지난 공연 기록':'공연 고치기'):'공연 올리기',s?null:sub('부원 누구나 올릴 수 있어요. 고치기와 지우기는 올린 사람과 리더만 해요.'),form,acts(btn('그만두기',()=>openPlaza(past?'past':'show')))); }
+
+/* 아카이브 › 공연 연혁: 끝난 공연을 해마다 묶어 최근 것부터. 공연 이름·장소·곡·출연자로 찾는다 */
+function showHistory(hit){ if(!cloud.member||!db.shows)return [db.locked||db.sample?'':empty('공연 연혁은 승인받은 부원만 볼 수 있어요.')];
+  const today=todayStr(), l=db.shows.filter(s=>s.date<today&&hit(s.title,s.place,...s.setlist,...s.cast.map(c=>nm(c.who)))).sort((a,b)=>a.date<b.date?1:-1);
+  if(!l.length)return [empty(arch.q?'찾는 공연이 없어요.':'아직 지난 공연이 없어요. 광장에 올린 공연이 끝나면 여기에 쌓여요.')];
+  const out=[]; let y=''; for(const s of l){ const yy=s.date.slice(0,4); if(yy!==y){ y=yy; out.push(h2(`${yy}년 · ${l.filter(x=>x.date.startsWith(yy)).length}회`)); } out.push(showCard(s)); } return out; }
 
 /* ---------- 공연 초대장 ---------- */
 const showLink=tok=>`${baseUrl()}#show=${tok}`;
