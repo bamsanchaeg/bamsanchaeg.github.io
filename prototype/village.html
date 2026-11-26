@@ -2,15 +2,16 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-hXgwYV9GEH12kdwxup86XXqubTK6EX2jnuaqPxhAQoc=' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js; style-src 'sha256-Bzc4vhJJ79N2QQYJDAPXAjlgG/tyujTEwpYdnTt9Xrg=' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://cncshhbsfkugqwgvkgwk.supabase.co; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-y+NCP1NNb7iTSHMT5tgs61SkbBmHmHvieMaBg6z/sXY=' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js; style-src 'sha256-dJgazhA1vG+TDl3y2OOSzZdnvLqZYvFAGLG0zV9s5+g=' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://cncshhbsfkugqwgvkgwk.supabase.co; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'">
 <meta name="referrer" content="no-referrer">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Groov</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Nanum+Gothic+Coding:wght@400;700&display=swap">
 <style>
-:root { --paper:#fbfaf5; --ink:#4658a3; --deep:#34448e; --mid:#8d9acb; --pale:#e4e8f4; --yel:#f0c53c; --grey:#6e7386; --type:"Courier Prime","Courier New","Nanum Gothic Coding","D2Coding","Apple SD Gothic Neo","Malgun Gothic",monospace; }
+:root { --sl:env(safe-area-inset-left,0px); --sr:env(safe-area-inset-right,0px); --st:env(safe-area-inset-top,0px); --sb:env(safe-area-inset-bottom,0px); --vh:100vh; --vt:0px; --paper:#fbfaf5; --ink:#4658a3; --deep:#34448e; --mid:#8d9acb; --pale:#e4e8f4; --yel:#f0c53c; --grey:#6e7386; --type:"Courier Prime","Courier New","Nanum Gothic Coding","D2Coding","Apple SD Gothic Neo","Malgun Gothic",monospace; }
 * { box-sizing:border-box; }
-html,body { margin:0; height:100%; overflow:hidden; background:var(--paper); color:var(--deep); font:16px/1.5 var(--type); }
+@supports (height:100dvh) { :root { --vh:100dvh; } }
+html,body { margin:0; height:100%; overflow:hidden; overscroll-behavior:none; touch-action:manipulation; -webkit-text-size-adjust:100%; text-size-adjust:100%; -webkit-tap-highlight-color:transparent; background:var(--paper); color:var(--deep); font:16px/1.5 var(--type); }
 canvas,img { image-rendering:pixelated; display:block; }
 #cv { position:fixed; left:0; top:0; touch-action:none; }
 button,input,select,textarea { font:inherit; color:inherit; }
@@ -18,19 +19,19 @@ button,input,select,textarea { font:inherit; color:inherit; }
 .label { position:absolute; left:0; top:0; padding:0 8px; background:var(--paper); border:1.5px solid var(--ink); font-size:13px; white-space:nowrap; }
 .label.hot { background:var(--ink); color:var(--paper); z-index:1; }
 .win { background:radial-gradient(rgba(70,88,163,.10) .6px,transparent .8px) 0 0/5px 5px,radial-gradient(rgba(110,115,134,.09) .6px,transparent .8px) 2px 3px/7px 7px,var(--paper); border:2px solid var(--ink); box-shadow:5px 5px 0 rgba(70,88,163,.28); }
-#who0 { position:fixed; left:12px; top:12px; display:flex; align-items:center; gap:10px; padding:4px 14px 4px 5px; pointer-events:none; }
+#who0 { position:fixed; left:calc(12px + var(--sl)); top:calc(12px + var(--st)); display:flex; align-items:center; gap:10px; padding:4px 14px 4px 5px; pointer-events:none; }
 #who0 canvas { width:44px; height:44px; border:1.5px solid var(--ink); background:#fff; }
-#hud { position:fixed; top:12px; right:12px; display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; }
+#hud { position:fixed; top:calc(12px + var(--st)); right:calc(12px + var(--sr)); z-index:2; display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; }
 .btn:active { transform:translate(2px,2px); box-shadow:none; }
 .btn { background:var(--paper); border:1.5px solid var(--ink); box-shadow:2px 2px 0 var(--mid); padding:4px 12px; cursor:pointer; min-height:36px; color:var(--deep); text-decoration:none; display:inline-grid; place-items:center; }
 .btn:hover,.btn:focus-visible { background:var(--ink); color:var(--paper); outline:none; }
 .btn:disabled { opacity:.45; cursor:default; }
-#panel { position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); width:min(720px,calc(100vw - 24px)); max-height:calc(100vh - 32px); display:none; flex-direction:column; z-index:10; }
+#panel { position:fixed; left:50%; top:calc(var(--vt) + var(--vh) / 2); transform:translate(-50%,-50%); width:min(720px,calc(100vw - 24px - var(--sl) - var(--sr))); max-height:calc(var(--vh) - 24px - var(--st) - var(--sb)); display:none; flex-direction:column; z-index:10; }
 #panel.on { display:flex; }
 #panel header { display:flex; align-items:center; gap:14px; padding:12px 18px 10px; }
 #panel h1 { font-size:20px; margin:0; font-weight:400; letter-spacing:.02em; flex:1; min-width:0; overflow-wrap:anywhere; }
 .mark { color:var(--ink); white-space:nowrap; }
-#body { padding:6px 18px 18px; overflow:auto; min-height:0; }
+#body { padding:6px 18px 18px; overflow:auto; min-height:0; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; touch-action:pan-y; }
 #body h2 { font-size:15px; margin:18px 0 6px; font-weight:700; border-bottom:1.5px solid var(--ink); padding-bottom:3px; }
 .tabs { display:flex; gap:0; border-bottom:2px solid var(--ink); margin-bottom:10px; }
 .tab { background:none; border:1.5px solid var(--ink); border-bottom:0; padding:5px 16px; cursor:pointer; margin-right:-1.5px; min-height:38px; }
@@ -80,18 +81,18 @@ input:disabled { background:var(--pale); }
 .menu { display:grid; gap:6px; }
 .menu .btn { justify-content:start; text-align:left; }
 .acts { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
-#talk { position:fixed; left:50%; bottom:16px; transform:translateX(-50%); width:min(640px,calc(100vw - 24px)); min-height:106px; padding:12px 18px; display:none; cursor:pointer; z-index:11; }
+#talk { position:fixed; left:50%; bottom:calc(16px + var(--sb)); transform:translateX(-50%); width:min(640px,calc(100vw - 24px - var(--sl) - var(--sr))); user-select:none; -webkit-user-select:none; min-height:106px; padding:12px 18px; display:none; cursor:pointer; z-index:11; }
 #talk.on { display:block; }
 #talk b { display:block; border-bottom:1.5px solid var(--ink); margin-bottom:6px; }
-#hint { position:fixed; left:12px; bottom:12px; background:var(--paper); border:1.5px solid var(--mid); padding:2px 10px; font-size:13px; pointer-events:none; }
-#osm { position:fixed; right:8px; bottom:6px; font-size:12px; color:var(--deep); background:var(--paper); padding:2px 6px; }
+#hint { position:fixed; left:calc(12px + var(--sl)); bottom:calc(12px + var(--sb)); background:var(--paper); border:1.5px solid var(--mid); padding:2px 10px; font-size:13px; pointer-events:none; }
+#osm { position:fixed; right:calc(8px + var(--sr)); bottom:calc(6px + var(--sb)); font-size:12px; color:var(--deep); background:var(--paper); padding:2px 6px; }
 .mini { position:relative; }
 .mini canvas { width:100%; cursor:pointer; border:1.5px solid var(--ink); }
 .mini i { position:absolute; width:11px; height:11px; margin:-5px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1.5px var(--deep); pointer-events:none; }
 .miniwrap { flex:1 1 240px; max-width:320px; margin:0 auto; }
 .mapwrap { display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start; }
 .mapwrap .menu { flex:1 1 200px; }
-#jam { position:fixed; left:50%; bottom:12px; transform:translateX(-50%); width:min(760px,calc(100vw - 24px)); padding:10px 14px 12px; display:none; z-index:3; }
+#jam { position:fixed; left:50%; bottom:calc(12px + var(--sb)); transform:translateX(-50%); width:min(760px,calc(100vw - 24px)); padding:10px 14px 12px; display:none; z-index:3; }
 #jam.on { display:block; }
 .jtop { display:flex; flex-wrap:wrap; gap:6px 12px; align-items:center; }
 .jtop select { width:auto; }
@@ -106,18 +107,34 @@ input:disabled { background:var(--pale); }
 .pads { display:grid; grid-template-columns:repeat(8,1fr); gap:6px; }
 .pad { background:#fff; border:2px solid var(--ink); min-height:56px; padding:2px; cursor:pointer; touch-action:none; display:grid; place-items:center; }
 .pad.hit { background:var(--yel); }
-#title { position:fixed; inset:0; z-index:9; background:var(--paper); display:grid; grid-template-rows:auto 1fr auto; justify-items:center; padding:28px clamp(18px,5vw,64px); }
+#title { position:fixed; inset:0; z-index:9; background:var(--paper); display:grid; grid-template-rows:auto 1fr auto; justify-items:center; padding:calc(28px + var(--st)) calc(clamp(18px,5vw,64px) + var(--sr)) calc(var(--sb)) calc(clamp(18px,5vw,64px) + var(--sl)); }
+#toast { position:fixed; left:50%; top:calc(12px + var(--st)); transform:translate(-50%,-140%); padding:6px 16px; z-index:12; pointer-events:none; opacity:0; transition:transform .25s,opacity .25s; max-width:calc(100vw - 24px); text-align:center; }
+#toast.on { transform:translate(-50%,0); opacity:1; }
+@media (max-width:640px) { #toast { top:calc(108px + var(--st)); } }
+.badge { display:inline-block; min-width:1.4em; padding:0 5px; margin-left:4px; background:var(--yel); color:var(--deep); border:1.5px solid var(--ink); font-size:12px; line-height:1.3; }
 #title[hidden] { display:none; }
 #title .edge { width:100%; display:flex; justify-content:space-between; gap:16px; font-size:clamp(15px,2.2vw,24px); }
 #title img { min-height:0; height:100%; max-width:100%; object-fit:contain; padding:14px 0; }
-@media (prefers-reduced-motion:reduce) { .cov { transition:none; } }
+@media (prefers-reduced-motion:reduce) { .cov { transition:none; } #toast { transition:none; } }
+/* 광장, 편지, 초대장 */
+.letter { white-space:pre-wrap; overflow-wrap:anywhere; margin:6px 0; }
+.letter.paper { background:repeating-linear-gradient(#fff 0 27px,var(--pale) 27px 28px); border:1.5px solid var(--ink); padding:12px 14px; line-height:28px; min-height:120px; }
+.card.new { border-width:2.5px; background:#fff6d6; }
+.card.notice.pin { border-width:2.5px; }
+.code { font-size:20px; letter-spacing:.18em; font-weight:700; }
+.invite { border:2px solid var(--ink); background:#fff; padding:18px 18px 14px; margin:8px 0 12px; display:grid; gap:4px; text-align:center; box-shadow:6px 6px 0 var(--mid); position:relative; }
+.invite::before { content:''; position:absolute; inset:6px; border:1.5px dashed var(--mid); pointer-events:none; }
+.invite .invtop { letter-spacing:.3em; color:var(--grey); font-size:13px; }
+.invite .invttl { font-size:22px; font-weight:700; margin:4px 0; overflow-wrap:anywhere; }
+.invite .chips { justify-content:center; }
+.sheet.show .chips { margin-top:8px; }
 #title .go { padding:4px 0 10px; width:100%; display:grid; justify-items:center; gap:6px; }
 #title .gobtns { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
 #title .gobtns .btn { min-height:44px; padding:6px 18px; }
 #title .gobtns .main { background:var(--ink); color:var(--paper); min-width:180px; }
 #title .gobtns .main:hover,#title .gobtns .btn:focus-visible { outline:2px solid var(--yel); outline-offset:2px; }
 #title .tip { min-height:22px; font-size:14px; color:var(--grey); text-align:center; }
-@media (max-width:640px) { #hint { display:none; } #who0 { font-size:14px; padding-right:10px; } #who0 canvas { width:36px; height:36px; } #hud { top:64px; left:12px; justify-content:flex-start; } #hud .btn { padding:2px 8px; } .bars { grid-template-columns:repeat(4,1fr); } .three { grid-template-columns:1fr; } .mark { display:none; } .tab { padding:5px 10px; } }
+@media (max-width:640px) { #hint { display:none; } #who0 { font-size:14px; padding-right:10px; } #who0 canvas { width:36px; height:36px; } #hud { top:calc(64px + var(--st)); left:calc(12px + var(--sl)); justify-content:flex-start; } #hud .btn { padding:2px 8px; } .bars { grid-template-columns:repeat(4,1fr); } .three { grid-template-columns:1fr; } .mark { display:none; } .tab { padding:5px 10px; } }
 
 </style>
 </head>
@@ -126,10 +143,11 @@ input:disabled { background:var(--pale); }
 <div id="labels"></div>
 <div id="who0" class="win"><span id="place"></span></div>
 <div id="hud"><button class="btn" id="bHome">푸른방</button><button class="btn" id="bMenu">지도</button><button class="btn" id="bRide">스쿠터</button><button class="btn" id="bNight">밤으로</button><button class="btn" id="bAcct">로그인</button></div>
-<div id="hint">방향키·클릭 이동 / Shift 스쿠터 / Enter 조사 / R 푸른방 / M 지도 / C 아카이브</div>
+<div id="hint">방향키·클릭 이동 / Shift 스쿠터 / Enter 조사 / R 푸른방 / M 지도 / C 아카이브 / P 광장 / L 우편함</div>
 <a id="osm" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>
 <div id="jam" class="win"></div>
 <div id="talk" class="win"><b id="who"></b><span id="line"></span></div>
+<div id="toast" class="win" role="status" aria-live="polite"></div>
 <section id="panel" class="win" role="dialog" aria-modal="true" aria-labelledby="pt"><header><h1 id="pt"></h1><span class="mark" aria-hidden="true">Groov ⟫ 103</span><button class="btn" id="bClose">닫기</button></header><div id="body"></div></section>
 <div id="title"><div class="edge"><span>Groov Jazz Archive</span><span>103 ⟫ 푸른방</span></div><img id="ti" alt="헬멧과 고글을 쓰고 스쿠터를 탄 유령"><div class="go" id="go"></div></div>
 <script>
@@ -556,7 +574,8 @@ B.forEach(b=>binAdd(b.x0-30,b.y0-b.h-70,b.x1+30,b.y1+20,{y:b.y1,b}));
 for(let y=0;y<H;y++)for(let x=0;x<W;x++){ const k=G[I(x,y)]; if(k==='L'||k==='W') binAdd(x*16,y*16-32,x*16+16,y*16+16,{y:y*16+14,w:[x,y,k]}); }
 /* 픽셀을 자주 읽는 작업용 캔버스 */
 const mkR=(w,h)=>{const c=mk(w,h);c.getContext('2d',{willReadFrequently:true});return c;};
-const chunks=new Map();
+const chunks=new Map(), CHUNK_MAX=matchMedia('(pointer: coarse)').matches?40:80;   // 휴대폰은 캔버스 메모리가 넘치면 화면이 하얗게 빈다
+const freeCanvas=(...l)=>{for(const c of l)if(c){c.width=c.height=0;}};   // iOS 는 크기를 0으로 해야 바로 메모리를 돌려준다
 function chunk(cx,cy){ const key=cx+','+cy; let c=chunks.get(key); if(c){chunks.delete(key);chunks.set(key,c);return c;}
   c={base:mkR(CP,CP),top:mkR(CP,CP),lit:mk(CP,CP)}; const g=c.base.getContext('2d'),t=c.top.getContext('2d'),l=c.lit.getContext('2d'); paintGround(g,cx,cy); if(inkOn) inkCanvas(c.base,cx*CP,cy*CP,.28);
   const items=(binB.get(key)||[]).slice().sort((a,b)=>a.y-b.y), X=cx*CP,Y=cy*CP; for(const q of [g,t,l])q.translate(-X,-Y);
@@ -572,8 +591,8 @@ function chunk(cx,cy){ const key=cx+','+cy; let c=chunks.get(key); if(c){chunks.
     else { poly(m,b.q,0,-b.h); m.fill(); m.lineWidth=2; m.stroke(); b.q.forEach((p,i)=>{const n=b.q[(i+1)%b.q.length]; m.beginPath();m.moveTo(p[0],p[1]);m.lineTo(n[0],n[1]);m.lineTo(n[0],n[1]-b.h);m.lineTo(p[0],p[1]-b.h);m.closePath();m.fill();}); }
     m.globalCompositeOperation='destination-out'; poly(m,b.q,0,0); m.fill(); m.lineWidth=1.5; m.stroke(); }
   t.save(); t.setTransform(1,0,0,1,0,0); t.globalCompositeOperation='destination-in'; t.drawImage(M,0,0); t.restore();
-  for(const k of ['base','top']){ const f=mk(CP,CP); f.getContext('2d').drawImage(c[k],0,0); c[k]=f; }
-  chunks.set(key,c); if(chunks.size>80)chunks.delete(chunks.keys().next().value); return c; }
+  for(const k of ['base','top']){ const f=mk(CP,CP),o=c[k]; f.getContext('2d').drawImage(o,0,0); c[k]=f; freeCanvas(o); } freeCanvas(M);
+  chunks.set(key,c); if(chunks.size>CHUNK_MAX){ const k=chunks.keys().next().value,o=chunks.get(k); chunks.delete(k); freeCanvas(o.base,o.top,o.lit); } return c; }
 
 /* ---------- 소품 ---------- */
 const PIC={};
@@ -807,7 +826,7 @@ const newId=()=>store.nextId++, nm=w=>w===ME?mine().nick:w==='나'?store.me.nick
 /* ---------- 창 ---------- */
 const panel=document.getElementById('panel'), body=document.getElementById('body'), pt=document.getElementById('pt'), talk=document.getElementById('talk');
 function el(tag,props={},...kids){ const n=document.createElement(tag); for(const [k,v] of Object.entries(props)){ if(k==='cls')n.className=v; else if(k==='css')n.style.cssText=v; else n[k]=v; } n.append(...kids.filter(k=>k!==null&&k!==false&&k!==undefined)); return n; }
-function show(title,...kids){ keys.length=0; route=[]; after=null; pt.textContent=title; body.replaceChildren(...kids.filter(k=>k)); panel.classList.add('on'); body.scrollTop=0; (body.querySelector('.menu .btn')||document.getElementById('bClose')).focus({preventScroll:true}); }
+function show(title,...kids){ if(talkFromWorld)endTalk(); keys.length=0; route=[]; after=null; pt.textContent=title; body.replaceChildren(...kids.filter(k=>k)); panel.classList.add('on'); body.scrollTop=0; (body.querySelector('.menu .btn')||document.getElementById('bClose')).focus({preventScroll:true}); }
 function hide(){ panel.classList.remove('on'); document.activeElement?.blur(); }
 const btn=(t,f,dis)=>el('button',{cls:'btn',type:'button',textContent:t,onclick:f,disabled:!!dis}), field=(t,n)=>el('label',{},t,n), sub=t=>el('div',{cls:'sub',textContent:t}), h2=t=>el('h2',{textContent:t}), acts=(...k)=>el('div',{cls:'acts'},...k);
 const input=(v,max,x={})=>el('input',{value:v||'',maxLength:max,...x}), select=(o,v,x={})=>el('select',x,...o.map(t=>{const [a,b]=Array.isArray(t)?t:[t,t];return el('option',{value:a,textContent:b,selected:a===v});}));
@@ -886,7 +905,7 @@ function openRooms(){ const code=input('',60000,{placeholder:'GROOV1. 으로 시
 let crateSel='';
 function openRoom(r){ const crates=[...new Set([...(r.crates||[]),...r.songs.map(s=>s.crate).filter(Boolean)])]; if(crateSel&&!crates.includes(crateSel))crateSel=''; const l=r.songs.filter(s=>!crateSel||s.crate===crateSel), onCloud=cloud.member&&(r.mine||r.cloud);
   const notes=onCloud?(r.mine?cloud.room:cloud.rooms.find(x=>x.id===r.id)||r).guest:r.mine?store.me.guest:(store.notes[r.id]||[]), t=input('',80,{required:true,ariaLabel:'방명록'}), rid=r.mine?cloud.uid:r.id, again=()=>openRoom(r.mine?myRoom():cloud.rooms.find(x=>x.id===r.id)||r);
-  show(r.title,sub(`${r.nick} · ${r.songs.length}곡${r.mine?` · ${mine().open?'공개':'비공개'}${cloud.member?'':' · 이 브라우저에 저장'}`:''}`),r.mine&&!cloud.member&&!saveOk?el('div',{cls:'warn',textContent:'지금 브라우저에서는 저장이 막혀 있어, 닫으면 사라져요.'}):null,acts(scene.owner===r.id?null:btn('방으로 들어가기',()=>enterRoom(r)),r.mine?btn('곡 넣기',()=>openSongForm('room')):null,r.mine?btn('방 공유하기',openShare):null,r.mine?btn('방 꾸미기',openDecor):null,r.mine?btn('상자 정리',openCrates):null,btn('사람들의 방',openRooms)),
+  show(r.title,sub(`${r.nick} · ${r.songs.length}곡${r.mine?` · ${mine().open?'공개':'비공개'}${cloud.member?'':' · 이 브라우저에 저장'}`:''}`),r.mine&&!cloud.member&&!saveOk?el('div',{cls:'warn',textContent:'지금 브라우저에서는 저장이 막혀 있어, 닫으면 사라져요.'}):null,acts(scene.owner===r.id?null:btn('방으로 들어가기',()=>enterRoom(r)),onCloud&&!r.mine&&!r.shared?btn('편지 쓰기',()=>openWrite(r.id)):null,r.mine?btn('곡 넣기',()=>openSongForm('room')):null,r.mine?btn('방 공유하기',openShare):null,r.mine?btn('방 꾸미기',openDecor):null,r.mine?btn('상자 정리',openCrates):null,btn('사람들의 방',openRooms)),
     el('div',{cls:'chips'},...['',...crates].map(c=>el('button',{cls:'chip'+(crateSel===c?' on':''),type:'button',textContent:c||'모든 상자',onclick:()=>{crateSel=c;openRoom(r);}}))),...(l.length?l.map(s=>songCard(s,r)):[empty(r.mine?'상자가 비어 있어요. 곡을 넣거나 추천곡에서 보관해 보세요.':'아직 넣어둔 곡이 없어요.')]),
     h2('방명록'),...notes.map(n=>el('div',{cls:'row'},el('div',{cls:'grow'},sub(nm(n.by)),el('div',{textContent:n.text})),onCloud&&(r.mine||n.own||cloud.leader)?btn('지우기',()=>asMember(async()=>must(await cloud.sb.from('room_notes').delete().eq('id',n.id)),again)):null)),r.shared&&!r.mine?sub('공유 코드로 받은 방의 방명록은 이 브라우저에만 남아요.'):null,
     el('form',{onsubmit:e=>{e.preventDefault();const v=t.value.trim();if(!v)return;if(onCloud){asMember(async()=>must(await cloud.sb.from('room_notes').insert({room_id:rid,body:v})),again);return;}const n={by:ME,text:v};if(r.mine)store.me.guest.unshift(n);else(store.notes[r.id]=store.notes[r.id]||[]).unshift(n);save();openRoom(r);}},t,el('button',{cls:'btn',textContent:'남기기'}))); }
@@ -922,17 +941,21 @@ const dot=(x,y,c)=>el('i',{css:`left:${(x+.5)/W*100}%;top:${(y+.5)/H*100}%;backg
 function openMenu(){ const c=mk(W,H); c.getContext('2d').drawImage(Q(miniImg),0,0); c.onclick=e=>{const b=c.getBoundingClientRect();warp(world,...near(Math.floor((e.clientX-b.left)/b.width*W),Math.floor((e.clientY-b.top)/b.height*H)));hide();};
   const spot=scene===world?[me.tx,me.ty]:scene===cafe?MAP.doors.nc.door:MAP.doors.hub.door;
   show('성균관 · 대명거리 지도',el('div',{cls:'mapwrap'},el('div',{cls:'miniwrap'},el('div',{cls:'mini'},c,dot(...MAP.doors.hub.door,'#4658a3'),dot(...MAP.doors.nc.door,'#f0c53c'),dot(...spot,'#e0483c')),sub('빨강 나 · 파랑 푸른방 · 노랑 낫컴플리트. 지도를 누르면 그곳으로 가요.')),
-    el('div',{cls:'menu'},btn('푸른방으로 돌아가기',()=>goHub()),btn('낫컴플리트 — 잼',()=>{hide();warp(cafe,...cafe.start,3);}),btn('내 방',()=>enterRoom(myRoom())),btn('사람들의 방',openRooms),btn('Groov 아카이브',()=>openArchive('rec')),h2('동네'),...['명륜당 은행나무','대성전','금잔디광장','정문 앞','대명사거리','대명거리','혜화역 앞'].map(n=>btn(n,()=>{warp(world,...near(...placeAt(n)));hide();}))))); }
-let queue=[],full='',timer=0; const fast=matchMedia('(prefers-reduced-motion: reduce)').matches;
-function say(name,lines){ keys.length=0;route=[];after=null; document.getElementById('who').textContent=name; queue=[...lines]; full=''; document.getElementById('line').textContent=''; talk.classList.add('on'); nextLine(); }
-function nextLine(){ const line=document.getElementById('line'); if(line.textContent.length<full.length){clearInterval(timer);line.textContent=full;return;} if(!queue.length){talk.classList.remove('on');full='';line.textContent='';return;} full=queue.shift(); let i=0; line.textContent=fast?full:''; clearInterval(timer); if(!fast)timer=setInterval(()=>{line.textContent=full.slice(0,++i);if(i>=full.length)clearInterval(timer);},30); }
+    el('div',{cls:'menu'},btn('푸른방으로 돌아가기',()=>goHub()),btn('낫컴플리트 — 잼',()=>{hide();warp(cafe,...cafe.start,3);}),btn('Groov 광장 — 공지·공연',()=>openPlaza()),cloud.member?btn(`우편함${unread()?` (${unread()})`:''}`,()=>openMailbox()):null,btn('내 방',()=>enterRoom(myRoom())),btn('사람들의 방',openRooms),btn('Groov 아카이브',()=>openArchive('rec')),h2('동네'),...['명륜당 은행나무','대성전','금잔디광장','정문 앞','대명사거리','대명거리','혜화역 앞'].map(n=>btn(n,()=>{warp(world,...near(...placeAt(n)));hide();}))))); }
+let queue=[],full='',timer=0,talkFromWorld=false; const fast=matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* 대화창 닫기. 장소를 옮기거나, 걷다가 나온 대화 위로 창을 열면 닫는다 (창 안에서 띄운 안내는 남긴다) */
+function endTalk(){ clearInterval(timer); queue=[]; full=''; talkFromWorld=false; talk.classList.remove('on'); document.getElementById('line').textContent=''; }
+function say(name,lines){ talkFromWorld=!panel.classList.contains('on'); keys.length=0;route=[];after=null; document.getElementById('who').textContent=name; queue=[...lines]; full=''; document.getElementById('line').textContent=''; talk.classList.add('on'); nextLine(); }
+function nextLine(){ const line=document.getElementById('line'); if(line.textContent.length<full.length){clearInterval(timer);line.textContent=full;return;} if(!queue.length){endTalk();return;} full=queue.shift(); let i=0; line.textContent=fast?full:''; clearInterval(timer); if(!fast)timer=setInterval(()=>{line.textContent=full.slice(0,++i);if(i>=full.length)clearInterval(timer);},30); }
 talk.onclick=nextLine;
+/* 잠깐 떴다 사라지는 알림 (연결됨, 새 편지 등) */
+let toastT=0; function toast(t,ms=3200){ const e=document.getElementById('toast'); e.textContent=t; e.classList.add('on'); clearTimeout(toastT); toastT=setTimeout(()=>e.classList.remove('on'),ms); }
 
 /* ===== 로그인과 서버 저장 (Supabase). 권한은 supabase/migrations 의 RLS 가 막고, 여기서는 안내만 한다 ===== */
-const cloud={state:'off',note:'',sb:null,uid:null,profile:null,people:[],infos:[],info:null,email:'',noInfoTable:false,rooms:[],room:null,busy:false,sentAt:0,back:null,pub:null,pubOk:false,pubAt:0,get member(){return this.state==='member';},get leader(){return this.member&&this.profile.role==='leader';}};
+const cloud={pubShows:[],joins:[],noPlaza:false,state:'off',note:'',sb:null,uid:null,profile:null,people:[],infos:[],info:null,email:'',noInfoTable:false,rooms:[],room:null,busy:false,sentAt:0,back:null,pub:null,pubOk:false,pubAt:0,get member(){return this.state==='member';},get leader(){return this.member&&this.profile.role==='leader';}};
 const SDK={src:'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js',sri:'sha384-uteMfOloLDGt042uDz+xHGF3ym63/WQ6rFq7murQRG8Ih7QrXGEGNtWd8688sb4O'};
 function badKey(k){ if(/^sb_secret_/.test(k))return true; try{return JSON.parse(unb64(k.split('.')[1])).role==='service_role';}catch(e){return false;} }
-const MSG={no_profile:'이메일 인증을 먼저 마쳐 주세요.',must_agree:'개인정보 안내에 동의해 주세요.',no_info:'아직 가입 정보를 적지 않은 사람이에요.',daily_limit:'오늘 올릴 수 있는 만큼 올렸어요. 내일 다시 해 주세요.',total_limit:'더 넣을 수 없어요. 오래된 것을 정리해 주세요.',last_leader:'리더가 한 명뿐이라 지울 수 없어요. 다른 리더를 먼저 정해 주세요.','expired or is invalid':'인증번호가 틀렸거나 시간이 지났어요.','not authorized':'지금은 이 주소로 메일을 보낼 수 없어요. 리더에게 알려 주세요.','captcha':'사람인지 확인하지 못했어요. 다시 해 주세요.','security purposes':'방금 보냈어요. 1분 뒤에 다시 받을 수 있어요.',not_member:'승인된 부원만 할 수 있어요.',not_leader:'리더만 할 수 있어요.',not_self:'자기 자신은 바꿀 수 없어요.',already_in_song:'이 곡에는 이미 맡은 자리가 있어요.',bad_invite:'승인된 다른 부원만 초대할 수 있어요.',too_many_jams:'열린 잼은 열 개까지예요. 끝난 잼을 마감해 주세요.',not_in_song:'이 곡에 참가한 사람만 기록할 수 있어요.',profiles_nick_key:'이미 다른 부원이 쓰는 이름이에요.',room_songs_once:'이미 내 방에 있는 곡이에요.',rec_likes_pkey:'이미 누른 곡이에요.',_check:'입력한 내용을 다시 확인해 주세요.','row-level security':'승인된 부원만 할 수 있어요.','permission denied':'권한이 없어요.','Failed to fetch':'서버에 연결하지 못했어요. 잠시 뒤 다시 해 주세요.','rate limit':'잠시 뒤에 다시 시도해 주세요.'};
+const MSG={not_yours:'올린 사람이나 리더만 할 수 있어요.',too_many_invites:'쓰지 않은 초대장이 다섯 장 있어요. 그걸 먼저 보내 주세요.',bad_code:'쓸 수 없는 초대장이에요. 코드를 다시 확인해 주세요.',already_used:'이미 초대장을 썼어요.',not_pending:'승인을 기다리는 사람만 초대장을 쓸 수 있어요.',show_cast_pkey:'이미 출연 명단에 있어요.',letters_check:'나에게는 보낼 수 없어요.',shows_links_check:'사진·영상 주소를 다시 확인해 주세요.',no_profile:'이메일 인증을 먼저 마쳐 주세요.',must_agree:'개인정보 안내에 동의해 주세요.',no_info:'아직 가입 정보를 적지 않은 사람이에요.',daily_limit:'오늘 올릴 수 있는 만큼 올렸어요. 내일 다시 해 주세요.',total_limit:'더 넣을 수 없어요. 오래된 것을 정리해 주세요.',last_leader:'리더가 한 명뿐이라 지울 수 없어요. 다른 리더를 먼저 정해 주세요.','expired or is invalid':'인증번호가 틀렸거나 시간이 지났어요.','not authorized':'지금은 이 주소로 메일을 보낼 수 없어요. 리더에게 알려 주세요.','captcha':'사람인지 확인하지 못했어요. 다시 해 주세요.','security purposes':'방금 보냈어요. 1분 뒤에 다시 받을 수 있어요.',not_member:'승인된 부원만 할 수 있어요.',not_leader:'리더만 할 수 있어요.',not_self:'자기 자신은 바꿀 수 없어요.',already_in_song:'이 곡에는 이미 맡은 자리가 있어요.',bad_invite:'승인된 다른 부원만 초대할 수 있어요.',too_many_jams:'열린 잼은 열 개까지예요. 끝난 잼을 마감해 주세요.',not_in_song:'이 곡에 참가한 사람만 기록할 수 있어요.',profiles_nick_key:'이미 다른 부원이 쓰는 이름이에요.',room_songs_once:'이미 내 방에 있는 곡이에요.',rec_likes_pkey:'이미 누른 곡이에요.',_check:'입력한 내용을 다시 확인해 주세요.','row-level security':'승인된 부원만 할 수 있어요.','permission denied':'권한이 없어요.','Failed to fetch':'서버에 연결하지 못했어요. 잠시 뒤 다시 해 주세요.','rate limit':'잠시 뒤에 다시 시도해 주세요.'};
 const errMsg=e=>{const t=String(e&&e.message||e);for(const k in MSG)if(t.includes(k))return MSG[k];return '처리하지 못했어요. 잠시 뒤 다시 해 주세요.';};
 const must=r=>{if(r.error)throw r.error;return r.data;};
 const rpc=async(f,a)=>must(await cloud.sb.rpc(f,a));
@@ -941,7 +964,7 @@ async function asMember(fn,done){ if(!cloud.member){openAccount();return false;}
 const who=id=>id===cloud.uid?ME:(cloud.people.find(p=>p.id===id)||{nick:'떠난 부원'}).nick;
 const toSong=r=>({id:r.id,title:r.title,artist:r.artist,key:r.song_key,link:r.link,memo:r.memo,tags:r.tags||[],crate:r.crate});
 const fromSong=v=>({title:v.title,artist:v.artist||'',song_key:v.key||'',link:v.link||'',memo:v.memo||'',tags:v.tags||[]});
-async function pull(){ const S_b=cloud.sb,[pp,rc,jm,lg,gb,rs,rn]=(await Promise.all([S_b.from('profiles').select('*').order('created_at'),S_b.from('recs').select('*,rec_likes(user_id)').order('created_at',{ascending:false}).limit(300),S_b.from('jams').select('*,jam_songs(*,jam_slots(*))').order('created_at',{ascending:false}).limit(60),S_b.from('jam_logs').select('*').order('created_at',{ascending:false}).limit(200),S_b.from('guestbook').select('*').order('created_at',{ascending:false}).limit(60),S_b.from('room_songs').select('*').order('created_at',{ascending:false}).limit(1000),S_b.from('room_notes').select('*').order('created_at',{ascending:false}).limit(400)])).map(must);
+async function pull(){ const S_b=cloud.sb, plz=pullPlaza(), [pp,rc,jm,lg,gb,rs,rn]=(await Promise.all([S_b.from('profiles').select('*').order('created_at'),S_b.from('recs').select('*,rec_likes(user_id)').order('created_at',{ascending:false}).limit(300),S_b.from('jams').select('*,jam_songs(*,jam_slots(*))').order('created_at',{ascending:false}).limit(60),S_b.from('jam_logs').select('*').order('created_at',{ascending:false}).limit(200),S_b.from('guestbook').select('*').order('created_at',{ascending:false}).limit(60),S_b.from('room_songs').select('*').order('created_at',{ascending:false}).limit(1000),S_b.from('room_notes').select('*').order('created_at',{ascending:false}).limit(400)])).map(must);
   cloud.infos=!cloud.noInfoTable&&cloud.profile.role==='leader'?must(await S_b.from('member_info').select('*')):[];
   cloud.people=pp; cloud.profile=pp.find(p=>p.id===cloud.uid)||cloud.profile;
   const by=(a,b)=>a.pos-b.pos;
@@ -949,17 +972,31 @@ async function pull(){ const S_b=cloud.sb,[pp,rc,jm,lg,gb,rs,rn]=(await Promise.
     jams:jm.map(j=>({id:j.id,title:j.title,host:who(j.host_id),when:j.when_text,closed:j.status==='closed',pub:!!j.is_public,songs:j.jam_songs.sort(by).map(s=>({id:s.id,title:s.title,artist:s.artist,key:s.song_key,slots:s.jam_slots.sort(by).map(x=>({id:x.id,part:x.part,who:x.user_id?who(x.user_id):null,invited:x.invited_id?who(x.invited_id):null}))}))})),
     logs:lg.map(g=>({id:g.id,title:g.jam_title,when:g.played_on.replace(/-/g,'.'),song:g.title,artist:g.artist,key:g.song_key,members:g.members.map(m=>[m.part,m.id===cloud.uid?ME:m.nick])})),
     guest:gb.map(g=>({id:g.id,by:who(g.author_id),text:g.body}))};
+  const P=await plz, before=unread(); cloud.joins=P.joins;
+  db.notices=P.notices.map(n=>({id:n.id,title:n.title,body:n.body,pinned:n.pinned,by:n.author_id?who(n.author_id):'떠난 부원',at:n.created_at}));
+  db.shows=P.shows.map(s=>({id:s.id,title:s.title,date:s.show_on,time:s.show_time,place:s.place,setlist:s.setlist||[],memo:s.memo,recap:s.recap,links:s.links||[],token:s.invite_token,mine:s.created_by===cloud.uid,by:s.created_by?who(s.created_by):'떠난 부원',cast:(s.show_cast||[]).map(c=>({part:c.part,who:who(c.user_id),me:c.user_id===cloud.uid}))}));
+  db.letters=P.letters.map(l=>({id:l.id,inbox:l.to_id===cloud.uid,fromId:l.from_id,from:who(l.from_id),to:who(l.to_id),body:l.body,at:l.created_at,read:!!l.read_at}));
+  if(cloud.pulled&&unread()>before)toast('새 편지가 왔어요. 오른쪽 위 이름을 눌러 보세요.',4500); else if(!cloud.pulled&&unread())toast(`읽지 않은 편지가 ${unread()}통 있어요.`,4500); cloud.pulled=true;
   const roomOf=p=>({id:p.id,nick:p.nick,title:p.room_title,theme:p.room_theme,shelf:[p.shelf_shape,p.shelf_color],open:p.room_open,crates:p.crates,songs:rs.filter(s=>s.user_id===p.id).map(toSong),guest:rn.filter(n=>n.room_id===p.id).map(n=>({id:n.id,by:who(n.author_id),text:n.body,own:n.author_id===cloud.uid})),cloud:true});
   cloud.room=roomOf(cloud.profile); cloud.rooms=pp.filter(p=>p.id!==cloud.uid&&p.status==='approved'&&p.room_open).map(roomOf); hudAcct(); }
+async function pullPlaza(){ const none={notices:[],shows:[],letters:[],joins:[]}; if(cloud.noPlaza)return none; const S_b=cloud.sb;
+  const r=await Promise.all([S_b.from('notices').select('*').order('pinned',{ascending:false}).order('created_at',{ascending:false}).limit(50),S_b.from('shows').select('*,show_cast(user_id,part)').order('show_on',{ascending:false}).limit(200),S_b.from('letters').select('*').order('created_at',{ascending:false}).limit(300),S_b.from('join_invites').select('*').order('created_at',{ascending:false}).limit(300)]);
+  if(r.some(x=>x.error&&/PGRST20[05]|42P01/.test(x.error.code||''))){cloud.noPlaza=true;return none;} const [notices,shows,letters,joins]=r.map(must); return {notices,shows,letters,joins}; }
 const invites=()=>db.jams.filter(j=>!j.closed).flatMap(j=>j.songs.flatMap(s=>s.slots.filter(x=>x.invited===ME).map(x=>({j,s,x}))));
-function hudAcct(){ const b=document.getElementById('bAcct'); const n=cloud.member?invites().length:0; b.textContent=cloud.member?`${cloud.profile.nick}${n?` · 초대 ${n}`:''}`:cloud.state==='pending'?'승인 대기':cloud.state==='setup'?'가입 마무리':'로그인'; titleMenu(); }
-async function session(){ try{ const {data}=await cloud.sb.auth.getSession(); const u=data.session&&data.session.user; if(!u){Object.assign(cloud,{uid:null,profile:null,info:null,infos:[],email:'',state:'out'});db=cloudEmpty();hudAcct();loadPub();return;}
+function hudAcct(){ const b=document.getElementById('bAcct'); const n=cloud.member?invites().length:0, u=unread(); b.textContent=cloud.member?`${cloud.profile.nick}${u?` · 편지 ${u}`:''}${n?` · 초대 ${n}`:''}`:cloud.state==='pending'?'승인 대기':cloud.state==='setup'?'가입 마무리':'로그인'; titleMenu(); }
+async function session(){ const was=cloud.state; keepJoinCode(); await session_(); if(cloud.state==='pending'&&joinCode())await useJoinCode(joinCode()); connected(was); hudAcct(); }
+async function session_(){ try{ const {data}=await cloud.sb.auth.getSession(); const u=data.session&&data.session.user; if(!u){Object.assign(cloud,{uid:null,profile:null,info:null,infos:[],email:'',state:'out'});db=cloudEmpty();hudAcct();loadPub();return;}
     cloud.uid=u.id; cloud.email=u.email||''; cloud.profile=must(await cloud.sb.from('profiles').select('*').eq('id',u.id).maybeSingle());
     const inf=await cloud.sb.from('member_info').select('*').eq('id',u.id).maybeSingle(); cloud.noInfoTable=!!(inf.error&&/PGRST205|42P01/.test(inf.error.code||'')); if(inf.error&&!cloud.noInfoTable)throw inf.error; cloud.info=inf.data||null;
     const st=cloud.profile&&cloud.profile.status; cloud.state=st==='approved'?'member':st==='blocked'?'blocked':cloud.noInfoTable||cloud.info?'pending':'setup';
     if(cloud.member)await pull();else db=cloudEmpty(); loadPub(); cloud.note=cloud.noInfoTable?'서버에 두 번째 SQL(가입·방 정책)이 아직 적용되지 않았어요.':''; }catch(e){ cloud.note=errMsg(e); cloud.state=cloud.state==='loading'?'out':cloud.state; } hudAcct(); }
+/* '연결하는 중' 다음에는 연결됐다고 알려 준다. 첫 화면이면 안내 줄에, 게임 안이면 위쪽 알림으로 */
+function connected(was){ if(was!=='loading'||cloud.state==='loading')return; cloud.connectedAt=Date.now(); setTimeout(titleMenu,5200); if(title.hidden)toast(cloud.note||(cloud.member?`연결됐어요. ${cloud.profile.nick}님 어서 와요.`:'서버에 연결됐어요.')); }
 /* 로그인하지 않아도 보이는 잼 요약 (이름과 id 없음). 무엇을 내보낼지는 서버의 public_jams 가 정한다 */
-async function loadPub(){ if(!cloud.sb)return; cloud.pubAt=Date.now(); try{ const r=await cloud.sb.rpc('public_jams'); cloud.pubOk=!r.error; cloud.pub=!r.error&&Array.isArray(r.data)?r.data:null; }catch(e){ cloud.pubOk=false; cloud.pub=null; } }
+async function loadPub(){ if(!cloud.sb)return; cloud.pubAt=Date.now(); try{ const r=await cloud.sb.rpc('public_jams'); cloud.pubOk=!r.error; cloud.pub=!r.error&&Array.isArray(r.data)?r.data:null; }catch(e){ cloud.pubOk=false; cloud.pub=null; }
+  try{ const r=await cloud.sb.rpc('public_shows'); cloud.pubShows=!r.error&&Array.isArray(r.data)?r.data.filter(x=>x&&typeof x==='object'):[]; }catch(e){ cloud.pubShows=[]; } }
+/* 새 편지 확인: 받은 편지 수만 가볍게 세 보고, 늘었으면 모두 다시 불러온다 */
+async function checkMail(){ if(!cloud.member||cloud.noPlaza||cloud.busy||document.hidden)return; try{ const r=await cloud.sb.from('letters').select('id',{count:'exact',head:true}).eq('to_id',cloud.uid).is('read_at',null); if(!r.error&&r.count>unread())await pull(); }catch(e){} }
 /* 로그인이 필요한 일을 하려던 화면을 기억했다가 돌아온다 */
 function needLogin(back){ cloud.back=typeof back==='function'?back:null; openAccount(); }
 function entered(){ if(!cloud.member){openAccount();return;} const b=cloud.back; cloud.back=null; hide(); startGame(); if(b)b(); }
@@ -967,8 +1004,9 @@ const cloudEmpty=()=>({recs:[],jams:[],logs:[],guest:[],locked:true});
 async function cloudInit(){ if(!CONFIG.url||!CONFIG.key)return hudAcct(); if(badKey(CONFIG.key)){cloud.note='비밀(service_role) 키가 들어 있어 연결하지 않았어요. 공개용 키로 바꿔 주세요.';return hudAcct();} if(!/^https:\/\/|^http:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(CONFIG.url)){cloud.note='설정의 주소가 올바르지 않아요.';return hudAcct();}
   cloud.state='loading'; db=cloudEmpty(); hudAcct();
   try{ if(!window.supabase) await new Promise((ok,no)=>{const s=document.createElement('script');s.src=SDK.src;s.integrity=SDK.sri;s.crossOrigin='anonymous';s.onload=ok;s.onerror=()=>no(new Error('Failed to fetch'));document.head.append(s);});
-    cloud.sb=window.supabase.createClient(CONFIG.url,CONFIG.key,{auth:{flowType:'pkce'}}); await session(); cloud.sb.auth.onAuthStateChange(ev=>{ if(ev==='SIGNED_IN'||ev==='SIGNED_OUT')setTimeout(session,0); });
-  }catch(e){ cloud.state='out'; cloud.note=errMsg(e); hudAcct(); } }
+    cloud.sb=window.supabase.createClient(CONFIG.url,CONFIG.key,{auth:{flowType:'pkce'}}); await session(); openShowFromHash(); addEventListener('hashchange',()=>{keepJoinCode();openShowFromHash();});
+    setInterval(checkMail,90000); cloud.sb.auth.onAuthStateChange(ev=>{ if(ev==='SIGNED_IN'||ev==='SIGNED_OUT')setTimeout(session,0); });
+  }catch(e){ cloud.state='out'; cloud.note=errMsg(e); connected('loading'); hudAcct(); } }
 /* ---------- 계정 창 ---------- */
 const RULE='승인받은 부원만 곡과 잼을 보고 등록할 수 있어요.';
 const isWeb=()=>/^https?:/.test(location.protocol), backTo=()=>location.origin+location.pathname;
@@ -993,23 +1031,340 @@ function openCode(mail,again){ const c=el('input',{cls:'code',required:true,inpu
   const form=el('form',{onsubmit:e=>{e.preventDefault();busyForm(form,msg,async()=>{ if((cloud.tries||0)>=5){msg.textContent='여러 번 틀렸어요. 인증번호를 새로 받아 주세요.';return;} const r=await cloud.sb.auth.verifyOtp({email:mail,token:c.value,type:'email'}); if(r.error){cloud.tries=(cloud.tries||0)+1;c.value='';throw r.error;} Object.assign(cloud,{tries:0,sentAt:0,sentMail:''}); await session(); entered(); });}},field('인증번호',c),el('button',{cls:'btn',textContent:'확인'}),msg);
   show('로그인',again?el('div',{cls:'warn',textContent:'새 메일은 아직 보내지 않았어요. 조금 전에 받은 번호를 넣거나, 1분 뒤에 다시 받아 주세요.'}):null,sub(`${mail} 로 보낸 메일의 숫자를 넣어 주세요. 여러 통이면 가장 늦게 온 번호만 쓸 수 있어요. 오지 않으면 스팸함을 확인해 주세요.`),form,acts(btn('다시 받기',()=>{const left=waitSec(mail); if(left)msg.textContent=`새 메일은 ${left}초 뒤에 받을 수 있어요.`;else openLogin();}),btn('다른 이메일로',()=>{cloud.lastMail='';openLogin();}))); c.focus(); }
 /* 3단계: 처음 온 사람의 가입 정보 */
-function openSetup(){ const p=cloud.profile||{},inf=cloud.info||{},nick=input(/^유령[0-9a-f]{8}$/.test(p.nick||'')?'':p.nick,12,{required:true,placeholder:'게임에서 보일 이름'}),name=input(inf.real_name,20,{required:true,autocomplete:'name'}),part=select([...PARTS,'감상'],inf.part||PARTS[0]),coh=input((inf.cohort||'').replace('학번',''),2,{placeholder:'예: 24 (선택)',inputMode:'numeric',pattern:'[0-9]{2}',title:'입학 연도 두 자리',oninput:()=>{coh.value=coh.value.replace(/\D/g,'');}}),room=input(p.room_title==='새로운 방'?'':p.room_title,20,{placeholder:'비워 두면 별명의 방'}),open_=select([['0','비공개 — 나만 봄'],['1','공개 — 부원이 놀러 올 수 있음']],cloud.info&&p.room_open?'1':'0'),ok=el('input',{type:'checkbox',required:true}),msg=warnBox();
-  const form=el('form',{onsubmit:e=>{e.preventDefault();busyForm(form,msg,async()=>{ await rpc('complete_signup',{p_nick:nick.value.trim(),p_real_name:name.value.trim(),p_part:part.value,p_cohort:coh.value?`${coh.value}학번`:'',p_room_title:(room.value.trim()||`${nick.value.trim()}의 방`).slice(0,20),p_room_open:open_.value==='1',p_agree:ok.checked}); await session(); openAccount(); });}},
-    h2('내 정보'),field('별명',nick),field('이름 — 본인과 리더만 봐요',name),field('파트',part),field('학번 — 입학 연도 두 자리만',coh),h2('내 방'),field('방 이름',room),field('공개',open_),
+function openSetup(){ const p=cloud.profile||{},inf=cloud.info||{},nick=input(/^유령[0-9a-f]{8}$/.test(p.nick||'')?'':p.nick,12,{required:true,placeholder:'게임에서 보일 이름'}),name=input(inf.real_name,20,{required:true,autocomplete:'name'}),part=select([...PARTS,'감상'],inf.part||PARTS[0]),coh=input((inf.cohort||'').replace('학번',''),2,{placeholder:'예: 24 (선택)',inputMode:'numeric',pattern:'[0-9]{2}',title:'입학 연도 두 자리',oninput:()=>{coh.value=coh.value.replace(/\D/g,'');}}),room=input(p.room_title==='새로운 방'?'':p.room_title,20,{placeholder:'비워 두면 별명의 방'}),open_=select([['0','비공개 — 나만 봄'],['1','공개 — 부원이 놀러 올 수 있음']],cloud.info&&p.room_open?'1':'0'),ok=el('input',{type:'checkbox',required:true}),msg=warnBox(),jc=cloud.info?null:joinField();
+  const form=el('form',{onsubmit:e=>{e.preventDefault();busyForm(form,msg,async()=>{ await rpc('complete_signup',{p_nick:nick.value.trim(),p_real_name:name.value.trim(),p_part:part.value,p_cohort:coh.value?`${coh.value}학번`:'',p_room_title:(room.value.trim()||`${nick.value.trim()}의 방`).slice(0,20),p_room_open:open_.value==='1',p_agree:ok.checked}); if(jc&&jc.value){ try{localStorage.setItem(JOIN_KEY,jc.value);}catch(x){} } await session(); openAccount(); });}},
+    h2('내 정보'),field('별명',nick),field('이름 — 본인과 리더만 봐요',name),field('파트',part),field('학번 — 입학 연도 두 자리만',coh),h2('내 방'),field('방 이름',room),field('공개',open_),jc?h2('초대장'):null,jc?field('초대 코드 — 받았다면 적어 주세요. 리더가 누가 초대했는지 함께 봐요',jc):null,
     el('label',{cls:'check'},ok,el('span',{textContent:'부원 확인을 위해 이메일, 이름, 파트, 입학 연도를 저장하는 데 동의해요. 이름과 입학 연도는 본인과 리더만 보고, 계정을 지우면 함께 지워져요.'})),el('button',{cls:'btn',textContent:cloud.info?'저장하기':'가입 마치기'}),msg);
   show(cloud.info?'내 정보 고치기':'가입하기',cloud.info?null:sub('처음 오셨네요. 리더가 승인할 수 있게 알려 주세요.'),noteBox(),form,acts(cloud.info?btn('그만두기',openAccount):btn('로그아웃',async()=>{await cloud.sb.auth.signOut();await session();openAccount();}))); }
 function openMine(){ const st=cloud.state, out=btn('로그아웃',async()=>{await cloud.sb.auth.signOut();await session();openAccount();}), tail=acts(out,btn('다른 기기 모두 로그아웃',async()=>{const r=await cloud.sb.auth.signOut({scope:'others'});say('계정',[r.error?errMsg(r.error):'다른 기기에서 로그아웃했어요. 길게는 한 시간쯤 걸릴 수 있어요.']);}),btn('계정 지우기',openLeave));
   if(st==='blocked'){ show('계정',el('div',{cls:'warn',textContent:'이용이 제한된 계정이에요. 리더에게 문의해 주세요.'}),acts(out,btn('계정 지우기',openLeave))); return; }
   const nick=input(cloud.profile?cloud.profile.nick:'',12,{required:true}),msg=warnBox(), form=el('form',{onsubmit:e=>{e.preventDefault();busyForm(form,msg,async()=>{must(await cloud.sb.from('profiles').update({nick:nick.value.trim()}).eq('id',cloud.uid));await session();msg.textContent='저장했어요.';});}},field('별명',nick),el('button',{cls:'btn',textContent:'별명 저장'}),msg);
-  if(st==='pending'){ show('승인을 기다리는 중',sub('리더가 승인하면 바로 쓸 수 있어요.'),noteBox(),form,acts(cloud.noInfoTable?null:btn('내 정보 고치기',openSetup),btn('승인됐는지 확인',async()=>{await session();entered();})),tail); return; }
+  if(st==='pending'){ const jc=joinField(), jf=el('form',{onsubmit:e=>{e.preventDefault();if(!jc.value)return;busyForm(jf,jm,async()=>{ const by=await rpc('use_join_invite',{p_code:jc.value}); try{localStorage.removeItem(JOIN_KEY);}catch(x){} jm.textContent=`${by}님의 초대장을 썼어요. 리더가 승인 화면에서 함께 봐요.`; });}},field('받은 초대 코드',jc),el('button',{cls:'btn',textContent:'초대장 쓰기'})), jm=warnBox(); jf.append(jm);
+    show('승인을 기다리는 중',sub('리더가 승인하면 바로 쓸 수 있어요.'),noteBox(),form,cloud.noPlaza?null:jf,acts(cloud.noInfoTable?null:btn('내 정보 고치기',openSetup),btn('승인됐는지 확인',async()=>{await session();entered();})),tail); return; }
   const inv=invites(), localSongs=store.me.songs.filter(s=>!cloud.room.songs.some(x=>same(x,s)));
-  show('내 계정',sub(`${cloud.leader?'리더':'부원'} · ${cloud.email}`),noteBox(),...(inv.length?[h2('받은 초대'),...inv.map(inviteRow)]:[]),form,cloud.noInfoTable?null:acts(btn(cloud.info?'내 정보 고치기':'가입 정보 적기',openSetup)),localSongs.length?acts(btn(`이 브라우저의 곡 ${localSongs.length}개 가져오기`,()=>asMember(async()=>{for(const s of localSongs)must(await cloud.sb.from('room_songs').insert({...fromSong(s),crate:cloud.room.crates.includes(s.crate)?s.crate:cloud.room.crates[0]}));},()=>openRoom(myRoom())))):null,acts(btn('새로 고침',async()=>{await session();openAccount();})),tail,...(cloud.leader?memberRows():[])); }
+  show('내 계정',sub(`${cloud.leader?'리더':'부원'} · ${cloud.email}`),noteBox(),acts(btn(`우편함${unread()?` (${unread()})`:''}`,()=>openMailbox()),btn('광장',()=>openPlaza()),btn('가입 초대장',openJoinInvites)),...(inv.length?[h2('받은 초대'),...inv.map(inviteRow)]:[]),form,cloud.noInfoTable?null:acts(btn(cloud.info?'내 정보 고치기':'가입 정보 적기',openSetup)),localSongs.length?acts(btn(`이 브라우저의 곡 ${localSongs.length}개 가져오기`,()=>asMember(async()=>{for(const s of localSongs)must(await cloud.sb.from('room_songs').insert({...fromSong(s),crate:cloud.room.crates.includes(s.crate)?s.crate:cloud.room.crates[0]}));},()=>openRoom(myRoom())))):null,acts(btn('새로 고침',async()=>{await session();openAccount();})),tail,...(cloud.leader?memberRows():[])); }
 function openLeave(){ const c=input('',20,{required:true,placeholder:'지우기'}),msg=warnBox(); const form=el('form',{onsubmit:e=>{e.preventDefault();if(c.value.trim()!=='지우기'){msg.textContent="'지우기'라고 적어 주세요.";return;}busyForm(form,msg,async()=>{await rpc('delete_my_account',{});try{await cloud.sb.auth.signOut({scope:'local'});}catch(x){}await session();say('계정',['계정을 지웠어요. 그동안 고마웠어요.']);openAccount();});}},field("정말 지우려면 '지우기'라고 적어 주세요",c),el('button',{cls:'btn',textContent:'계정 지우기'}),msg); show('계정 지우기',el('div',{cls:'warn',textContent:'되돌릴 수 없어요. 내 정보, 방, 추천곡, 내가 연 잼이 모두 지워지고, 함께한 잼 기록에는 이름만 지워진 채 남아요.'}),form,acts(btn('그만두기',openAccount))); }
 const inviteRow=({j,s,x})=>el('div',{cls:'row'},el('div',{cls:'grow'},el('div',{textContent:`${s.title} · ${x.part}`}),sub(`${j.title} · ${nm(j.host)}의 초대`)),btn('수락',()=>answer(x,true)),btn('거절',()=>answer(x,false)));
 const answer=(x,yes)=>asMember(()=>rpc('answer_invite',{p_slot:x.id,p_accept:yes}).then(ok=>{if(!ok)throw new Error('초대가 바뀌었어요');}),()=>openAccount());
-const infoOf=p=>{const i=cloud.infos.find(x=>x.id===p.id);return i?`${i.real_name} · ${i.part}${i.cohort?` · ${i.cohort}`:''}`:cloud.noInfoTable?'':'정보 없음';};
+const infoOf=p=>{const i=cloud.infos.find(x=>x.id===p.id), j=(cloud.joins||[]).find(x=>x.used_by===p.id), by=j?` · 초대 ${nm(who(j.created_by))}`:'';return (i?`${i.real_name} · ${i.part}${i.cohort?` · ${i.cohort}`:''}`:cloud.noInfoTable?'':'정보 없음')+by;};
 function memberRows(){ const set=(p,s)=>asMember(()=>rpc('set_member_status',{p_user:p.id,p_status:s}),openAccount), L={pending:'승인 대기',approved:'부원',blocked:'차단'}; const row=p=>el('div',{cls:'row'},el('div',{cls:'grow'},el('div',{textContent:p.nick}),sub([p.role==='leader'?'리더':L[p.status],infoOf(p)].filter(Boolean).join(' · '))),p.id===cloud.uid?null:p.status!=='approved'?btn('승인',()=>set(p,'approved')):null,p.id!==cloud.uid&&p.status==='approved'?btn(p.role==='leader'?'리더 해제':'리더로',()=>asMember(()=>rpc('set_member_role',{p_user:p.id,p_role:p.role==='leader'?'member':'leader'}),openAccount)):null,p.id!==cloud.uid&&p.status!=='blocked'?btn('차단',()=>set(p,'blocked')):null);
   const o={pending:0,approved:1,blocked:2}; return [h2('부원 관리'),...cloud.people.slice().sort((a,b)=>o[a.status]-o[b.status]).map(row)]; }
+
+/* ===== 광장(공지·공연·지난 공연), 편지, 공연 초대장, 가입 초대장 =====
+   권한은 supabase/migrations/20261126030000_plaza_letters.sql 이 막고, 여기서는 보여 주고 안내만 한다.
+   공지는 리더만, 공연은 부원 누구나. 편지는 보낸 사람과 받는 사람만 읽는다. */
+const CAST_PARTS=[...PARTS,'트럼펫','트롬본','기타 악기','스태프'];
+const DOW='일월화수목금토';
+const todayStr=()=>new Date(Date.now()+9*3600e3).toISOString().slice(0,10);   // 한국 날짜
+const fmtDate=d=>{ const [y,m,dd]=String(d).split('-').map(Number); if(!dd)return String(d||''); return `${m}월 ${dd}일 (${DOW[new Date(Date.UTC(y,m-1,dd)).getUTCDay()]})`; };
+const fmtAt=t=>{ const d=new Date(new Date(t).getTime()+9*3600e3); return `${d.getUTCMonth()+1}.${d.getUTCDate()} ${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}`; };
+const lines_=(v,max,len)=>v.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,max).map(x=>x.slice(0,len));
+const baseUrl=()=>location.origin+location.pathname;
+const plazaOff=()=>cloud.noPlaza?el('div',{cls:'warn',textContent:'서버에 다섯 번째 SQL(광장·편지)이 아직 적용되지 않았어요.'}):null;
+async function copyText(t,msg){ try{ await navigator.clipboard.writeText(t); msg.textContent='복사했어요.'; }catch(e){ msg.textContent='복사하지 못했어요. 길게 눌러 직접 복사해 주세요.'; } }
+
+/* NPC 가 이야기할 다가올 공연: 부원은 광장의 공연, 방문자는 초대장이 있는 공연 */
+function plazaEvents(){ const l=cloud.member&&db.shows?db.shows.map(s=>({name:s.title,date:s.date,place:s.place,time:s.time})):(cloud.pubShows||[]).map(s=>({name:String(s.title||''),date:String(s.date||''),place:String(s.place||''),time:String(s.time||'')}));
+  return l.filter(e=>e.name&&/^\d{4}-\d{2}-\d{2}$/.test(e.date)); }
+
+/* ---------- 광장 ---------- */
+const plaza={tab:'notice'};
+function openPlaza(tab){ if(tab)plaza.tab=tab; const T_=[['notice','공지'],['show','공연'],['past','지난 공연']];
+  const tabs=el('div',{cls:'tabs',role:'tablist'},...T_.map(([k,t])=>el('button',{cls:'tab'+(plaza.tab===k?' on':''),type:'button',role:'tab',textContent:t,onclick:()=>openPlaza(k)})));
+  if(!cloud.member){ const pubs=cloud.pubShows||[];
+    show('Groov 광장',tabs,el('div',{cls:'gate'},el('span',{textContent:plaza.tab==='show'?'둘러보기: 초대장이 있는 공연만 이름 없이 보여요.':'공지와 지난 공연은 승인받은 부원만 볼 수 있어요.'}),btn('로그인',()=>needLogin(()=>openPlaza()))),
+      ...(plaza.tab==='show'?(pubs.length?pubs.map(s=>el('article',{cls:'card'},el('div',{cls:'grow'},el('div',{cls:'ttl',textContent:String(s.title||'')}),sub(`${fmtDate(s.date)} ${String(s.time||'')} · ${String(s.place||'')}`)),el('span',{cls:'stamp',textContent:'공연'}))):[empty('지금 밖에 알린 공연이 없어요.')]):[]));
+    return; }
+  const today=todayStr(), shows=db.shows||[], up=shows.filter(s=>s.date>=today).sort((a,b)=>a.date<b.date?-1:1), past=shows.filter(s=>s.date<today);
+  const body_=plaza.tab==='notice'?noticeList():plaza.tab==='show'?(up.length?up.map(showCard):[empty('다가올 공연이 없어요. 공연을 올려 보세요.')]):(past.length?past.map(showCard):[empty('아직 지난 공연 기록이 없어요.')]);
+  const add=plaza.tab==='notice'?(cloud.leader?btn('공지 쓰기',()=>openNoticeForm()):null):plaza.tab==='show'?btn('공연 올리기',()=>openShowForm()):null;
+  show('Groov 광장',tabs,plazaOff(),plaza.tab==='past'?sub('끝난 공연이 셋리스트, 출연진, 후기와 함께 남아요.'):null,acts(add,btn('우편함',()=>openMailbox()),btn('아카이브',()=>openArchive())),...body_); }
+
+function noticeList(){ const l=db.notices||[]; if(!l.length)return [empty('아직 공지가 없어요.')];
+  return l.map(n=>el('article',{cls:'card notice'+(n.pinned?' pin':'')},el('div',{cls:'grow'},el('div',{cls:'ttl',textContent:`${n.pinned?'[고정] ':''}${n.title}`}),sub(`${nm(n.by)} · ${fmtAt(n.at)}`),n.body?el('div',{cls:'letter',textContent:n.body}):null),
+    cloud.leader?el('div',{cls:'side'},btn('고치기',()=>openNoticeForm(n)),btn('지우기',()=>asMember(async()=>must(await cloud.sb.from('notices').delete().eq('id',n.id)),()=>openPlaza('notice')))):null)); }
+
+function openNoticeForm(n){ const t=input(n&&n.title,60,{required:true}),b=el('textarea',{value:n?n.body:'',maxLength:1000,rows:6}),pin=el('input',{type:'checkbox',checked:!!(n&&n.pinned)}),msg=warnBox();
+  const form=el('form',{onsubmit:e=>{e.preventDefault(); const v={title:t.value.trim(),body:b.value.trim(),pinned:pin.checked}; if(!v.title){msg.textContent='제목을 적어 주세요.';return;}
+    asMember(async()=>must(n?await cloud.sb.from('notices').update(v).eq('id',n.id):await cloud.sb.from('notices').insert(v)),()=>openPlaza('notice'));}},
+    field('제목',t),field('내용',b),el('label',{cls:'check'},pin,el('span',{textContent:'맨 위에 고정'})),el('button',{cls:'btn',textContent:n?'고치기':'올리기'}),msg);
+  show(n?'공지 고치기':'공지 쓰기',form,acts(btn('그만두기',()=>openPlaza('notice')))); }
+
+function castLine(s){ return s.cast.length?s.cast.map(c=>`${c.part} ${nm(c.who)}`).join(' · '):'아직 출연진이 없어요'; }
+function showCard(s){ const past=s.date<todayStr(), canEdit=s.mine||cloud.leader, me_=s.cast.find(c=>c.me);
+  return el('article',{cls:'sheet show'},el('div',{cls:'song'},s.setlist[0]?cover({title:s.setlist[0],artist:s.title}):null,el('div',{cls:'grow'},el('div',{cls:'ttl',textContent:s.title}),sub(`${fmtDate(s.date)}${s.time?` ${s.time}`:''} · ${s.place}`),sub(`올린 사람 ${nm(s.by)}${s.token&&!past?' · 초대장 있음':''}`))),
+    s.setlist.length?el('div',{cls:'chips'},...s.setlist.map(sticker)):null, s.memo?el('div',{cls:'memo',textContent:s.memo}):null, sub(`출연 ${castLine(s)}`),
+    past&&s.recap?el('div',{cls:'letter',textContent:s.recap}):null, past&&s.links.length?acts(...s.links.map((u,i)=>el('a',{cls:'btn',textContent:`사진·영상 ${i+1}`,href:u,target:'_blank',rel:'noopener noreferrer'}))):null,
+    acts(past?null:me_?btn('출연 취소',()=>asMember(async()=>must(await cloud.sb.from('show_cast').delete().eq('show_id',s.id).eq('user_id',cloud.uid)),()=>openPlaza())):btn('나도 출연',()=>openCastForm(s)),
+      canEdit&&!past?btn(s.token?'초대장':'초대장 만들기',()=>openShowInvite(s)):null, canEdit?btn(past?'후기 남기기':'고치기',()=>openShowForm(s)):null,
+      canEdit?btn('지우기',()=>openDropShow(s)):null)); }
+
+function openCastForm(s){ const p=select(CAST_PARTS,(cloud.info&&cloud.info.part&&CAST_PARTS.includes(cloud.info.part))?cloud.info.part:PARTS[0]);
+  show(`${s.title} 출연`,sub(`${fmtDate(s.date)} · ${s.place}`),el('form',{onsubmit:e=>{e.preventDefault();asMember(async()=>must(await cloud.sb.from('show_cast').insert({show_id:s.id,part:p.value})),()=>openPlaza());}},field('파트',p),el('button',{cls:'btn',textContent:'출연하기'})),acts(btn('그만두기',()=>openPlaza()))); }
+
+function openDropShow(s){ show('공연 지우기',el('div',{cls:'warn',textContent:`‘${s.title}’을(를) 지우면 출연진과 후기도 함께 사라지고, 초대장 주소도 닫혀요.`}),acts(btn('지우기',()=>asMember(async()=>must(await cloud.sb.from('shows').delete().eq('id',s.id)),()=>openPlaza())),btn('그만두기',()=>openPlaza()))); }
+
+function openShowForm(s){ const past=!!s&&s.date<todayStr(), t=input(s&&s.title,40,{required:true,placeholder:'예: 12월 정기공연'}), d=input(s?s.date:'',10,{type:'date',required:true}), tm=input(s&&s.time,10,{placeholder:'예: 19:00'}), pl=input(s?s.place:'낫컴플리트',40,{required:true}),
+    sl=el('textarea',{value:s?s.setlist.join('\n'):'',rows:5,placeholder:'한 줄에 한 곡 (서른 곡까지)'}), mm=el('textarea',{value:s?s.memo:'',maxLength:500,rows:3,placeholder:'준비물, 리허설 시간 등 (부원만 봐요)'}),
+    rc=el('textarea',{value:s?s.recap:'',maxLength:1000,rows:4,placeholder:'어땠나요? 다음에 기억할 것'}), lk=el('textarea',{value:s?s.links.join('\n'):'',rows:3,placeholder:'사진·영상 주소, 한 줄에 하나 (다섯 개까지)'}), msg=warnBox();
+  const form=el('form',{onsubmit:e=>{e.preventDefault(); const links=lines_(lk.value,5,200); if(links.some(u=>!/^https?:\/\/\S+$/.test(u))){msg.textContent='사진·영상 주소는 http:// 나 https:// 로 시작해야 해요.';return;}
+    const v={title:t.value.trim(),show_on:d.value,show_time:tm.value.trim(),place:pl.value.trim()||'낫컴플리트',setlist:lines_(sl.value,30,60),memo:mm.value.trim()};
+    if(!v.title||!v.show_on){msg.textContent='이름과 날짜를 적어 주세요.';return;}
+    asMember(async()=>must(s?await cloud.sb.from('shows').update({...v,recap:rc.value.trim(),links}).eq('id',s.id):await cloud.sb.from('shows').insert(v)),()=>openPlaza(v.show_on<todayStr()?'past':'show'));}},
+    field('공연 이름',t),el('div',{cls:'three'},field('날짜',d),field('시간',tm),field('장소',pl)),field('셋리스트',sl),field('메모',mm),
+    s?h2('지난 공연 기록'):null,s?sub(past?'끝난 공연의 후기와 사진·영상 주소를 남겨요.':'공연이 끝나면 여기에 후기를 남겨요.'):null,s?field('후기',rc):null,s?field('사진·영상',lk):null,
+    el('button',{cls:'btn',textContent:s?'저장하기':'올리기'}),msg);
+  show(s?(past?'지난 공연 기록':'공연 고치기'):'공연 올리기',s?null:sub('부원 누구나 올릴 수 있어요. 고치기와 지우기는 올린 사람과 리더만 해요.'),form,acts(btn('그만두기',()=>openPlaza(past?'past':'show')))); }
+
+/* ---------- 공연 초대장 ---------- */
+const showLink=tok=>`${baseUrl()}#show=${tok}`;
+function openShowInvite(s){ const msg=warnBox(), set=on=>asMember(async()=>{ await rpc('set_show_invite',{p_show:s.id,p_on:on}); },()=>{ const n=(db.shows||[]).find(x=>x.id===s.id); n?openShowInvite(n):openPlaza('show'); });
+  if(!s.token){ show('공연 초대장',sub('초대장을 만들면 주소를 받은 누구나 로그인 없이 공연 이름, 날짜, 장소, 셋리스트를 볼 수 있어요. 출연진 이름과 메모는 보이지 않아요.'),sub('초대장이 있는 공연은 동네 사람들도 이야기하게 돼요.'),acts(btn('초대장 만들기',()=>set(true)),btn('뒤로',()=>openPlaza('show')))); return; }
+  const link=showLink(s.token), ta=el('textarea',{readOnly:true,value:link,rows:2,ariaLabel:'초대장 주소',onclick:()=>ta.select()});
+  show('공연 초대장',inviteCard({title:s.title,date:s.date,time:s.time,place:s.place,setlist:s.setlist}),ta,msg,
+    acts(navigator.share?btn('보내기',()=>navigator.share({title:`Groov 초대장 · ${s.title}`,text:`${fmtDate(s.date)} ${s.time} ${s.place}`,url:link}).catch(()=>{})):null,btn('주소 복사',()=>copyText(link,msg)),btn('달력 파일',()=>saveIcs({title:s.title,date:s.date,time:s.time,place:s.place})),btn('초대장 닫기',()=>set(false)),btn('뒤로',()=>openPlaza('show'))),
+    sub('초대장 닫기를 누르면 지금 주소는 더 열리지 않아요. 다시 만들면 새 주소가 생겨요.')); }
+function inviteCard(c){ const str=x=>typeof x==='string'?x:String(x??''), sl=Array.isArray(c.setlist)?c.setlist.filter(x=>typeof x==='string').slice(0,30):[];
+  return el('article',{cls:'invite'},el('div',{cls:'invtop',textContent:'Groov 초대장'}),el('div',{cls:'invttl',textContent:str(c.title)}),el('div',{textContent:`${fmtDate(str(c.date))}${c.time?` ${str(c.time)}`:''}`}),el('div',{textContent:str(c.place)}),
+    sl.length?el('div',{cls:'chips'},...sl.map(t=>sticker(t))):null,el('div',{cls:'sub',textContent:'성균관대 재즈 동아리 Groov'})); }
+/* 달력 파일(.ics): 시간이 있으면 두 시간짜리 일정, 없으면 하루 일정 */
+function saveIcs(c){ const esc=t=>String(t||'').replace(/[\\;,]/g,m=>'\\'+m).replace(/\n/g,'\\n'), d=String(c.date).replace(/-/g,''), m=/^(\d{1,2}):(\d{2})$/.exec(String(c.time||'').trim());
+  let when; if(m){ const u=new Date(Date.UTC(+d.slice(0,4),+d.slice(4,6)-1,+d.slice(6,8),+m[1]-9,+m[2])), f=x=>x.toISOString().replace(/[-:]/g,'').slice(0,15)+'Z'; when=`DTSTART:${f(u)}\r\nDTEND:${f(new Date(u.getTime()+2*3600e3))}`; } else when=`DTSTART;VALUE=DATE:${d}`;
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Groov//KO','BEGIN:VEVENT',`UID:${d}-${strSeed(c.title+c.date)>>>0}@groov`,`DTSTAMP:${new Date().toISOString().replace(/[-:]/g,'').slice(0,15)}Z`,when,`SUMMARY:${esc('Groov · '+c.title)}`,`LOCATION:${esc(c.place)}`,'END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const a=el('a',{href:URL.createObjectURL(new Blob([ics],{type:'text/calendar'})),download:'groov.ics'}); document.body.append(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000); }
+/* 주소의 #show= 로 들어온 사람: 로그인 없이 초대장을 본다 */
+async function openShowFromHash(){ const m=/[#&]show=([0-9a-f]{32})/.exec(location.hash||''); if(!m||!cloud.sb)return false; let c=null; try{ c=must(await cloud.sb.rpc('show_invite',{p_token:m[1]})); }catch(e){ c=null; }
+  const go=btn(title.hidden?'닫기':'Groov 둘러보기',()=>{ hide(); if(!title.hidden)return; browse(); });
+  if(!c||typeof c!=='object'){ show('공연 초대장',sub('닫혔거나 없는 초대장이에요. 보낸 사람에게 새 주소를 받아 주세요.'),acts(go)); return true; }
+  show('공연 초대장',inviteCard(c),c.past?el('div',{cls:'warn',textContent:'이미 끝난 공연이에요.'}):null,acts(c.past?null:btn('달력 파일',()=>saveIcs(c)),/낫컴플리트/.test(String(c.place))?btn('낫컴플리트 가는 길',()=>{ hide(); startGame(); const [x,y]=MAP.doors.nc.door; warp(world,x,y+1,3); say('낫컴플리트',['성균관로 골목의 카페, 2층이 무대예요.']); }):null,go)); return true; }
+
+/* ---------- 편지 ---------- */
+const unread=()=>cloud.member&&db.letters?db.letters.filter(l=>l.inbox&&!l.read).length:0;
+const mail={box:'in'};
+function openMailbox(box){ if(!cloud.member){needLogin(()=>openMailbox(box));return;} if(box)mail.box=box; const l=(db.letters||[]).filter(x=>mail.box==='in'?x.inbox:!x.inbox);
+  const tabs=el('div',{cls:'tabs',role:'tablist'},...[['in',`받은 편지${unread()?` (${unread()})`:''}`],['out','보낸 편지']].map(([k,t])=>el('button',{cls:'tab'+(mail.box===k?' on':''),type:'button',role:'tab',textContent:t,onclick:()=>openMailbox(k)})));
+  show('우편함',tabs,plazaOff(),sub('편지는 보낸 사람과 받는 사람만 읽어요. 리더도 볼 수 없어요.'),acts(btn('편지 쓰기',()=>openWrite())),
+    ...(l.length?l.map(x=>el('article',{cls:'card'+(x.inbox&&!x.read?' new':'')},el('div',{cls:'grow'},el('div',{cls:'ttl',textContent:`${x.inbox?nm(x.from):`${nm(x.to)}에게`}${x.inbox&&!x.read?' · 새 편지':''}`}),sub(`${fmtAt(x.at)}${!x.inbox&&x.read?' · 읽음':''}`),el('div',{textContent:x.body.length>40?x.body.slice(0,40)+'…':x.body})),btn('열기',()=>openLetter(x)))):[empty(mail.box==='in'?'아직 받은 편지가 없어요.':'아직 보낸 편지가 없어요.')])); }
+async function openLetter(x){ if(x.inbox&&!x.read){ try{ await rpc('read_letter',{p_id:x.id}); x.read=true; hudAcct(); }catch(e){} }
+  show(x.inbox?`${nm(x.from)}의 편지`:`${nm(x.to)}에게 보낸 편지`,sub(fmtAt(x.at)),el('div',{cls:'letter paper',textContent:x.body}),
+    acts(x.inbox&&x.fromId&&cloud.people.some(p=>p.id===x.fromId&&p.status==='approved')?btn('답장',()=>openWrite(x.fromId)):null,btn('편지함에서 빼기',()=>asMember(async()=>{ await rpc('drop_letter',{p_id:x.id}); },()=>openMailbox())),btn('뒤로',()=>openMailbox()))); }
+function openWrite(to){ if(!cloud.member){needLogin(()=>openWrite(to));return;} const ppl=friends_(); if(!ppl.length){ show('편지 쓰기',empty('편지를 받을 수 있는 부원이 아직 없어요.'),acts(btn('뒤로',()=>openMailbox()))); return; }
+  const who_=select(ppl.map(p=>[p.id,p.nick]),to||ppl[0].id,{ariaLabel:'받는 사람'}), b=el('textarea',{maxLength:1000,rows:8,required:true,placeholder:'천 자까지 쓸 수 있어요.'}), n=sub('0 / 1000'), msg=warnBox(); b.oninput=()=>{n.textContent=`${b.value.length} / 1000`;};
+  const form=el('form',{onsubmit:e=>{e.preventDefault(); const v=b.value.trim(); if(!v){msg.textContent='내용을 적어 주세요.';return;} asMember(async()=>must(await cloud.sb.from('letters').insert({to_id:who_.value,body:v})),()=>{toast('편지를 보냈어요.');openMailbox('out');});}},
+    field('받는 사람',who_),field('내용',b),n,el('button',{cls:'btn',textContent:'보내기'}),msg);
+  show('편지 쓰기',sub('받는 사람만 읽어요. 하루 서른 통까지 보낼 수 있어요.'),form,acts(btn('그만두기',()=>openMailbox()))); }
+
+/* ---------- 가입 초대장 ---------- */
+const joinLink=code=>`${baseUrl()}#join=${code}`;
+function openJoinInvites(){ if(!cloud.member){openAccount();return;} const now=Date.now(), mineJ=(cloud.joins||[]).filter(j=>j.created_by===cloud.uid), msg=warnBox();
+  const state=j=>j.used_by?`${who(j.used_by)===ME?'나':nm(who(j.used_by))}님이 썼어요`:new Date(j.expires_at).getTime()<=now?'기한 지남':`${fmtAt(j.expires_at)}까지`;
+  show('가입 초대장',sub('신입 부원에게 보내는 초대장이에요. 받은 사람이 가입하면 리더의 승인 화면에 누가 초대했는지 함께 보여요. 승인은 여전히 리더가 해요.'),plazaOff(),
+    acts(btn('새 초대장 만들기',()=>asMember(async()=>{ const c=await rpc('make_join_invite',{}); cloud.lastJoin=c; },openJoinInvites)),btn('뒤로',openAccount)),msg,
+    ...(mineJ.length?mineJ.map(j=>{ const live=!j.used_by&&new Date(j.expires_at).getTime()>now; return el('div',{cls:'row'},el('div',{cls:'grow'},el('div',{cls:'code',textContent:j.code}),sub(state(j))),live?btn('주소 복사',()=>copyText(joinLink(j.code),msg)):null,live&&navigator.share?btn('보내기',()=>navigator.share({title:'Groov 가입 초대장',text:`초대 코드 ${j.code}`,url:joinLink(j.code)}).catch(()=>{})):null); }):[empty('아직 만든 초대장이 없어요.')]),
+    sub('쓰지 않은 초대장은 다섯 장까지, 2주 동안 쓸 수 있어요.')); }
+/* 주소의 #join= 코드는 가입을 마칠 때까지 이 브라우저에 기억해 둔다 */
+const JOIN_KEY='groov.join';
+function joinCode(){ try{ return localStorage.getItem(JOIN_KEY)||''; }catch(e){ return ''; } }
+function keepJoinCode(){ const m=/[#&]join=([A-Za-z0-9]{10})/.exec(location.hash||''); if(!m)return; try{ localStorage.setItem(JOIN_KEY,m[1].toUpperCase()); }catch(e){} }
+async function useJoinCode(code,quiet){ if(!code)return ''; try{ const by=await rpc('use_join_invite',{p_code:code}); try{localStorage.removeItem(JOIN_KEY);}catch(e){} if(!quiet)toast(`${by}님의 초대장을 썼어요. 리더가 승인하면 들어갈 수 있어요.`); return by; }catch(e){ if(/already_used|bad_code/.test(String(e.message)))try{localStorage.removeItem(JOIN_KEY);}catch(x){} if(!quiet)toast(errMsg(e)); return ''; } }
+function joinField(){ const c=input(joinCode(),10,{placeholder:'받은 초대 코드 (없으면 비워 두기)',autocapitalize:'characters',ariaLabel:'초대 코드',oninput:()=>{c.value=c.value.toUpperCase().replace(/[^A-Z0-9]/g,'');}}); return c; }
+
+/* ---------- 금잔디광장 게시판 (월드) ---------- */
+function setupPlazaBoard(){ const [x,y]=near(...placeAt('금잔디광장').map((v,i)=>v+(i?-3:4))), c=mk(24,32), g=c.getContext('2d');
+  R(g,'#5d3b28',3,10,3,22); R(g,'#5d3b28',18,10,3,22); R(g,'#8a5a34',1,2,22,16); R(g,'#c08a54',1,2,22,2); R(g,'#fbfaf5',3,5,8,9); R(g,'#f0c53c',13,6,8,7); R(g,'#4658a3',4,7,6,1); R(g,'#4658a3',4,9,5,1); R(g,'#4658a3',4,11,6,1); R(g,'#c8453a',16,5,2,2);
+  const img=edge(c,.4), cx=x*16+8, by=y*16+15; bucket(x,y).things.push({x:cx-12,y:by-31,img,base:by,sh:[SH.t,cx-8,by-4]}); solid[I(x,y)]=1;
+  world.spots[x+','+y]={name:'광장 게시판',run:()=>openPlaza()}; addLabel('Groov 광장 게시판',cx,by-38,1); }
+
+/* ===== NPC 대사 =====
+   말을 걸 때마다 대사를 새로 고른다.
+   1) 그 인물다운 재즈 이야기 한 줄
+   2) 지금 화제 한 줄: 다가올 공연 → 빈자리 있는 잼 → 재즈 거장 생일 → 계절 이야기 → 추천곡
+   같은 줄이 연달아 나오지 않게 직전 대사는 피한다.
+   존댓말을 쓰는 인물(polite)은 화제도 존댓말로, 주민은 학생 이야기(방학·동방·시험)를 하지 않는다. */
+
+/* 다가올 행사. 광장에 올린 공연(plazaEvents)을 먼저 쓰고, 서버 없이 시험할 때만 여기에 적는다 (지난 행사는 저절로 빠진다).
+   예) { name:'12월 정기공연', date:'2026-12-12', place:'낫컴플리트', time:'19:00' } */
+const EVENTS=[];
+const allEvents=()=>[...EVENTS,...(typeof plazaEvents==='function'?plazaEvents():[])];
+
+/* 한국 시간 기준 오늘 (기기 시간대와 상관없이) */
+const kstNow=()=>new Date(Date.now()+9*3600e3);
+const dayNum=d=>Math.floor(d.getTime()/864e5);
+const md=d=>[d.getUTCMonth()+1,d.getUTCDate()];
+const anyOf=a=>a[Math.random()*a.length|0];
+const fresh=(n,key,pool)=>{ const seen=n.said||(n.said={}), l=pool.length>1?pool.filter(x=>x!==seen[key]):pool, x=anyOf(l); seen[key]=x; return x; };
+
+/* 다가올 행사: 오늘부터 30일 안 */
+function nextEvent(){ const t=dayNum(kstNow()); let best=null;
+  for(const e of allEvents()){ const d=Date.parse(e.date+'T00:00:00Z'); if(isNaN(d))continue; const left=Math.floor(d/864e5)-t; if(left>=0&&left<=30&&(!best||left<best.left))best={...e,left}; }
+  return best; }
+const EV_MOOD={
+  색소폰:['솔로 몇 코러스 돌지 아직 못 정했어.','리드 새로 갈아 두고 길들이는 중이야.'],
+  보컬:['그날 목 아끼려고 찬 음료 끊었어.','가사 카드 만들어서 주머니에 넣고 다녀.'],
+  드럼:['카운트 템포 정하는 게 제일 떨려.','브러시도 챙길까 고민 중이야. 발라드가 있으면 필요하거든.'],
+  부원:['포스터 붙이는 거 도와줄 사람!','셋리스트 순서 짜느라 단톡이 불났어.'],
+  주민:['동네에 재즈 공연이라니, 구경 가야겠네.','우리 가게에도 포스터 하나 붙여 줘.'],
+  유령:['…그날은 나도 맨 뒷줄에서 들을게. 아무도 못 보겠지만.'],
+  바리스타:['그날은 커피를 넉넉히 내려 둘게요.','공연 끝나고 오시면 따뜻한 거 한 잔 드릴게요.'],
+  손님:['그날은 일찍 와서 앞자리에 앉으려고요.','책은 집에 두고 가야겠어요.'] };
+const jong=w=>{ const c=(w||'').trim().slice(-1).charCodeAt(0); return !(c>=0xac00&&c<=0xd7a3)||(c-0xac00)%28>0; };   /* 받침이 있으면(한글이 아니면) true */
+const iya=w=>w+(jong(w)?'이야':'야'), iga=w=>w+(jong(w)?'이':'가'), ieyo=w=>w+(jong(w)?'이에요':'예요');
+function eventLines(role,polite){ const e=nextEvent(); if(!e)return []; const [m,d]=e.date.split('-').slice(1).map(Number);
+  const where=[e.place&&`${e.place}에서`,e.time].filter(Boolean).join(' '), w=where?` ${where}.`:'', moods=EV_MOOD[role]||EV_MOOD.부원;
+  const head=polite?(e.left===0?`오늘이 ${ieyo(e.name)}!${w}`:e.left===1?`내일이 ${ieyo(e.name)}.${w}`:e.left<=7?`${e.name}까지 ${e.left}일 남았대요.${w}`:`${m}월 ${d}일에 ${iga(e.name)} 있대요.${w}`)
+    :(e.left===0?`오늘이 ${iya(e.name)}!${w} 늦지 마.`:e.left===1?`내일이 ${iya(e.name)}.${w}`:e.left<=7?`${e.name}까지 D-${e.left}.${w}`:`${m}월 ${d}일에 ${iga(e.name)} 있대.${w}`);
+  return e.left===0?[head]:moods.map(x=>`${head} ${x}`); }
+
+/* 빈자리 있는 잼: 부원은 실제 잼, 방문자는 공개된 잼 요약, 연결 전에는 예시 잼 */
+function openJams(){
+  if(db.jams&&db.jams.length) return db.jams.filter(j=>!j.closed).map(j=>({title:j.title,when:j.when,songs:j.songs.map(s=>({title:s.title,key:s.key,open:s.slots.filter(x=>!x.who&&!x.invited).map(x=>x.part)}))}));
+  if(cloud.pub) return cloud.pub.filter(j=>j&&typeof j.title==='string').map(j=>({title:j.title,when:typeof j.when==='string'?j.when:'',songs:(j.songs||[]).map(s=>({title:String(s.title||''),key:String(s.key||''),open:Array.isArray(s.open)?s.open:[]}))}));
+  return []; }
+function jamLines(part,polite){ const l=openJams().flatMap(j=>j.songs.filter(s=>s.open.length).map(s=>({j,s}))); if(!l.length)return [];
+  const mine=part?l.filter(x=>x.s.open.includes(part)):[], {j,s}=anyOf(mine.length?mine:l), when=j.when?`(${j.when})`:'', key=s.key?` 키는 ${s.key}.`:'';
+  if(mine.length) return [`${j.title}${when}에 ${s.title} ${part} 자리가 비었더라. 나 갈까 말까….`,`${s.title}에 ${iga(part)} 없대. 이건 내 차례 아냐?${key}`];
+  const p=anyOf(s.open); if(polite) return [`${j.title}${when}에 ${s.title} ${p} 자리가 비었대요. 푸른방 게시판에 있어요.`,`${s.title} 잼을 한대요.${key} ${p} 구한다던데요.`];
+  return [`${j.title}${when}에 ${s.title} ${p} 자리가 비었대. 너 해 볼래? 푸른방 게시판에 있어.`,`${s.title} 잼 한대.${key} ${p} 구한다던데.`]; }
+
+/* 재즈 거장 생일: 앞뒤 사흘 */
+const BDAY=[[4,12,'허비 행콕','Watermelon Man'],[4,22,'찰스 밍거스','Goodbye Pork Pie Hat'],[4,25,'엘라 피츠제럴드','How High the Moon'],[4,29,'듀크 엘링턴','Take the "A" Train'],
+  [5,26,'마일스 데이비스','So What'],[8,16,'빌 에반스','Waltz for Debby'],[8,29,'찰리 파커','Ornithology'],[9,7,'소니 롤린스','St. Thomas'],[9,23,'존 콜트레인','Giant Steps'],
+  [10,10,'텔로니어스 몽크',"'Round Midnight"],[10,21,'디지 길레스피','A Night in Tunisia'],[12,23,'쳇 베이커','My Funny Valentine']];
+function bdayLines(polite){ const now=kstNow(), y=now.getUTCFullYear(), t=dayNum(now), l=[];
+  for(const [m,d,who,song] of BDAY) for(const yy of [y-1,y,y+1]){ const off=Math.floor(Date.UTC(yy,m-1,d)/864e5)-t; if(Math.abs(off)>3)continue;
+    l.push(polite?(off===0?`오늘이 ${who} 생일이래요. 하루 종일 ${song} 틀어 둘게요.`:off>0?`${m}월 ${d}일이 ${who} 생일이래요. 그날은 ${song}부터 틀려고요.`:`며칠 전이 ${who} 생일이었대요. 요즘도 ${song} 자주 틀어요.`)
+      :(off===0?`오늘 ${who} 생일이야! 하루 종일 ${song}만 들을 거야.`:off>0?`${m}월 ${d}일이 ${who} 생일이야. 그날 잼 첫 곡은 ${song}.`:`며칠 전이 ${who} 생일이었어. 아직 ${song} 반복 재생 중.`)); }
+  return l; }
+
+/* 계절과 학사 일정 (대략) */
+function seasonLines(role,polite){ const [m,d]=md(kstNow()), n=m*100+d, l=[], dark=typeof night!=='undefined'&&night;
+  if(polite&&role==='바리스타'){
+    if(dark) l.push("밤에는 볼륨을 조금 낮춰요. 'Round Midnight 시간이니까요.");
+    if(n>=1201&&n<=1225) l.push('12월엔 Christmas Time Is Here를 자주 틀어요. 손님들이 좋아하시더라고요.');
+    if(m===12||m<=2) l.push('추운 날엔 따뜻한 라떼에 발라드가 어울려요.');
+    if(m>=9&&m<=11) l.push('가을엔 Autumn Leaves 신청이 제일 많아요.');
+    if(m>=6&&m<=8) l.push('더운 날엔 보사노바를 틀어요. Wave 같은 곡이요.');
+    if(m>=3&&m<=5) l.push('봄엔 창문 열고 It Might as Well Be Spring을 틀어요.');
+    return l; }
+  if(polite){
+    if(dark) l.push('밤에 오면 2층 불빛이 참 따뜻해요.');
+    if(m===12||m<=2) l.push('추운 날엔 따뜻한 차 한 잔 시켜 놓고 오래 앉아 있어요.');
+    if(m>=9&&m<=11) l.push('가을엔 창가 자리에서 발라드 듣는 게 좋아요.');
+    if(m>=6&&m<=8) l.push('여름엔 시원한 거 시켜 놓고 보사노바 들어요.');
+    if(m>=3&&m<=5) l.push('봄엔 창문을 열어 두면 골목 소리가 같이 들어와요.');
+    return l; }
+  if(role==='주민'){
+    if(dark) l.push('밤이 되면 골목에 색소폰 소리가 더 멀리 퍼져.');
+    if(m===12||m<=2) l.push('추워지니까 가게 라디오도 캐럴 재즈만 나와.');
+    if(m>=9&&m<=11) l.push('은행잎 쓸다 보면 라디오에서 Autumn Leaves가 꼭 나와.');
+    if(m>=6&&m<=8) l.push('여름 밤엔 골목에서 보사노바 소리가 들려.');
+    if(m>=3&&m<=5) l.push('봄엔 성균관 앞 산책길이 제일 좋아.');
+    return l; }
+  if(dark) l.push("밤엔 템포를 반으로 내려. 'Round Midnight 시간이잖아.",'밤 골목은 리버브가 길어. 롱톤 불기 딱 좋아.');
+  if(n>=1201&&n<=1225) l.push('크리스마스 다가오니까 다들 Christmas Time Is Here만 쳐. 빈스 과랄디 만세.','My Favorite Things가 캐럴이냐 재즈냐, 올해도 동방에서 싸움 났어.');
+  if(n>=1226) l.push('연말엔 Auld Lang Syne도 스윙으로 쳐 줘야지.');
+  if(m<=2) l.push('방학 목표는 하루 한 곡 솔로 카피. 오늘도 실패.','추워서 손이 굳어. 스케일 열 번 돌리고 나서야 손가락이 풀려.');
+  if((n>=301&&n<=320)||(n>=901&&n<=920)) l.push('개강했다! 신입 부원 오면 Blue Bossa부터 같이 하자.','새 학기엔 리얼북부터 새로 사고 싶어지지.');
+  if((n>=415&&n<=426)||(n>=1015&&n<=1026)||(n>=608&&n<=620)||(n>=1208&&n<=1220)) l.push('시험 기간이라 연습실이 텅 비었어…. 지금이 기회야.','공부하다 막히면 Kind of Blue 한 바퀴. 이게 내 휴식이야.');
+  if(n>=427&&n<=430) l.push('4월 30일은 유네스코가 정한 세계 재즈의 날이야. 그날은 뭐라도 연주해야 해.');
+  if(m===5) l.push('5월은 축제에 재즈 페스티벌까지 겹쳐서 주말이 모자라.');
+  if(m===10) l.push('10월만 되면 자라섬 재즈 페스티벌 생각뿐이야. 가평 가는 기차 같이 탈래?');
+  if(m===9||m===10||m===11) l.push('가을엔 Autumn Leaves 금지령 내려야 해. 잼마다 세 번씩 나와.','쌀쌀해지니까 발라드가 당겨. 오늘은 쳇 베이커 버전 My Funny Valentine.');
+  if(m>=6&&m<=8) l.push('더울 땐 보사노바지. Wave 한 곡이면 에어컨 필요 없어.','여름엔 Summertime을 꼭 한 번은 하게 돼. 거슈윈이 만든 오페라 노래야.');
+  if(m>=3&&m<=5) l.push('봄엔 It Might as Well Be Spring. 제목부터 설레.');
+  return l; }
+
+/* 부원이 올린 추천곡 (로그인했을 때만 보인다. 예시 곡은 말하지 않는다) */
+function recLines(){ const r=db.recs&&db.recs.length&&!db.sample?anyOf(db.recs.slice(0,30)):null; if(!r)return [];
+  return [`요즘 추천곡에 ${r.title} 올라왔더라. ${r.artist}… 취향 좋다.`,`턴테이블에 ${r.title} 걸려 있던데, 누가 올린 거야? 한 번 더 듣고 싶어.`]; }
+
+/* 화제가 없을 때 꺼내는 재즈 이야기 */
+const TRIVIA=["'Round Midnight 앞의 따옴표는 Around가 줄어든 거야. 몽크는 제목까지 멋있어.",
+  '블루노트 재킷은 사진이랑 글자 배치만 봐도 어느 레이블인지 알겠더라.',
+  '빌 에반스 트리오에서 스콧 라파로 베이스 들어 봐. 베이스가 반주만 하는 악기가 아니야.',
+  '스탠더드는 원래 뮤지컬이나 영화 노래였던 게 많아. 가사를 알면 솔로가 달라져.',
+  '찰리 파커는 Cherokee 코드 위에서 놀다가 비밥의 실마리를 찾았대.'];
+
+/* 지금 화제 한 줄. 후보를 모아 직전과 다른 걸 고른다. 행사가 가까울수록 더 자주 나온다 */
+function topical(n,v){ const {role,part,polite}=v, e=nextEvent(), pool=[], add=(l,w=1)=>{ for(let i=0;i<w;i++)pool.push(...l); };
+  add(eventLines(role,polite), e?(e.left<=7?6:3):0);
+  if(polite){ if(role==='바리스타')add(jamLines(null,true)); }
+  else if(role!=='주민'){ add(jamLines(part),2); add(recLines()); add(TRIVIA); }
+  add(bdayLines(polite),2); add(seasonLines(role,polite));
+  return pool.length?fresh(n,'t',pool):null; }
+
+/* 인물별 대사 */
+const VOICE={
+  sax:{role:'색소폰',part:'색소폰',lines:[
+    '이 은행나무 밑에서 불면 소리가 노랗게 번져.',
+    'Giant Steps 체인지는 아직도 손가락이 길을 잃어. 장3도씩 도는 게 문제야.',
+    '테너는 롤린스파야, 게츠파야? 나는 둘 다. 그날 날씨 따라.',
+    'Body and Soul은 1939년 콜먼 호킨스 녹음부터 들어 봐. 멜로디를 거의 다 바꿔서 불어.',
+    'Blue Bossa 솔로에서 Cm에서 D♭으로 넘어가는 그 순간이 제일 좋아.',
+    '오늘은 덱스터 고든처럼 박자 뒤에 느긋하게 기대서 불어 보는 중이야.'],
+    guide:['잼은 성균관로 골목의 낫컴플리트에서 열려. 2층이야.']},
+  vocal:{role:'보컬',part:'보컬',lines:[
+    '금잔디에 누워 있으면 허밍이 절로 나와.',
+    '엘라의 Ella in Berlin 들어 봤어? How High the Moon 스캣은 거의 트럼펫이야.',
+    '빌리 홀리데이는 박자 뒤에 살짝 기대서 불러. 그 레이백 따라 하다 보면 하루가 가.',
+    '보컬한테 키 먼저 물어봐 주는 반주자가 제일 멋있어.',
+    '스캣할 때 늘 두비두바만 하지 말고 음절을 바꿔 봐. 소리 색이 달라져.',
+    'Misty 가사 외우다가 여기서 잠들었어. 에롤 가너가 비행기에서 떠올린 멜로디래.'],
+    guide:['보컬 자리 빈 잼, 게시판에서 찾아봐.','바로 옆 광장 게시판엔 공연 소식이 붙어. 출연하고 싶으면 거기서 신청해.']},
+  drum:{role:'드럼',part:'드럼',lines:[
+    '라이드 심벌 레가토만 한 시간 쳤어. 칭- 칭가- 칭가-.',
+    '토니 윌리엄스가 마일스 밴드에 들어갔을 때 열일곱이었대. 난 열일곱에 뭐 했지….',
+    '하이햇은 2랑 4. 이것만 지켜도 잼에서 미움 안 받아.',
+    '아트 블레이키 프레스 롤 들으면 심장이 같이 굴러.',
+    'Take Five는 5/4박자야. 조 모렐로 솔로 박자 세다가 포기하지 마.',
+    '4마디 트레이드 할 때 멜로디를 생각하면서 쳐 봐. 드럼도 노래해.'],
+    guide:['낫컴플리트 무대에 올라가면 바로 잼을 시작할 수 있어.','내 자리를 신청하고 A부터 K까지 눌러 봐!']},
+  member:{role:'부원',part:null,lines:[
+    '동방 턴테이블에 Kind of Blue 걸어 두면 다들 말이 없어져.',
+    '리얼북 코드 그대로 믿지 마. 판마다 조금씩 달라.',
+    'ii–V–I만 연습했더니 신호등도 투파이브원으로 보여.',
+    '첫 잼 곡은 블루스가 최고야. 12마디만 알면 누구랑도 할 수 있어.'],
+    guide:['푸른방은 학생회관 103호! 파란 문을 찾아와.','어디서든 R을 누르면 푸른방으로 돌아갈 수 있어.','공지랑 공연 소식은 금잔디광장 게시판에 붙어.']},
+  student:{role:'부원',part:null,lines:[
+    '중도에서 공부하는데 이어폰에서 Moanin\' 나오니까 고개가 저절로 끄덕여져.',
+    '빌 에반스 Sunday at the Village Vanguard는 잔 부딪히는 소리까지 음악이야.',
+    '모달 재즈가 뭐냐고? 코드를 바꾸는 대신 한 스케일 위에서 오래 노는 거.',
+    '하드밥 입문은 아트 블레이키 Moanin\' 앨범. 반박 안 받아.',
+    '몽크는 틀린 음 같은데, 다시 들으면 그게 정답이야.',
+    '랜덤 재생에 웨인 쇼터 Footprints가 나왔어. 오늘 운 다 썼다.',
+    '600주년기념관 가는 오르막은 템포 240 비밥이야. 숨이 차.',
+    'All the Things You Are가 왜 스탠더드 중의 스탠더드인지 잼 가 보면 알아.',
+    '중고 LP 가게에서 블루노트 재킷만 보면 지갑이 열려.',
+    '대명거리에서 저녁 먹고 낫컴플리트 갈래? 잼 있는 날엔 2층이 시끌벅적해.',
+    '스쿠터 탄 유령이네? 부츠가 멋지다!']},
+  resident:{role:'주민',part:null,lines:[
+    '우리 가게 라디오는 늘 재즈 채널이야. 손님들이 오래 앉아 있거든.',
+    '밤에 골목에서 학생들이 두비두바 하던데, 그게 재즈야?',
+    '젊을 땐 나도 LP 모았지. 그때는 재킷 보고 골랐어.',
+    '대성전 앞은 언제 와도 조용해서 좋아.',
+    '낫컴플리트 2층에서 색소폰 소리 나면 장사가 잘돼.',
+    '스쿠터 탄 유령이네? 부츠가 멋지다!']},
+  ghost:{role:'유령',part:null,lines:[
+    '…오늘 턴테이블엔 뭘 걸까. 너무 신나는 건 말고.',
+    '나는 쳇 베이커 목소리가 좋아. 유령끼리 통하는 데가 있거든.',
+    '방명록에 한 줄 남겨 줘. 읽는 게 내 낙이야.'],
+    guide:['…어서 와. 여기는 Groov의 푸른방이야.','나는 그냥 여기 있는 유령이야. 이름은 묻지 말아 줘.','턴테이블은 추천곡, 게시판은 잼 세션이야. 파란 문을 열면 각자의 방으로 갈 수 있어.','잼을 하고 싶으면 낫컴플리트로 가 봐.']},
+  barista:{role:'바리스타',part:null,polite:true,lines:[
+    '2층까지 올라오셨네요. 따뜻한 거 드릴까요?',
+    '오늘 원두는 쳇 베이커 같은 맛이에요. 쓸쓸하고 부드럽게.',
+    '이 스피커로 Kind of Blue 틀면 손님들이 주문을 잊어요.',
+    '무대는 저쪽이에요. 편하게 연주하세요. 컵은 앰프 위에 두지 말고요.']},
+  guest:{role:'손님',part:null,polite:true,lines:[
+    '여긴 조용해서 책 읽기도 좋아요. 잼이 시작되기 전까진요.',
+    '잼이 시작되면 책은 덮어요. 4마디 트레이드는 놓칠 수 없죠.',
+    '지난번 누가 Autumn Leaves를 보사노바로 하던데, 그것도 좋더라고요.']}};
+
+/* 말을 건 횟수에 따라: 처음엔 안내, 그다음부터는 수다와 화제 */
+function npcTalk(kind){ const v=VOICE[kind]; return n=>{ n.talks=(n.talks||0)+1;
+  if(v.guide&&n.talks===1) return kind==='ghost'?v.guide:[fresh(n,'l',v.lines),...v.guide];
+  const out=[fresh(n,'l',v.lines)], t=topical(n,v); if(t)out.push(t);
+  else if(v.guide&&Math.random()<.5) out.push(fresh(n,'g',v.guide));
+  return out; }; }
 
 /* ===== 장면, 이동, 그리기, 입력 ===== */
 const DIR={down:[0,1,0],left:[-1,0,1],right:[1,0,2],up:[0,-1,3]};
@@ -1025,17 +1380,16 @@ const castLooks=[{sp:'rabbit',shirt:'#1f4a36',sleeve:'#e6dcc4',jacket:1,pants:'#
 /* 같은 부원은 어디서나 같은 동물 */
 const LOOK={'피아노 부원':0,'베이스 부원':1,'드럼 부원':2,'보컬 부원':3,'기타 부원':4}, lookFor=n=>castLooks[LOOK[n]??(strSeed(n||'')%castLooks.length)];
 const person=(x,y,img,name,lines,range=2)=>{const p=near(x,y),n=actor(...p,img,{name,lines,home:p,range});world.npcs.push(n);return n;};
-person(...placeAt('명륜당 은행나무').map((v,i)=>v+(i?6:5)),personSheet({sp:'otter',shirt:'#34406e',pants:'#2a2a3a',sax:1,scarf:true}),'은행나무 아래 색소폰',['이 은행나무 밑에서 불면 소리가 노랗게 번져.','잼은 성균관로 골목의 낫컴플리트에서 열려. 2층이야.']);
-person(...placeAt('학생회관'),castLooks[0],'Groov 부원',['푸른방은 학생회관 103호! 파란 문을 찾아와.','어디서든 R을 누르면 푸른방으로 돌아갈 수 있어.']);
-person(...placeAt('금잔디광장'),castLooks[3],'금잔디의 보컬',['금잔디에 누워 있으면 허밍이 절로 나와.','보컬 자리 빈 잼, 게시판에서 찾아봐.']);
-person(...placeAt('낫컴플리트 골목'),castLooks[2],'골목의 드러머',['낫컴플리트 무대에 올라가면 바로 잼을 시작할 수 있어.','내 자리를 신청하고 A부터 K까지 눌러 봐!']);
+person(...placeAt('명륜당 은행나무').map((v,i)=>v+(i?6:5)),personSheet({sp:'otter',shirt:'#34406e',pants:'#2a2a3a',sax:1,scarf:true}),'은행나무 아래 색소폰',npcTalk('sax'));
+person(...placeAt('학생회관'),castLooks[0],'Groov 부원',npcTalk('member'));
+person(...placeAt('금잔디광장'),castLooks[3],'금잔디의 보컬',npcTalk('vocal'));
+person(...placeAt('낫컴플리트 골목'),castLooks[2],'골목의 드러머',npcTalk('drum'));
 { const C=['#c8453a','#4f8a6a','#48709e','#e0a030','#8a5aa8','#3a3a4a'];
-  const L=['명륜당 은행나무가 지금 딱 절정이래.','중도 자리 벌써 다 찼더라….','대명거리에서 저녁 먹고 낫컴플리트 갈래?','대성전 앞은 언제 와도 조용해서 좋아.','600주년기념관 가는 오르막, 매일이 등산이야.','스쿠터 탄 유령이네? 부츠가 멋지다!'];
   const looks=Object.keys(SPECIES).map((sp,i)=>personSheet({sp,shirt:pick(C,hash(i,1)),pants:pick(['#34406e','#4a4650','#6a4630'],hash(i,6)),glass:hash(i,9)<.2,jacket:hash(i,3)<.3?1:0,sleeve:'#e6dcc4',v:i}));
-  for(let i=0;i<46;i++){ const p=MAP.places[i%MAP.places.length],lk=looks[(i*7+3)%looks.length]; person(p[1]+(hash(i,2)*18-9|0),p[2]+(hash(i,3)*14-7|0),lk,`${lk.label} ${hash(i,12)<.7?'학생':'주민'}`,[L[i%L.length]],4); } }
-hub.npcs.push(actor(7,9,catSheet,{name:'익명의 유령',lines:['…어서 와. 여기는 Groov의 푸른방이야.','나는 그냥 여기 있는 유령이야. 이름은 묻지 말아 줘.','턴테이블은 추천곡, 게시판은 잼 세션이야. 파란 문을 열면 각자의 방으로 갈 수 있어.','잼을 하고 싶으면 낫컴플리트로 가 봐.'],home:[7,9],range:1}));
-cafe.npcs.push(actor(20,8,castLooks[5],{name:'부엉이 바리스타',lines:['2층까지 올라오셨네요. 따뜻한 거 드릴까요?','무대는 저쪽이에요. 편하게 연주하세요.'],home:[20,8],range:0}));
-cafe.npcs.push(actor(15,12,castLooks[6],{name:'사슴 손님',lines:['여긴 조용해서 책 읽기도 좋아요. 잼이 시작되기 전까진요.'],home:[15,12],range:0,dir:2}));
+  for(let i=0;i<46;i++){ const p=MAP.places[i%MAP.places.length],lk=looks[(i*7+3)%looks.length]; person(p[1]+(hash(i,2)*18-9|0),p[2]+(hash(i,3)*14-7|0),lk,`${lk.label} ${hash(i,12)<.7?'학생':'주민'}`,npcTalk(hash(i,12)<.7?'student':'resident'),4); } }
+hub.npcs.push(actor(7,9,catSheet,{name:'익명의 유령',lines:npcTalk('ghost'),home:[7,9],range:1}));
+cafe.npcs.push(actor(20,8,castLooks[5],{name:'부엉이 바리스타',lines:npcTalk('barista'),home:[20,8],range:0}));
+cafe.npcs.push(actor(15,12,castLooks[6],{name:'사슴 손님',lines:npcTalk('guest'),home:[15,12],range:0,dir:2}));
 for(const n in MAP.exits)world.spots[MAP.exits[n].join()]={name:'출구',run:()=>say(`혜화역 ${n}번 출구`,[n==='4'?'대명거리로 나가는 출구. 성균관대 가는 사람들로 늘 북적인다.':'대학로 쪽 출구. 공연 포스터가 빼곡하다.'])};
 /* 문과 랜드마크 */
 for(const k of ['hub','nc']){ const [x,y]=MAP.doors[k].door; world.spots[x+','+y]={door:true,name:k==='hub'?'푸른방':'낫컴플리트',run:()=>k==='hub'?goHub():(hide(),warp(cafe,...cafe.start,3))}; }
@@ -1048,7 +1402,7 @@ const busy=(x,y,self)=>(me!==self&&me.tx===x&&me.ty===y)||scene.npcs.some(a=>a!=
 const free=(x,y,self)=>!solidAt(scene,x,y)&&!busy(x,y,self);
 function go(a,name){ const [dx,dy,r]=DIR[name]; a.dir=r; if(!free(a.tx+dx,a.ty+dy,a))return false; a.tx+=dx;a.ty+=dy;a.moving=true;return true; }
 const face=()=>{const d=Object.values(DIR).find(v=>v[2]===me.dir);return [me.tx+d[0],me.ty+d[1]];};
-function interact(x,y){ const n=scene.npcs.find(n=>n.tx===x&&n.ty===y); if(n){ if(!n.moving&&!n.stage)n.dir=[3,2,1,0][me.dir]; say(n.name,n.lines); return; }
+function interact(x,y){ const n=scene.npcs.find(n=>n.tx===x&&n.ty===y); if(n){ if(!n.moving&&!n.stage)n.dir=[3,2,1,0][me.dir]; say(n.name,typeof n.lines==='function'?n.lines(n):n.lines); return; }
   const s=scene.spots[x+','+y]; if(s){s.run();return;} if(scene!==world)return; const b=bid(x,y)&&MAP.B[bid(x,y)-1]; if(b&&b[2]){say(b[2],INFO[b[2]]||['지금은 들어갈 수 없다.']);return;}
   if(giants.some(q=>Math.abs(q.cx/16-x)<3&&Math.abs(q.by/16-y)<3)) say('명륜당 은행나무',['수백 년을 살아온 천연기념물 은행나무.','굵은 가지 밑으로 유주가 고드름처럼 자라 있고, 발밑은 온통 노랗다.']); }
 function find(gx,gy){ const s=scene, w=s.W, ix=(x,y)=>y*w+x; if(gx<0||gy<0||gx>=s.W||gy>=s.H)return null; const goal=new Map(), around=(x,y,hit)=>Object.values(DIR).forEach(([a,b])=>{if(x+a>=0&&y+b>=0&&x+a<s.W&&y+b<s.H)goal.set(ix(x+a,y+b),hit);});
@@ -1056,7 +1410,7 @@ function find(gx,gy){ const s=scene, w=s.W, ix=(x,y)=>y*w+x; if(gx<0||gy<0||gx>=
   const prev=new Int32Array(s.W*s.H).fill(-1), st=ix(me.tx,me.ty), q=[st]; prev[st]=st;
   for(let h=0;h<q.length&&h<24000;h++){ const i=q[h],x=i%w,y=i/w|0; if(goal.has(i)){ const r=[]; let c=i; while(c!==st){const p=prev[c];r.unshift(Object.keys(DIR).find(k=>DIR[k][0]===c%w-p%w&&DIR[k][1]===(c/w|0)-(p/w|0)));c=p;} return {r,hit:goal.get(i)}; }
     for(const [a,b] of Object.values(DIR)) if(!solidAt(s,x+a,y+b)){const j=ix(x+a,y+b); if(prev[j]<0&&!busy(x+a,y+b,me)){prev[j]=i;q.push(j);}} } return null; }
-function warp(s,x,y,dir){ const ch=scene!==s; scene=s; if(ch)resize(); [me.tx,me.ty]=[x,y]; me.px=x*T;me.py=y*T;me.moving=false;route=[];after=null;keys.length=0; if(dir!==undefined)me.dir=dir; if(jam.on&&s!==cafe)stopJam(); fade=1; }
+function warp(s,x,y,dir){ endTalk(); const ch=scene!==s; scene=s; if(ch)resize(); [me.tx,me.ty]=[x,y]; me.px=x*T;me.py=y*T;me.moving=false;route=[];after=null;keys.length=0; if(dir!==undefined)me.dir=dir; if(jam.on&&s!==cafe)stopJam(); fade=1; }
 let fade=0;
 function advance(a,dt,v){ const gx=a.tx*T,gy=a.ty*T,m=v*dt; a.px+=Math.sign(gx-a.px)*Math.min(m,Math.abs(gx-a.px)); a.py+=Math.sign(gy-a.py)*Math.min(m,Math.abs(gy-a.py)); a.step+=dt*(v>120?12:8); if(a.px===gx&&a.py===gy){a.moving=false;return true;} }
 const uiOpen=()=>panel.classList.contains('on')||talk.classList.contains('on');
@@ -1068,9 +1422,10 @@ function update(dt){ fade=Math.max(0,fade-dt*2.6); if(me.moving&&advance(me,dt,r
 let notes=[]; const noteFx=()=>{ notes.push({x:me.px+Math.random()*18-4,y:me.py-18,t:0,c:pick(['#ffe49a','#9fd8ff','#ffb0c8'],Math.random())}); };
 /* ---------- 그리기 ---------- */
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),layer=document.getElementById('labels'); let S=3,VW=320,VH=240,cx=0,cy=0,clock=0; const lm=mk(8,8),lc=lm.getContext('2d');
-function resize(){ S=Math.max(2,Math.floor(scene===world?Math.min(innerWidth/400,innerHeight/270):Math.min(innerWidth/(scene.W*T),(innerHeight-(jam.on?170:0))/(scene.H*T)))); VW=Math.ceil(innerWidth/S);VH=Math.ceil(innerHeight/S);cv.width=lm.width=VW;cv.height=lm.height=VH;cv.style.width=VW*S+'px';cv.style.height=VH*S+'px'; } addEventListener('resize',resize); resize();
+let sizeKey=''; function resize(){ sizeKey=innerWidth+'x'+innerHeight; S=Math.max(2,Math.floor(scene===world?Math.min(innerWidth/400,innerHeight/270):Math.min(innerWidth/(scene.W*T),(innerHeight-(jam.on?170:0))/(scene.H*T)))); VW=Math.ceil(innerWidth/S);VH=Math.ceil(innerHeight/S);cv.width=lm.width=VW;cv.height=lm.height=VH;cv.style.width=VW*S+'px';cv.style.height=VH*S+'px'; } addEventListener('resize',resize); resize();
 const labels=[]; const addLabel=(name,x,y,hot)=>{const e=document.createElement('div');e.className='label'+(hot?' hot':'');e.textContent=name;e.style.display='none';layer.append(e);labels.push({x,y,el:e,on:false});};
 B.forEach(b=>{ if(!b.n||b.k==='N')return; if(b.k==='u')addLabel(b.n,(b.x0+b.x1)/2,(b.y0+b.y1)/2-b.h); else if(b.k!=='K'||b.x1-b.x0>60)addLabel(b.n,(b.x0+b.x1)/2,b.k==='V'?(b.y0+b.y1)/2:b.y1+16); });
+setupPlazaBoard();
 for(const n in MAP.exits)addLabel(`혜화역 ${n}번 출구`,MAP.exits[n][0]*16+8,MAP.exits[n][1]*16-30,1); addLabel('낫컴플리트',MAP.doors.nc.door[0]*16+8,MAP.doors.nc.door[1]*16-40,1); addLabel('명륜당 은행나무',giants[0].cx,giants[0].by+40,1);
 const glow=mk(128,128); {const p=px(glow);for(let y=0;y<128;y++)for(let x=0;x<128;x++){const d=Math.hypot(x-63.5,y-63.5)/64;if(d<1){const v=Math.pow(1-d,1.5)+bay(x>>1,y>>1)*.05;const a=Math.max(0,Math.min(255,v*235|0));p.b[y*128+x]=(a<<24|150<<16|214<<8|255)>>>0;}}p.done();}
 const cam=(p,v,m)=>v>=m?Math.round((m-v)/2):Math.round(Math.max(0,Math.min(m-v,p-v/2)));
@@ -1085,8 +1440,9 @@ function draw(){ const s=scene; cx=cam(jam.on&&s===cafe?100:me.px+8,VW,s.W*T); c
   const pk=s.name+me.tx+','+me.ty; if(pk!==placeKey){placeKey=pk; if(s!==world)placeEl.textContent=s.title; else {let b=1e9,n='';for(const [m,x,y] of MAP.places){const d=(x-me.tx)**2+(y-me.ty)**2;if(d<b){b=d;n=m;}}placeEl.textContent=n;}} }
 function drawRoom(s){ if(inkOn)R(ctx,K1,-2,-2,s.W*T+4,s.H*T+4); ctx.drawImage(Q(s.bg),0,0); if(inkOn){ctx.fillStyle='#4658a3';for(const [x,y,w,h] of s.lines){if(w===1||h===1)ctx.fillRect(x,y,w,h);else{ctx.fillRect(x,y,w,1);ctx.fillRect(x,y+h-1,w,1);ctx.fillRect(x,y,1,h);ctx.fillRect(x+w-1,y,1,h);}}} for(const [im,x,y] of s.walls)ctx.drawImage(Q(im),x,y); ctx.drawImage(Q(s.over),0,0); const list=[...s.things,...[me,...s.npcs].map(a=>({a,base:a.py+14}))].sort((p,q)=>p.base-q.base); for(const t of list){ if(t.a){ctx.drawImage(Q(SH.t),Math.round(t.a.px),Math.round(t.a.py)+9);drawActor(t.a);} else ctx.drawImage(Q(t.img),t.x,t.y); } if(!inkOn){ ctx.save(); ctx.translate(cx,cy); drawLight(s.ambient,s.lamps); ctx.restore(); } if(s===hub&&!inkOn){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.55+Math.sin(clock*9)*.04;ctx.drawImage(ART.neon,186,8);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';} }
 let budget=0;
-function drawWorld(){ const x0=Math.max(0,Math.floor(cx/CP)),x1=Math.min(Math.ceil(W/CH)-1,Math.floor((cx+VW)/CP)),y0=Math.max(0,Math.floor(cy/CP)),y1=Math.min(Math.ceil(H/CH)-1,Math.floor((cy+VH)/CP)), vis=[],list=[],lamps=[];
-  for(let j=y0;j<=y1;j++)for(let i=x0;i<=x1;i++){const c=chunk(i,j);vis.push([c,i*CP,j*CP]);ctx.drawImage(c.base,i*CP,j*CP);if(night)ctx.drawImage(c.lit,i*CP,j*CP);}
+let built=0, frameNo=0; const chunkNow=(i,j)=>{ if(chunks.has(i+','+j))return chunk(i,j); if(built)return null; built++; return chunk(i,j); };
+function drawWorld(){ built=0; frameNo++; const x0=Math.max(0,Math.floor(cx/CP)),x1=Math.min(Math.ceil(W/CH)-1,Math.floor((cx+VW)/CP)),y0=Math.max(0,Math.floor(cy/CP)),y1=Math.min(Math.ceil(H/CH)-1,Math.floor((cy+VH)/CP)), vis=[],list=[],lamps=[];
+  for(let j=y0;j<=y1;j++)for(let i=x0;i<=x1;i++){const c=chunkNow(i,j);if(!c)continue;vis.push([c,i*CP,j*CP]);ctx.drawImage(c.base,i*CP,j*CP);if(night)ctx.drawImage(c.lit,i*CP,j*CP);}
   const seen=(x,y,w,h)=>x+w>cx&&x<cx+VW&&y+h>cy&&y<cy+VH;
   for(let j=y0-1;j<=y1+1;j++)for(let i=x0-1;i<=x1+1;i++){const b=buckets.get(i+','+j);if(!b)continue;for(const t of b.things)if(seen(t.x,t.y,t.img.width,t.img.height))list.push(t);for(const l of b.lamps)if(seen(l[0]-l[2],l[1]-l[2],l[2]*2,l[2]*2))lamps.push(l);}
   const acts=[me,...world.npcs].filter(a=>seen(a.px-4,a.py-22,24,40)); for(const t of list)if(t.sh)ctx.drawImage(Q(t.sh[0]),t.sh[1],t.sh[2]);
@@ -1097,13 +1453,13 @@ function drawWorld(){ const x0=Math.max(0,Math.floor(cx/CP)),x1=Math.min(Math.ce
   ctx.fillStyle=inkOn?K1:'#22222e'; for(const [a,b,c,d] of wires){ if(Math.max(a,c)<cx||Math.min(a,c)>cx+VW||Math.max(b,d)+30<cy||Math.min(b,d)>cy+VH)continue; const n=Math.ceil(Math.hypot(c-a,d-b)); for(const o of [0,7])for(let i=0;i<=n;i++){const t=i/n;ctx.fillRect(Math.round(a+(c-a)*t)+o-7,Math.round(b+(d-b)*t+Math.sin(t*Math.PI)*n*.06),1,1);} }
   drawActor(me,.28); // 건물 뒤에 있어도 비쳐 보이게
   for(const q of giants){ if(!seen(q.x,q.y,q.w,q.h+30))continue; const under=me.py+10<q.base&&((me.px+8-q.cx)/(q.w*.43))**2+((me.py-(q.by-q.h*.55))/(q.h*.44))**2<1; q.a+=((under?.5:1)-q.a)*.1; ctx.globalAlpha=q.a; ctx.drawImage(Q(q.img),q.x,q.y); ctx.globalAlpha=1; ctx.drawImage(Q(q.fence),q.cx-q.fence.width/2|0,q.by-8); for(const a of acts)if(a.py+14>q.base&&a.px>q.x-20&&a.px<q.x+q.w&&a.py<q.by+60)drawActor(a); if(under)drawActor(me,.6); }
-  // 다음에 보일 구역을 한 프레임에 하나씩 미리 그려 둔다
-  if(me.moving||route.length) pre: for(let j=Math.max(0,y0-1);j<=Math.min(Math.ceil(H/CH)-1,y1+1);j++)for(let i=Math.max(0,x0-1);i<=Math.min(Math.ceil(W/CH)-1,x1+1);i++) if(!chunks.has(i+','+j)){ chunk(i,j); break pre; }
+  // 다음에 보일 구역을 미리 그려 둔다: 움직일 때는 한 칸 둘레를 매 프레임, 멈춰 있을 때는 두 칸 둘레를 네 프레임에 하나씩
+  const go_=me.moving||route.length, rr=go_?1:2; if(!built&&(go_||frameNo%4===0)) pre: for(let j=Math.max(0,y0-rr);j<=Math.min(Math.ceil(H/CH)-1,y1+rr);j++)for(let i=Math.max(0,x0-rr);i<=Math.min(Math.ceil(W/CH)-1,x1+rr);i++) if(!chunks.has(i+','+j)){ built++; chunk(i,j); break pre; }
   // 흩날리는 잎
   const gk=giants.some(q=>Math.hypot(me.px-q.cx,me.py-q.by)<420), n=gk?54:16; for(let i=0;i<n;i++){const sp=14+hash(i,3)*16,px_=((hash(i,1)*(VW+80)+clock*(9+hash(i,4)*12)+Math.sin(clock*1.3+i)*14)%(VW+80))-40,py_=((hash(i,2)*(VH+60)+clock*sp)%(VH+60))-30,f=Math.sin(clock*4+i*2)>0; const c=gk?pick(['#fbe27c','#f0c846','#d9a42d'],hash(i,5)):pick(inkOn?['#f0c53c',K2,K3]:['#e0a030','#c8653a','#f0c846'],hash(i,5)); R(ctx,c,cx+px_|0,cy+py_|0,f?3:2,f?2:3);}
   if(night){ ctx.save();ctx.translate(cx,cy);drawLight(inkOn?'#6f7fc4':'#4a4f92',[...lamps,...giants.map(q=>[q.cx,q.by-60,150])],vis);ctx.restore(); }
   else if(!inkOn){ ctx.globalCompositeOperation='soft-light'; ctx.globalAlpha=.22; R(ctx,'#ffb65c',cx,cy,VW,VH); ctx.globalAlpha=1; ctx.globalCompositeOperation='source-over'; } }
-let last=0; function loop(t){const dt=Math.min(.05,(t-last)/1000||0);last=t;clock+=dt;update(dt);draw();requestAnimationFrame(loop);}
+let last=0; function loop(t){const dt=Math.min(.05,(t-last)/1000||0);last=t;clock+=dt;if(sizeKey!==innerWidth+'x'+innerHeight)resize();update(dt);draw();requestAnimationFrame(loop);}
 /* ---------- 입력 ---------- */
 const KEYMAP={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',KeyW:'up',KeyS:'down',KeyA:'left',KeyD:'right'};
 const title=document.getElementById('title'); const startGame=()=>{ if(title.hidden)return; title.hidden=true; document.activeElement?.blur(); const r=/room=(GROOV1\.[\w-]+)/.exec(location.hash||''), o=r&&readCode(r[1]); if(o){addFriend(o);enterRoom(o);} }; 
@@ -1111,24 +1467,26 @@ const title=document.getElementById('title'); const startGame=()=>{ if(title.hid
 let titleKey=''; const goBox=document.getElementById('go');
 const browse=()=>{ startGame(); if(scene===hub&&!cloud.member)say('익명의 유령',['둘러보는 중이구나. 천천히 걸어 봐.',...(cloud.pub?['게시판에서는 어떤 잼이 열리는지 이름 없이 볼 수 있어.']:[]),'추천곡과 사람들의 방은 로그인하고 승인받으면 열려. 오른쪽 위에서 언제든 할 수 있어.']); };
 const enterMember=()=>{ startGame(); const n=invites().length; if(scene===hub&&n)say('익명의 유령',[`잼 초대가 ${n}개 와 있어. 오른쪽 위 이름을 눌러 봐.`]); };
-function titleMenu(){ if(title.hidden)return; const st=cloud.state, shared=/room=GROOV1\./.test(location.hash||''), key=[st,cloud.note,cloud.profile&&cloud.profile.nick,shared].join('|'); if(key===titleKey)return; titleKey=key;
+function titleMenu(){ if(title.hidden)return; const st=cloud.state, shared=/room=GROOV1\./.test(location.hash||''), key=[st,cloud.note,cloud.profile&&cloud.profile.nick,shared,Date.now()-(cloud.connectedAt||0)<5000].join('|'); if(key===titleKey)return; titleKey=key;
   const login=btn('로그인',()=>needLogin()), look=btn('둘러보기',browse), visit=btn('놀러 가기',startGame), other=btn('다른 계정으로',async()=>{await cloud.sb.auth.signOut({scope:'local'});await session();needLogin();}), tell=el('div',{cls:'tip',role:'status'});
   const check=btn('승인됐는지 확인',async()=>{await session();if(cloud.member)return;tell.textContent='아직 승인 전이에요. 조금 뒤에 다시 확인해 주세요.';});
-  const named=(t,b)=>{b.textContent=t;return b;};
+  const named=(t,b)=>{b.textContent=t;return b;}, justOn=Date.now()-(cloud.connectedAt||0)<5000;
   const [main,...more]=shared&&st!=='loading'?[visit,...(st==='out'?[login]:[])]:st==='member'?[btn(`${cloud.profile.nick} 들어가기`,enterMember),other]:st==='out'?[named('로그인하고 시작',login),look]:st==='setup'?[btn('가입 이어서 하기',()=>needLogin()),look]:st==='pending'?[named('둘러보며 기다리기',look),check]:st==='blocked'?[look,btn('내 계정',()=>needLogin())]:[look];
-  tell.textContent=st==='loading'?'연결하는 중이에요…':st==='pending'?'리더의 승인을 기다리고 있어요.':st==='off'||st==='out'?cloud.note:'';
+  tell.textContent=st==='loading'?'연결하는 중이에요…':cloud.note&&st!=='member'?cloud.note:st==='pending'?'리더의 승인을 기다리고 있어요.':!justOn?'':st==='member'?'연결됐어요. 어서 와요.':st==='out'?'연결됐어요. 로그인하거나 둘러볼 수 있어요.':'연결됐어요.';
   main.classList.add('main'); goBox.replaceChildren(el('div',{cls:'gobtns'},main,...more),tell); if(!panel.classList.contains('on'))main.focus({preventScroll:true}); }
 addEventListener('keydown',e=>{ if(!title.hidden&&!panel.classList.contains('on')&&!talk.classList.contains('on')){ const b=[...goBox.querySelectorAll('button')],i=b.indexOf(document.activeElement),d=e.key==='Tab'?(e.shiftKey?-1:1):/^Arrow(Down|Right)$/.test(e.key)?1:/^Arrow(Up|Left)$/.test(e.key)?-1:0; if(d&&b.length){e.preventDefault();b[(Math.max(i,d<0?0:-1)+d+b.length)%b.length].focus();} else if((e.key==='Enter'||e.key===' ')&&i<0&&!e.repeat){e.preventDefault();b[0]?.click();} return; } run=e.shiftKey; if(e.metaKey||e.ctrlKey||e.altKey)return;
   if(panel.classList.contains('on')){ if(e.key==='Escape'){hide();return;} const f=[...panel.querySelectorAll('button:not(:disabled),a[href],input:not(:disabled),select,textarea')],i=f.indexOf(document.activeElement); if(e.key==='Tab'){e.preventDefault();f[(i+(e.shiftKey?-1:1)+f.length)%f.length].focus();} else if(!e.repeat&&(e.key==='ArrowDown'||e.key==='ArrowUp')&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName)){e.preventDefault();f[(i+(e.key==='ArrowDown'?1:-1)+f.length)%f.length].focus();} return; }
   if(talk.classList.contains('on')){ if(['Enter',' '].includes(e.key)||e.code==='KeyZ'){e.preventDefault();if(!e.repeat)nextLine();} return; }
   if(jam.on){ if(e.key==='Escape'){stopJam(true);return;} const i=PADS.indexOf(e.code.replace('Key','')); if(i>=0&&!/INPUT|SELECT/.test(document.activeElement?.tagName)){e.preventDefault();if(!e.repeat)jamHit(i);} return; }
   const d=KEYMAP[e.code]; if(d){e.preventDefault();if(!keys.includes(d))keys.push(d);return;} if(document.activeElement?.tagName==='BUTTON')return;
-  if((e.key==='Enter'||e.key===' '||e.code==='KeyZ')&&!e.repeat){e.preventDefault();if(!me.moving)interact(...face());} else if(e.code==='KeyM'||e.key==='Escape')openMenu(); else if(e.code==='KeyR')goHub(); else if(e.code==='KeyB')bR.onclick(); else if(e.code==='KeyC')openArchive(); });
+  if((e.key==='Enter'||e.key===' '||e.code==='KeyZ')&&!e.repeat){e.preventDefault();if(!me.moving)interact(...face());} else if(e.code==='KeyM'||e.key==='Escape')openMenu(); else if(e.code==='KeyR')goHub(); else if(e.code==='KeyB')bR.onclick(); else if(e.code==='KeyC')openArchive(); else if(e.code==='KeyP')openPlaza(); else if(e.code==='KeyL')openMailbox(); });
 addEventListener('keyup',e=>{run=e.shiftKey;const i=keys.indexOf(KEYMAP[e.code]);if(i>=0)keys.splice(i,1);}); addEventListener('blur',()=>{keys.length=0;});
 cv.addEventListener('pointerdown',e=>{document.activeElement?.blur();if(uiOpen()||jam.on||!title.hidden)return;const x=Math.floor((e.clientX/S+cx)/T),y=Math.floor((e.clientY/S+cy)/T),f=find(x,y);if(f){route=f.r;after=f.hit;}});
 document.getElementById('bClose').onclick=hide; document.getElementById('bMenu').onclick=()=>openMenu(); document.getElementById('bHome').onclick=()=>goHub();
 const bR=document.getElementById('bRide'); bR.onclick=()=>{ride=!ride;bR.textContent=ride?'걷기':'스쿠터';bR.blur();};
 const bN=document.getElementById('bNight'); bN.onclick=()=>{night=!night;bN.textContent=night?'낮으로':'밤으로';bN.blur();};
+/* 휴대폰: 키보드나 주소창 때문에 실제로 보이는 높이가 바뀌면 창이 그 안에 들어오게 한다 */
+{ const vv=window.visualViewport, root=document.documentElement.style, fit=()=>{ root.setProperty('--vh',vv.height+'px'); root.setProperty('--vt',vv.offsetTop+'px'); }; if(vv){ vv.addEventListener('resize',fit); vv.addEventListener('scroll',fit); fit(); } }
 if(matchMedia('(pointer: coarse)').matches||innerWidth<768)document.getElementById('hint').textContent='가고 싶은 곳이나 사람을 눌러 보세요';
 titleMenu(); cloudInit(); document.getElementById('bAcct').onclick=()=>needLogin();
 me.dir=0;

@@ -131,7 +131,8 @@ B.forEach(b=>binAdd(b.x0-30,b.y0-b.h-70,b.x1+30,b.y1+20,{y:b.y1,b}));
 for(let y=0;y<H;y++)for(let x=0;x<W;x++){ const k=G[I(x,y)]; if(k==='L'||k==='W') binAdd(x*16,y*16-32,x*16+16,y*16+16,{y:y*16+14,w:[x,y,k]}); }
 /* 픽셀을 자주 읽는 작업용 캔버스 */
 const mkR=(w,h)=>{const c=mk(w,h);c.getContext('2d',{willReadFrequently:true});return c;};
-const chunks=new Map();
+const chunks=new Map(), CHUNK_MAX=matchMedia('(pointer: coarse)').matches?40:80;   // 휴대폰은 캔버스 메모리가 넘치면 화면이 하얗게 빈다
+const freeCanvas=(...l)=>{for(const c of l)if(c){c.width=c.height=0;}};   // iOS 는 크기를 0으로 해야 바로 메모리를 돌려준다
 function chunk(cx,cy){ const key=cx+','+cy; let c=chunks.get(key); if(c){chunks.delete(key);chunks.set(key,c);return c;}
   c={base:mkR(CP,CP),top:mkR(CP,CP),lit:mk(CP,CP)}; const g=c.base.getContext('2d'),t=c.top.getContext('2d'),l=c.lit.getContext('2d'); paintGround(g,cx,cy); if(inkOn) inkCanvas(c.base,cx*CP,cy*CP,.28);
   const items=(binB.get(key)||[]).slice().sort((a,b)=>a.y-b.y), X=cx*CP,Y=cy*CP; for(const q of [g,t,l])q.translate(-X,-Y);
@@ -147,8 +148,8 @@ function chunk(cx,cy){ const key=cx+','+cy; let c=chunks.get(key); if(c){chunks.
     else { poly(m,b.q,0,-b.h); m.fill(); m.lineWidth=2; m.stroke(); b.q.forEach((p,i)=>{const n=b.q[(i+1)%b.q.length]; m.beginPath();m.moveTo(p[0],p[1]);m.lineTo(n[0],n[1]);m.lineTo(n[0],n[1]-b.h);m.lineTo(p[0],p[1]-b.h);m.closePath();m.fill();}); }
     m.globalCompositeOperation='destination-out'; poly(m,b.q,0,0); m.fill(); m.lineWidth=1.5; m.stroke(); }
   t.save(); t.setTransform(1,0,0,1,0,0); t.globalCompositeOperation='destination-in'; t.drawImage(M,0,0); t.restore();
-  for(const k of ['base','top']){ const f=mk(CP,CP); f.getContext('2d').drawImage(c[k],0,0); c[k]=f; }
-  chunks.set(key,c); if(chunks.size>80)chunks.delete(chunks.keys().next().value); return c; }
+  for(const k of ['base','top']){ const f=mk(CP,CP),o=c[k]; f.getContext('2d').drawImage(o,0,0); c[k]=f; freeCanvas(o); } freeCanvas(M);
+  chunks.set(key,c); if(chunks.size>CHUNK_MAX){ const k=chunks.keys().next().value,o=chunks.get(k); chunks.delete(k); freeCanvas(o.base,o.top,o.lit); } return c; }
 
 /* ---------- 소품 ---------- */
 const PIC={};
