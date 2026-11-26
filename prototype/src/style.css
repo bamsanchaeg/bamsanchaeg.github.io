@@ -82,6 +82,7 @@ input:disabled { background:var(--pale); }
 .part { display:grid; grid-template-columns:64px 1fr 1fr; gap:8px; align-items:center; margin-bottom:6px; }
 .menu { display:grid; gap:6px; }
 .menu .btn { justify-content:start; text-align:left; }
+form.find { display:flex; gap:8px; margin:6px 0 4px; } form.find input { flex:1; } form.find .btn { min-width:0; margin:0; background:var(--paper); color:var(--deep); font-weight:400; min-height:42px; }
 .acts { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
 #talk { position:fixed; left:50%; bottom:calc(16px + var(--sb)); transform:translateX(-50%); width:min(640px,calc(100vw - 24px - var(--sl) - var(--sr))); user-select:none; -webkit-user-select:none; min-height:106px; padding:12px 18px; display:none; cursor:pointer; z-index:11; }
 #talk.on { display:block; }
@@ -118,6 +119,8 @@ input:disabled { background:var(--pale); }
 .btn[hidden] { display:none; }
 #bMail { display:inline-flex; align-items:center; gap:2px; }
 #bMail[hidden] { display:none; }
+#bMusic { min-width:36px; padding:4px 8px; font-size:17px; }
+#bMusic.off { color:var(--mid); text-decoration:line-through; }
 #bMail .badge { margin-left:4px; }
 #title .edge { width:100%; display:flex; justify-content:space-between; gap:16px; font-size:clamp(15px,2.2vw,24px); }
 #title img { min-height:0; height:100%; max-width:100%; object-fit:contain; padding:14px 0; }

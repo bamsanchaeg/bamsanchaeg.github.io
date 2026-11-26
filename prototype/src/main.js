@@ -94,7 +94,13 @@ function drawWorld(){ built=0; frameNo++; const x0=Math.max(0,Math.floor(cx/CP))
 let last=0; function loop(t){const dt=Math.min(.05,(t-last)/1000||0);last=t;clock+=dt;if(sizeKey!==innerWidth+'x'+innerHeight)resize();update(dt);draw();requestAnimationFrame(loop);}
 /* ---------- 입력 ---------- */
 const KEYMAP={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',KeyW:'up',KeyS:'down',KeyA:'left',KeyD:'right'};
-const title=document.getElementById('title'); const startGame=()=>{ if(title.hidden)return; title.hidden=true; document.activeElement?.blur(); const r=/room=(GROOV1\.[\w-]+)/.exec(location.hash||''), o=r&&readCode(r[1]); if(o){addFriend(o);enterRoom(o);} }; 
+/* 배경음악: 브라우저는 누르기 전엔 소리를 막으므로 첫 화면 버튼을 누를 때 작게 시작한다. 끄면 이 브라우저에 기억하고, 다른 탭으로 가면 멈춘다 */
+const bgm={el:null,on:true}; try{ bgm.on=localStorage.getItem('groov.bgm')!=='off'; }catch(e){}
+function bgmPlay(){ if(!bgm.on||document.hidden)return; if(!bgm.el){ bgm.el=new Audio('audio/our_little_clubroom.mp3'); bgm.el.loop=true; bgm.el.volume=.3; bgm.el.preload='auto'; } bgm.el.play().catch(()=>{}); }
+function bgmShow(){ const b=document.getElementById('bMusic'); b.classList.toggle('off',!bgm.on); b.ariaPressed=String(bgm.on); b.ariaLabel=bgm.on?'배경음악 끄기':'배경음악 켜기'; b.title=b.ariaLabel; }
+function bgmToggle(){ bgm.on=!bgm.on; try{ localStorage.setItem('groov.bgm',bgm.on?'on':'off'); }catch(e){} if(bgm.on)bgmPlay(); else if(bgm.el)bgm.el.pause(); bgmShow(); }
+document.addEventListener('visibilitychange',()=>{ if(document.hidden){ if(bgm.el)bgm.el.pause(); } else if(title.hidden)bgmPlay(); });
+const title=document.getElementById('title'); const startGame=()=>{ if(title.hidden)return; title.hidden=true; bgmPlay(); document.activeElement?.blur(); const r=/room=(GROOV1\.[\w-]+)/.exec(location.hash||''), o=r&&readCode(r[1]); if(o){addFriend(o);enterRoom(o);} }; 
 /* 첫 화면 메뉴: 로그인 상태에 따라 버튼이 바뀐다. 둘러보기는 언제나 할 수 있다 */
 let titleKey=''; const goBox=document.getElementById('go');
 const browse=()=>{ startGame(); if(scene===hub&&!cloud.member)say('익명의 유령',['둘러보는 중이구나. 천천히 걸어 봐.',...(cloud.pub?['게시판에서는 어떤 잼이 열리는지 이름 없이 볼 수 있어.']:[]),'추천곡과 사람들의 방은 로그인하고 승인받으면 열려. 오른쪽 위에서 언제든 할 수 있어.']); };
@@ -122,6 +128,6 @@ const bN=document.getElementById('bNight'); bN.onclick=()=>{night=!night;bN.text
 /* 휴대폰: 키보드나 주소창 때문에 실제로 보이는 높이가 바뀌면 창이 그 안에 들어오게 한다 */
 { const vv=window.visualViewport, root=document.documentElement.style, fit=()=>{ root.setProperty('--vh',vv.height+'px'); root.setProperty('--vt',vv.offsetTop+'px'); }; if(vv){ vv.addEventListener('resize',fit); vv.addEventListener('scroll',fit); fit(); } }
 if(matchMedia('(pointer: coarse)').matches||innerWidth<768)document.getElementById('hint').textContent='가고 싶은 곳이나 사람을 눌러 보세요';
-titleMenu(); cloudInit(); document.getElementById('bAcct').onclick=()=>needLogin(); document.getElementById('bMail').onclick=e=>{e.currentTarget.blur();openMailbox();};
+titleMenu(); cloudInit(); document.getElementById('bAcct').onclick=()=>needLogin(); document.getElementById('bMail').onclick=e=>{e.currentTarget.blur();openMailbox();}; document.getElementById('bMusic').onclick=e=>{e.currentTarget.blur();bgmToggle();}; bgmShow();
 me.dir=0;
 requestAnimationFrame(loop);

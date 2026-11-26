@@ -30,7 +30,7 @@ def bundle():
     cap = re.search(r"captcha:\s*['\"`]([^'\"`]+)", rd('config.js')); cf = 'https://challenges.cloudflare.com'
     inline = lambda tag: sha(re.search(r'<%s>(.*?)</%s>' % (tag, tag), html, re.S)[1])
     csp = '; '.join(["default-src 'none'", 'script-src %s %s%s' % (inline('script'), sdk, ' ' + cf if cap else ''), 'style-src %s https://fonts.googleapis.com' % inline('style'), 'font-src https://fonts.gstatic.com',
-                     "img-src 'self' data:", 'connect-src ' + (url[1] if url else "'none'"), "base-uri 'none'", "form-action 'none'", "object-src 'none'", 'frame-src ' + (cf if cap else "'none'")])
+                     "img-src 'self' data:", "media-src 'self'", 'connect-src ' + (url[1] if url else "'none'"), "base-uri 'none'", "form-action 'none'", "object-src 'none'", 'frame-src ' + (cf if cap else "'none'")])
     open(os.path.join(ROOT, 'village.html'), 'w', encoding='utf-8').write(html.replace('/*CSP*/', csp))
 if len(sys.argv) < 2: bundle(); sys.exit()
 
