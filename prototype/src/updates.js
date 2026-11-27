@@ -17,10 +17,12 @@ const UPD_KEY='cabinet.updates.seen';
 /* 처음 온 기기는 최근 2주 소식만 알려 준다 */
 function updSeen(){ try{ const v=localStorage.getItem(UPD_KEY); if(v)return v; }catch(e){} return new Date(Date.now()-14*864e5).toISOString().slice(0,10); }
 const freshUpdates=()=>{ const s=updSeen(); return UPDATES.filter(u=>u.id>s); };
-function markUpdates(){ try{ if(UPDATES[0])localStorage.setItem(UPD_KEY,UPDATES[0].id); }catch(e){} }
+/* 유령이 알려 주거나 새 소식 창에서 본 것으로 쳐도, 게시판 탭을 처음 열 때까지는 NEW 도장을 남긴다 */
+let updBefore=null;
+function markUpdates(){ if(updBefore===null)updBefore=updSeen(); try{ if(UPDATES[0])localStorage.setItem(UPD_KEY,UPDATES[0].id); }catch(e){} }
 const updDate=id=>{ const [,m,d]=id.split('-').map(Number); return `${m}월 ${d}일`; };
 /* 게시판 '업데이트' 탭의 카드. 보여 준 뒤에는 본 것으로 친다 */
-function updateCards(){ const s=updSeen(); markUpdates(); if(typeof hudAcct==='function')hudAcct();
+function updateCards(){ markUpdates(); const s=updBefore; updBefore=null; if(typeof hudAcct==='function')hudAcct();
   return UPDATES.length?UPDATES.map(u=>el('article',{cls:'card notice'},el('div',{cls:'grow'},el('div',{cls:'ttl',textContent:u.title}),sub(`Cabinet 업데이트 · ${updDate(u.id)}`),el('div',{cls:'letter',textContent:u.lines.join('\n')})),u.id>s?el('span',{cls:'stamp',textContent:'NEW'}):null)):[empty('아직 업데이트 소식이 없어요.')]; }
 const openUpdates=()=>openPlaza('update');
 /* 안 본 소식이 있으면 유령이 읽어 주고, 다 들으면 next 로 이어 간다 */
