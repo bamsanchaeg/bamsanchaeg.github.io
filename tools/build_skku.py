@@ -294,7 +294,22 @@ reach = flood(road0)
 cand = [p for p in su['t'] if (p[0], p[1] + 1) in reach and (p[0] - 1, p[1]) in su['t'] and (p[0] + 1, p[1]) in su['t'] and (p[0] - 1, p[1] + 1) in reach]
 mx = sum(p[0] for p in su['t']) / len(su['t'])
 su_door = min(cand, key=lambda p: abs(p[0] - mx))
-doors = dict(hub=dict(id=byname['학생회관'] + 1, door=list(su_door)), nc=dict(id=nc[0], door=nc[1]))
+# 건강한 빵집: 정문 앞 길가의 이름 없는 상가 건물 하나를 빵집으로 (가상의 가게)
+def shop_at(name, cx, cy):
+    best = None
+    for i, b in enumerate(B):
+        if b['n'] or b['k'] != 'n' or len(b['t']) < 20: continue
+        ts = set(b['t']); xs = [p[0] for p in b['t']]; ys = [p[1] for p in b['t']]
+        if max(xs) - min(xs) < 6 or max(ys) - min(ys) < 3: continue
+        mx = (min(xs) + max(xs)) / 2
+        dr = [p for p in b['t'] if (p[0], p[1] + 1) in reach and (p[0] - 1, p[1]) in ts and (p[0] + 1, p[1]) in ts and (p[0], p[1] - 2) in ts and G[p[1] + 1][p[0]] in 'sarPpe']
+        if not dr: continue
+        d = math.hypot(mx - cx, sum(ys) / len(ys) - cy)
+        if best is None or d < best[0]: best = (d, i, min(dr, key=lambda p: abs(p[0] - mx)))
+    B[best[1]]['k'], B[best[1]]['n'] = 'N', name
+    return dict(id=best[1] + 1, door=list(best[2]))
+bk = shop_at('건강한 빵집', *map(int, A(175, 262)))
+doors = dict(hub=dict(id=byname['학생회관'] + 1, door=list(su_door)), nc=dict(id=nc[0], door=nc[1]), bk=bk)
 for k, d in doors.items(): assert (d['door'][0], d['door'][1] + 1) in reach, k
 exits = {}
 for n in node.values():

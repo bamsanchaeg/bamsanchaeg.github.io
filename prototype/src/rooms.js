@@ -41,7 +41,7 @@ function makeRoom(name,w,h,wallH,o){ const solidR=new Uint8Array(w*h), c=mk(w*T,
     prop(img,tx,ty,tw,th,s,dx=0,dy=0){ for(let j=0;j<th;j++)for(let i=0;i<tw;i++)solidR[(ty+j)*w+tx+i]=1; r.things.push({x:tx*T+(tw*T-img.width)/2+dx|0,y:(ty+th)*T-img.height+dy,img,base:(ty+th)*T-1}); if(s)r.spot(tx,ty,tw,th,s); },
     wall(img,x,y,s,tx,tw){ r.walls.push([img,x,y]); if(s)r.spot(tx,wallH-1,tw,1,s); } };
   return r; }
-const inkAmb={hub:'#dfe5f8',cafe:'#fdfaf0'};
+const inkAmb={hub:'#dfe5f8',cafe:'#fdfaf0',bakery:'#fdfaf0'};
 function planks(g,x0,y0,x1,y1,c,seed){ for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){ const row=(y-y0)/8|0,o=(row*37)%64,b=((x+o)/64)|0; let k=.9+hash(b,row,seed)*.2+(nz(N8,x,y*5)-.5)*.16; if((y-y0)%8===0)k*=.66; if((x+o)%64===0)k*=.72; if((y-y0)%8===1)k*=1.08; if(y-y0<6)k*=.72+(y-y0)*.04; g.fillStyle=lit(c,k);g.fillRect(x,y,1,1);} }
 /* 지하층 창밖: 잉크 팔레트 색만 써서 인쇄 효과를 거쳐도 또렷하다 */
 const pen=(g,X,Y)=>(c,x,y,w,h)=>R(g,c,X+x,Y+y,w,h);
@@ -108,6 +108,39 @@ cafe.prop(ART.plant,22,5+0,1,1); cafe.prop(ART.plant,22,13,1,1); cafe.prop(ART.p
 for(let i=0;i<4;i++)cafe.lines.push([13+i*62,9,56,54],[40+i*62,12,1,48],[16+i*62,34,50,1]); cafe.lines.push([261,11,74,50],[0,73,384,1],[0,79,384,1],[60,4,1,12],[160,4,1,12],[260,4,1,12],[340,4,1,12]);
 { const g=cafe.og; g.drawImage(ART.stairs,176,220); cafe.solid[15*24+11]=cafe.solid[15*24+12]=cafe.solid[15*24+13]=0; for(const x of [11,12,13])cafe.spots[x+',15']={door:true,name:'계단',run:()=>leaveCafe()}; }
 cafe.lamps.push([100,120,90],[320,110,70],[200,210,60]); cafe.start=[12,13];
+/* ---------- 건강한 빵집 (정문 앞) ---------- */
+const loaf=(g,x,y,k)=>{ if(k===0){ ball(g,x+6,y+4,6,'#b5773c',.6); for(let i=0;i<3;i++)R(g,'#e6c48a',x+2+i*4,y+1+(i&1),2,1); }                      // 통밀 바게트 같은 긴 빵
+  else if(k===1){ ball(g,x+5,y+4,5,'#7a4a2c',.8); R(g,'#c9a06a',x+3,y+2,4,1); R(g,'#c9a06a',x+4,y+4,3,1); }                                       // 호밀빵
+  else if(k===2){ ball(g,x+5,y+4,5,'#c98f4e',.8); for(let i=0;i<4;i++)R(g,'#f4e6c4',x+2+i*2,y+1+(i*3)%4,1,1); }                                    // 귀리·씨앗빵
+  else { ball(g,x+5,y+4,5,'#a8683a',.75); R(g,'#f0dcb0',x+2,y+3,7,1); R(g,'#f0dcb0',x+4,y+1,1,5); } };                                            // 사워도우
+Object.assign(ART,{
+  bshelf:pic(66,62,g=>{ box(g,0,0,66,62,'#7a5236',{grain:1}); for(let r=0;r<3;r++){ R(g,'#3a2518',4,5+r*19,58,15); for(let i=0;i<5;i++)loaf(g,5+i*11,8+r*19,(i+r*2)%4); R(g,'#a97a4e',2,20+r*19,62,3); } R(g,'#e6d6b0',22,0,22,4); }),
+  oven:pic(62,44,g=>{ for(let y=0;y<44;y++)for(let x=0;x<62;x++){ const row=y/6|0,o=(row&1)*5,e=y%6===0||(x+o)%10===0; R(g,e?'#7a3a2a':lit('#b5674a',.9+hash(x/10|0,row,7)*.2),x,y,1,1); }
+    R(g,'#3a2a22',0,0,62,4); ball(g,31,22,12,'#2a1c16',.75); R(g,'#2a1c16',19,22,25,12); R(g,'#e07a2a',22,26,19,7); R(g,'#f6c04a',25,28,13,3); R(g,'#ffe68a',29,29,5,1);
+    R(g,'#6a6e7a',10,36,42,3); R(g,'#a5a9b4',10,36,42,1); }),
+  bcase:pic(98,46,g=>{ box(g,0,14,98,32,'#7a5236',{grain:1,v:1}); box(g,0,4,98,14,'#d5e2e0'); R(g,'#f4f8f6',2,5,94,2); R(g,'#8a8e98',0,4,98,1); R(g,'#8a8e98',0,17,98,1);
+    for(let i=0;i<8;i++)loaf(g,3+i*12,8,i%4); for(let i=0;i<6;i++)R(g,'#4f3422',8+i*16,24,1,20); R(g,'#f4efe2',74,0,18,5); R(g,'#e6b84a',80,2,6,1); }),
+  bmenu:pic(66,46,g=>{ box(g,0,0,66,46,'#5c3c24',{grain:1}); R(g,'#34448e',3,3,60,40); crispText(g,'BREAD',33,11,'bold 9px Georgia,"Times New Roman",serif','#fbfbf7');
+    for(let i=0;i<4;i++){ R(g,'#c8d0c4',8,20+i*5,26+(i*7)%12,1); R(g,'#f0c53c',48,20+i*5,8,1); } }),
+  basket:pic(30,22,g=>{ for(let i=0;i<3;i++)loaf(g,2+i*8,0,(i+1)%4); box(g,0,8,30,14,'#a97a4e'); for(let y=10;y<21;y+=3)R(g,'#7a5236',1,y,28,1); for(let x=3;x<28;x+=5)R(g,'#7a5236',x,9,1,12); }),
+});
+const bakery=makeRoom('bakery',18,13,5,{ambient:'#f6e6c8',title:'건강한 빵집'});
+{ const g=bakery.g,w=288,h=208; planks(g,0,80,w,h,'#b08458',13);
+  for(let y=0;y<80;y++)for(let x=0;x<w;x++){ let k=.96+(nz(N32,x,y)-.5)*.12+(hash(x,y,2)-.5)*.05; if(y>54){ const row=(y-54)/6|0,o=(row&1)*7; if((y-54)%6===0||(x+o)%14===0)k*=.86; } g.fillStyle=lit(y>54?'#d9c4a0':'#efe4cc',k); g.fillRect(x,y,1,1); }
+  box(g,0,73,w,7,'#8a6a4c',{grain:1}); R(g,'#5a5048',0,0,w,4); R(g,'#8a6a4c',0,54,w,2);
+  // 거리 쪽 창: 1층이라 바깥은 정문 앞 길
+  box(g,118,10,52,40,'#6a4a30',{grain:1}); for(let yy=0;yy<34;yy++)for(let xx=0;xx<46;xx++){ let c=lit('#a9cfe4',1.1-yy/50); if(yy>22)c=lit('#b5aa9a',.9+hash(xx,yy,4)*.15); if(yy>27)c=lit('#8f8378',.9); g.fillStyle=c; g.fillRect(121+xx,13+yy,1,1); }
+  R(g,'#6a4a30',143,12,2,36); R(g,'rgba(255,255,255,.35)',125,16,3,12); box(g,114,49,60,4,'#8a5f3c',{grain:1}); bakery.lamps.push([144,32,60]);
+  for(const x of [60,230]){ R(g,'#2a2420',x,4,1,12); R(g,'#2a2420',x-6,16,13,4); R(g,'#ffe6a8',x-4,20,9,3); bakery.lamps.push([x,26,44]); } }
+bakery.wall(ART.bmenu,182,8,{name:'오늘의 빵',run:()=>say('오늘의 빵',['통밀 바게트 · 호밀 깜파뉴 · 귀리 씨앗빵 · 사워도우','바게트앙 · 소프트앙 · 무화과 타르트','설탕과 버터를 줄이고, 천천히 발효했어요.'])},11,2);
+bakery.prop(ART.bshelf,1,5,4,1,{name:'빵 선반',run:()=>say('빵 선반',['통밀, 호밀, 귀리, 사워도우가 나란히 놓여 있다.','갓 구운 빵 냄새에 발이 멈춘다.'])});
+bakery.prop(ART.oven,13,5,4,1,{name:'화덕',run:()=>say('돌 화덕',['안쪽에서 장작불이 낮게 타고 있다.','빵 껍질이 바삭하게 익어 가는 소리가 들린다.'])},0,2);
+bakery.prop(ART.bcase,6,7,6,1,{name:'진열대',run:()=>say('빵 진열대',['유리 안에 오늘 구운 빵이 줄지어 있다.','이름표마다 "통밀 100%", "무설탕"이라고 적혀 있다.','맨 끝 칸엔 바게트앙, 소프트앙, 무화과 타르트가 놓여 있다.'])});
+for(const [x,y] of [[3,10],[14,10]]){ bakery.prop(ART.ctab,x,y,2,1,{name:'자리',run:()=>say('창가 자리',['빵 한 조각과 보리차 한 잔. 여기서 잠깐 쉬어 가자.'])}); bakery.prop(ART.chair,x-1,y,1,1); bakery.prop(ART.chair,x+2,y,1,1); }
+bakery.prop(ART.basket,12,8,1,1,{name:'빵 바구니',run:()=>say('시식 바구니',['"한 조각씩 드셔 보세요." 고소한 귀리 맛이 난다.'])}); bakery.prop(ART.plant,16,8,1,1); bakery.prop(ART.plant,1,8,1,1);
+bakery.lines.push([117,9,54,42],[0,73,288,1],[0,79,288,1],[60,4,1,12],[230,4,1,12]);
+{ const g=bakery.og; R(g,'#3a2a22',128,192,32,16); box(g,130,194,28,14,'#8a5f3c',{grain:1}); R(g,'#d5e2e0',134,197,20,4); bakery.solid[12*18+8]=bakery.solid[12*18+9]=0; for(const x of [8,9])bakery.spots[x+',12']={door:true,name:'문',run:()=>leaveBakery()}; }
+bakery.lamps.push([90,110,80],[200,110,80],[144,180,50]); bakery.start=[9,10];
 /* 무대에서의 자리: 잼 할 때 사람이 서는 칸 */
 const STAGE={ 피아노:[4,7,3], 드럼:[8,5,0], 베이스:[3,8,0], 기타:[10,9,0], 색소폰:[8,9,0], 보컬:[6,10,0] };
 

@@ -265,7 +265,7 @@ function bodyPx(g,d,f,P,o){ const s=f===1?-1:f===3?1:0, side=d===1, back=d===3;
   if(side){ const x=15+(hold?-2:s*3); R(g,P.sleeve,x,34,4,8);R(g,P.in,x+4,35,1,7);R(g,PA,x,42,4,2); if(hold)R(g,PA,10,38,3,2); }
   else if(hold){ Mr(g,P.sleeve,7,33,3,5);Mr(g,P.sleeve,4,38,5,2);Mr(g,PA,2,38,2,2); }
   else { const al=s>0?-1:0,ar=s<0?-1:0; R(g,P.sleeve,8,33+al,3,9);R(g,PA,8,42+al,3,2);R(g,P.sleeve,25,33+ar,3,9);R(g,PA,25,42+ar,3,2);R(g,P.in,11,35,1,8);R(g,P.in,24,35,1,8); }
-  if(hold){ if(o.hold==='sax'){R(g,YE,side?11:17,32,2,10);R(g,YE,side?9:17,41,5,3);R(g,YE,side?7:22,38,3,5);R(g,'#d9a92c',side?12:18,33,1,9);R(g,PA,side?11:17,35,1,1);R(g,PA,side?11:17,38,1,1);} else if(o.hold==='book'){R(g,PA,side?8:13,36,side?5:10,7);R(g,K3,side?9:15,38,side?3:6,1);R(g,K3,side?9:15,40,side?2:5,1);R(g,K2,side?12:18,36,1,7);} else {R(g,PA,side?9:16,36,4,5);R(g,YE,side?9:16,38,4,1);} }
+  if(hold){ if(o.hold==='sax'){R(g,YE,side?11:17,32,2,10);R(g,YE,side?9:17,41,5,3);R(g,YE,side?7:22,38,3,5);R(g,'#d9a92c',side?12:18,33,1,9);R(g,PA,side?11:17,35,1,1);R(g,PA,side?11:17,38,1,1);} else if(o.hold==='bread'){ball(g,side?10:16,39,3,'#b5773c',.6);R(g,'#e6c48a',side?8:14,37,2,1);R(g,'#e6c48a',side?11:17,38,2,1);} else if(o.hold==='book'){R(g,PA,side?8:13,36,side?5:10,7);R(g,K3,side?9:15,38,side?3:6,1);R(g,K3,side?9:15,40,side?2:5,1);R(g,K2,side?12:18,36,1,7);} else {R(g,PA,side?9:16,36,4,5);R(g,YE,side?9:16,38,4,1);} }
   if(o.gcase&&back){ R(g,K1,16,22,4,10);R(g,K1,14,30,8,14);R(g,K2,15,31,1,12);R(g,K3,12,38,12,1); }
   g.restore(); }
 function personCell(d,f,P,o){ const yb=f%2; return cellOf(g=>{ g.save();g.translate(0,yb);tailPx(g,o.sp,d,P);g.restore(); bodyPx(g,d,f,P,o); g.save();g.translate(0,yb); headPx(g,o.sp,d,P);

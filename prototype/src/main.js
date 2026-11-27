@@ -22,13 +22,18 @@ person(...placeAt('낫컴플리트 골목'),castLooks[2],'골목의 드러머',n
 hub.npcs.push(actor(7,9,catSheet,{name:'익명의 유령',lines:npcTalk('ghost'),home:[7,9],range:1}));
 cafe.npcs.push(actor(20,8,castLooks[5],{name:'부엉이 바리스타',lines:npcTalk('barista'),home:[20,8],range:0}));
 cafe.npcs.push(actor(15,12,castLooks[6],{name:'사슴 손님',lines:npcTalk('guest'),home:[15,12],range:0,dir:2}));
+/* 건강한 빵집: 곰 제빵사와 다람쥐 단골, 가게 앞 강아지 손님 */
+bakery.npcs.push(actor(9,6,personSheet({sp:'bear',shirt:'#fbfbf7',pants:'#4a4650',jacket:0,pat:false,hold:'bread'}),{name:'곰 제빵사',lines:npcTalk('baker'),home:[9,6],range:1}));
+bakery.npcs.push(actor(12,10,personSheet({sp:'squirrel',shirt:'#8a5aa8',pants:'#34406e',hold:'bread'}),{name:'다람쥐 단골',lines:npcTalk('regular'),home:[12,10],range:0,dir:2}));
+person(MAP.doors.bk.door[0]+4,MAP.doors.bk.door[1]+2,personSheet({sp:'dog',shirt:'#e0a030',pants:'#34406e',hold:'bread'}),'빵 봉투 든 강아지',npcTalk('breadfan'),2);
 for(const n in MAP.exits)world.spots[MAP.exits[n].join()]={name:'출구',run:()=>say(`혜화역 ${n}번 출구`,[n==='4'?'대명거리로 나가는 출구. 성균관대 가는 사람들로 늘 북적인다.':'대학로 쪽 출구. 공연 포스터가 빼곡하다.'])};
 /* 문과 랜드마크 */
-for(const k of ['hub','nc']){ const [x,y]=MAP.doors[k].door; world.spots[x+','+y]={door:true,name:k==='hub'?'푸른방':'낫컴플리트',run:()=>k==='hub'?goHub():(hide(),warp(cafe,...cafe.start,3))}; }
-const doorOf={}; for(const k of ['hub','nc']) doorOf[MAP.doors[k].id]=MAP.doors[k].door;
-function leaveHub(){ const [x,y]=MAP.doors.hub.door; warp(world,x,y+1,0); } function leaveCafe(){ const [x,y]=MAP.doors.nc.door; warp(world,x,y+1,0); }
+const DOORS={hub:['푸른방',()=>goHub()],nc:['낫컴플리트',()=>{hide();warp(cafe,...cafe.start,3);}],bk:['건강한 빵집',()=>{hide();warp(bakery,...bakery.start,3);}]};
+for(const k in DOORS){ const [x,y]=MAP.doors[k].door; world.spots[x+','+y]={door:true,name:DOORS[k][0],run:DOORS[k][1]}; }
+const doorOf={}; for(const k in DOORS) doorOf[MAP.doors[k].id]=MAP.doors[k].door;
+const leave=k=>{ const [x,y]=MAP.doors[k].door; warp(world,x,y+1,0); }, leaveHub=()=>leave('hub'), leaveCafe=()=>leave('nc'), leaveBakery=()=>leave('bk');
 function goHub(){ hide(); warp(hub,...hub.start,3); tellNews(); }
-const INFO={ '명륜당':['유생들이 글을 배우던 강당. 가운데 채 양옆으로 낮은 날개채가 붙어 있다.','앞뜰의 두 은행나무는 천연기념물이다.'],'대성전':['문묘의 중심 건물. 정면 다섯 칸, 팔작지붕이 당당하다.'],'동재':['유생들의 기숙사. 서재와 마주 보고 서 있다.'],'서재':['유생들의 기숙사. 동재와 마주 보고 서 있다.'],'동무':['대성전 앞뜰 동쪽을 두른 긴 집채.'],'서무':['대성전 앞뜰 서쪽을 두른 긴 집채.'],'신삼문':['대성전으로 드는 남쪽 문. 태극 무늬가 그려져 있다.'],'비천당':['명륜당 서북쪽에 자리한 건물.'],'학생회관':['동아리방이 모여 있는 건물. 103호 파란 문이 푸른방이다.'],'중앙학술정보관':['시험 기간이면 불이 꺼지지 않는다.'],'600주년기념관':['언덕 위로 우뚝 선 기념관.'],'낫컴플리트':['성균관로 골목의 카페. 문으로 들어가 보자.'] };
+const INFO={ '명륜당':['유생들이 글을 배우던 강당. 가운데 채 양옆으로 낮은 날개채가 붙어 있다.','앞뜰의 두 은행나무는 천연기념물이다.'],'대성전':['문묘의 중심 건물. 정면 다섯 칸, 팔작지붕이 당당하다.'],'동재':['유생들의 기숙사. 서재와 마주 보고 서 있다.'],'서재':['유생들의 기숙사. 동재와 마주 보고 서 있다.'],'동무':['대성전 앞뜰 동쪽을 두른 긴 집채.'],'서무':['대성전 앞뜰 서쪽을 두른 긴 집채.'],'신삼문':['대성전으로 드는 남쪽 문. 태극 무늬가 그려져 있다.'],'비천당':['명륜당 서북쪽에 자리한 건물.'],'학생회관':['동아리방이 모여 있는 건물. 103호 파란 문이 푸른방이다.'],'중앙학술정보관':['시험 기간이면 불이 꺼지지 않는다.'],'600주년기념관':['언덕 위로 우뚝 선 기념관.'],'낫컴플리트':['성균관로 골목의 카페. 문으로 들어가 보자.'],'건강한 빵집':['정문 앞 빵집. 통밀과 호밀 냄새가 길까지 난다.'] };
 const solidAt=(s,x,y)=>x<0||y<0||x>=s.W||y>=s.H||s.solid[y*s.W+x];
 const busy=(x,y,self)=>(me!==self&&me.tx===x&&me.ty===y)||scene.npcs.some(a=>a!==self&&a.tx===x&&a.ty===y);
 const free=(x,y,self)=>!solidAt(scene,x,y)&&!busy(x,y,self);
@@ -68,7 +73,7 @@ addEventListener('resize',resize); resize();
 const labels=[]; const addLabel=(name,x,y,hot)=>{const e=document.createElement('div');e.className='label'+(hot?' hot':'');e.textContent=name;e.style.display='none';layer.append(e);labels.push({x,y,el:e,on:false});};
 B.forEach(b=>{ if(!b.n||b.k==='N')return; if(b.k==='u')addLabel(b.n,(b.x0+b.x1)/2,(b.y0+b.y1)/2-b.h); else if(b.k!=='K'||b.x1-b.x0>60)addLabel(b.n,(b.x0+b.x1)/2,b.k==='V'?(b.y0+b.y1)/2:b.y1+16); });
 setupPlazaBoard();
-for(const n in MAP.exits)addLabel(`혜화역 ${n}번 출구`,MAP.exits[n][0]*16+8,MAP.exits[n][1]*16-30,1); addLabel('낫컴플리트',MAP.doors.nc.door[0]*16+8,MAP.doors.nc.door[1]*16-40,1); addLabel('명륜당 은행나무',giants[0].cx,giants[0].by+40,1);
+for(const n in MAP.exits)addLabel(`혜화역 ${n}번 출구`,MAP.exits[n][0]*16+8,MAP.exits[n][1]*16-30,1); addLabel('낫컴플리트',MAP.doors.nc.door[0]*16+8,MAP.doors.nc.door[1]*16-40,1); addLabel('건강한 빵집',MAP.doors.bk.door[0]*16+8,MAP.doors.bk.door[1]*16-40,1); addLabel('명륜당 은행나무',giants[0].cx,giants[0].by+40,1);
 const glow=mk(128,128); {const p=px(glow);for(let y=0;y<128;y++)for(let x=0;x<128;x++){const d=Math.hypot(x-63.5,y-63.5)/64;if(d<1){const v=Math.pow(1-d,1.5)+bay(x>>1,y>>1)*.05;const a=Math.max(0,Math.min(255,v*235|0));p.b[y*128+x]=(a<<24|150<<16|214<<8|255)>>>0;}}p.done();}
 const cam=(p,v,m)=>v>=m?Math.round((m-v)/2):Math.round(Math.max(0,Math.min(m-v,p-v/2)));
 function drawActor(a,al=1){ const fr=a.moving?Math.floor(a.step)%4:0, bz=a.stage&&jam.bounce[a.stage]?1:a===me&&jam.on&&jam.part&&jam.bounce[jam.part]?1:0, idle=!a.moving&&a===me&&Math.sin(clock*2.4)>.55?1:0, x=Math.round(a.px)-4,y=Math.round(a.py)-21-bz; if(al<1)ctx.globalAlpha=al; if(a===me&&riding())ctx.drawImage(scooterSheet,(a.moving?Math.floor(a.step*2)%2:0)*SW,a.dir*SHh,SW,SHh,Math.round(a.px)-19,Math.round(a.py)-43,SW,SHh); else { const im=a.img,[w,h,ox,oy]=im.m; ctx.drawImage(im,fr*w,a.dir*h,w,h,Math.round(a.px)+ox,Math.round(a.py)+oy-bz,w,h); } ctx.globalAlpha=1; }
@@ -109,7 +114,7 @@ const KEYMAP={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',
    브라우저는 누르기 전엔 소리를 막으므로 첫 화면 버튼을 누를 때 시작한다. 끄면 기억하고, 탭을 떠나거나 다른 창이 틀면 멈춘다 */
 const TRACKS={club:'audio/our_little_clubroom_8bit.mp3',walk:'audio/checkpoint_loop_jazz.m4a'}, VOL={club:.3,walk:.28};
 const bgm={on:true,ctx:null,want:null,cur:null,buf:{},loading:{},src:null,gain:null}; try{ bgm.on=localStorage.getItem('groov.bgm')!=='off'; }catch(e){}
-const bgmTrack=s=>s===cafe?null:s===world?'walk':'club';
+const bgmTrack=s=>s===cafe||s===bakery?null:s===world?'walk':'club';
 function bgmLoad(k){ if(bgm.buf[k])return Promise.resolve(bgm.buf[k]);
   return bgm.loading[k]||(bgm.loading[k]=fetch(TRACKS[k]).then(r=>{ if(!r.ok)throw new Error('bgm '+r.status); return r.arrayBuffer(); }).then(a=>new Promise((ok,no)=>bgm.ctx.decodeAudioData(a,ok,no))).then(b=>bgm.buf[k]=b,e=>{ bgm.loading[k]=null; throw e; })); }
 function bgmStop(fade=.6){ if(!bgm.src)return; const {src,gain}=bgm, t=bgm.ctx.currentTime; gain.gain.cancelScheduledValues(t); gain.gain.setValueAtTime(gain.gain.value,t); gain.gain.linearRampToValueAtTime(0,t+fade); try{ src.stop(t+fade+.05); }catch(e){} Object.assign(bgm,{src:null,gain:null,cur:null}); }
