@@ -19,6 +19,8 @@ button,input,select,textarea { font:inherit; color:inherit; }
 .btn:disabled { opacity:.45; cursor:default; }
 #panel { position:fixed; left:50%; top:calc(var(--vt) + var(--vh) / 2); transform:translate(-50%,-50%); width:min(720px,calc(100vw - 24px - var(--sl) - var(--sr))); max-height:calc(var(--vh) - 24px - var(--st) - var(--sb)); display:none; flex-direction:column; z-index:10; }
 #panel.on { display:flex; }
+/* 탭이 있는 창은 높이를 고정해서 탭을 바꿔도 탭 줄이 제자리에 있다 */
+#panel.tabbed { height:min(680px,calc(var(--vh) - 24px - var(--st) - var(--sb))); }
 #panel header { display:flex; align-items:center; gap:14px; padding:12px 18px 10px; }
 #panel h1 { font-size:20px; margin:0; font-weight:400; letter-spacing:.02em; flex:1; min-width:0; overflow-wrap:anywhere; }
 .mark { color:var(--ink); white-space:nowrap; }

@@ -47,13 +47,22 @@ function find(gx,gy){ const s=scene, w=s.W, ix=(x,y)=>y*w+x; if(gx<0||gy<0||gx>=
   const prev=new Int32Array(s.W*s.H).fill(-1), st=ix(me.tx,me.ty), q=[st]; prev[st]=st;
   for(let h=0;h<q.length&&h<24000;h++){ const i=q[h],x=i%w,y=i/w|0; if(goal.has(i)){ const r=[]; let c=i; while(c!==st){const p=prev[c];r.unshift(Object.keys(DIR).find(k=>DIR[k][0]===c%w-p%w&&DIR[k][1]===(c/w|0)-(p/w|0)));c=p;} return {r,hit:goal.get(i)}; }
     for(const [a,b] of Object.values(DIR)) if(!solidAt(s,x+a,y+b)){const j=ix(x+a,y+b); if(prev[j]<0&&!busy(x+a,y+b,me)){prev[j]=i;q.push(j);}} } return null; }
-function warp(s,x,y,dir){ endTalk(); const ch=scene!==s; scene=s; if(ch){resize();bgmSync();} [me.tx,me.ty]=[x,y]; me.px=x*T;me.py=y*T;me.moving=false;route=[];after=null;keys.length=0; if(dir!==undefined)me.dir=dir; if(jam.on&&s!==cafe)stopJam(); fade=1; }
+function warp(s,x,y,dir){ endTalk(); const ch=scene!==s; scene=s; if(ch){resize();bgmSync();} [me.tx,me.ty]=[x,y]; me.px=x*T;me.py=y*T;me.moving=false;route=[];after=null;chase=null;keys.length=0; if(dir!==undefined)me.dir=dir; if(jam.on&&s!==cafe)stopJam(); fade=1; }
 let fade=0;
+/* NPC 를 누르면: 그림을 누른 것으로 고르고(걷는 중이어도), 그 NPC 는 멈춰 기다린다. 길이 막히면 다시 찾고, 옆에 닿으면 말을 건다 */
+let chaseTries=0;
+function npcAt(wx,wy){ let best=null,bd=1e9; for(const n of scene.npcs){ const x=n.px+8,y=n.py; if(wx<x-10||wx>x+10||wy<y-26||wy>y+16)continue; const d=Math.abs(wx-x)+Math.abs(wy-y+6); if(d<bd){bd=d;best=n;} } return best; }
+function chaseStep(){ const n=chase; if(!n||!scene.npcs.includes(n)){chase=null;return;}
+  const d=Object.values(DIR).find(v=>me.tx+v[0]===n.tx&&me.ty+v[1]===n.ty);
+  if(d&&!n.moving){ chase=null; route=[]; after=null; me.dir=d[2]; interact(n.tx,n.ty); return; }
+  if(n.moving)return;   // 한 칸 옮기는 중이면 다 옮긴 뒤에 다시
+  if(chaseTries++>5){ chase=null; return; }
+  const f=find(n.tx,n.ty); if(f){ route=f.r; after=null; } else chase=null; }
 function advance(a,dt,v){ const gx=a.tx*T,gy=a.ty*T,m=v*dt; a.px+=Math.sign(gx-a.px)*Math.min(m,Math.abs(gx-a.px)); a.py+=Math.sign(gy-a.py)*Math.min(m,Math.abs(gy-a.py)); a.step+=dt*(v>120?12:8); if(a.px===gx&&a.py===gy){a.moving=false;return true;} }
 const uiOpen=()=>panel.classList.contains('on')||talk.classList.contains('on');
 function update(dt){ fade=Math.max(0,fade-dt*2.6); if(me.moving&&advance(me,dt,riding()?225:run?170:110)){ const s=scene.spots[me.tx+','+me.ty]; if(s&&s.door){s.run();return;} }
-  if(!me.moving&&!uiOpen()&&!jam.on){ if(keys.length){ route=[];after=null; if(!go(me,keys[keys.length-1])){const [x,y]=face(),s=scene.spots[x+','+y]; if(s&&s.door){keys.length=0;s.run();return;}} } else if(route.length){ if(!go(me,route.shift())){route=[];after=null;} } else if(after){ const [x,y]=after; after=null; const d=Object.values(DIR).find(v=>me.tx+v[0]===x&&me.ty+v[1]===y); if(d){me.dir=d[2];interact(x,y);} } }
-  for(const n of scene.npcs){ if(n.moving){advance(n,dt,38);continue;} n.wait=(n.wait??1+Math.random()*3)-dt; if(n.wait<0&&!uiOpen()&&n.range){ n.wait=1+Math.random()*3; const name=pick(Object.keys(DIR),Math.random()),[a,b]=DIR[name]; if(Math.abs(n.tx+a-n.home[0])<=n.range&&Math.abs(n.ty+b-n.home[1])<=n.range&&!(scene===world&&isRoad(at(n.tx+a,n.ty+b)))&&!scene.spots[(n.tx+a)+','+(n.ty+b)]) go(n,name); } }
+  if(!me.moving&&!uiOpen()&&!jam.on){ if(keys.length){ route=[];after=null;chase=null; if(!go(me,keys[keys.length-1])){const [x,y]=face(),s=scene.spots[x+','+y]; if(s&&s.door){keys.length=0;s.run();return;}} } else if(route.length){ if(!go(me,route.shift())){ route=[];after=null; if(chase)chaseStep(); } } else if(chase)chaseStep(); else if(after){ const [x,y]=after; after=null; const d=Object.values(DIR).find(v=>me.tx+v[0]===x&&me.ty+v[1]===y); if(d){me.dir=d[2];interact(x,y);} } }
+  for(const n of scene.npcs){ if(n.moving){advance(n,dt,38);continue;} n.wait=(n.wait??1+Math.random()*3)-dt; if(n.wait<0&&!uiOpen()&&n.range&&n!==chase){ n.wait=1+Math.random()*3; const name=pick(Object.keys(DIR),Math.random()),[a,b]=DIR[name]; if(Math.abs(n.tx+a-n.home[0])<=n.range&&Math.abs(n.ty+b-n.home[1])<=n.range&&!(scene===world&&isRoad(at(n.tx+a,n.ty+b)))&&!scene.spots[(n.tx+a)+','+(n.ty+b)]) go(n,name); } }
   for(const k in jam.bounce)jam.bounce[k]=Math.max(0,jam.bounce[k]-dt*6);
   for(const p of notes){p.y-=dt*26;p.t+=dt;} notes=notes.filter(p=>p.t<1.4); }
 let notes=[]; const noteFx=()=>{ notes.push({x:me.px+Math.random()*18-4,y:me.py-18,t:0,c:pick(['#ffe49a','#9fd8ff','#ffb0c8'],Math.random())}); };
@@ -151,7 +160,7 @@ addEventListener('keydown',e=>{ if(!title.hidden&&!panel.classList.contains('on'
   const d=KEYMAP[e.code]; if(d){e.preventDefault();if(!keys.includes(d))keys.push(d);return;} if(document.activeElement?.tagName==='BUTTON')return;
   if((e.key==='Enter'||e.key===' '||e.code==='KeyZ')&&!e.repeat){e.preventDefault();if(!me.moving)interact(...face());} else if(e.code==='KeyM'||e.key==='Escape')openMenu(); else if(e.code==='KeyR')goHub(); else if(e.code==='KeyB')bR.onclick(); else if(e.code==='KeyC')openArchive(); else if(e.code==='KeyP')openPlaza(); else if(e.code==='KeyL')openMailbox(); });
 addEventListener('keyup',e=>{run=e.shiftKey;const i=keys.indexOf(KEYMAP[e.code]);if(i>=0)keys.splice(i,1);}); addEventListener('blur',()=>{keys.length=0;});
-cv.addEventListener('pointerdown',e=>{document.activeElement?.blur();if(uiOpen()||jam.on||!title.hidden)return;const x=Math.floor((e.clientX/S+cx)/T),y=Math.floor((e.clientY/S+cy)/T),f=find(x,y);if(f){route=f.r;after=f.hit;}});
+cv.addEventListener('pointerdown',e=>{document.activeElement?.blur();if(uiOpen()||jam.on||!title.hidden)return;const wx=e.clientX/S+cx,wy=e.clientY/S+cy,n=npcAt(wx,wy); if(n){ chase=n; chaseTries=0; chaseStep(); return; } chase=null; const x=Math.floor(wx/T),y=Math.floor(wy/T),f=find(x,y);if(f){route=f.r;after=f.hit;}});
 document.getElementById('bClose').onclick=hide; document.getElementById('bMenu').onclick=()=>openMenu(); document.getElementById('bHome').onclick=()=>goHub();
 const hud=document.getElementById('hud'), bMore=document.getElementById('bMore');
 function mobileMenu(open){hud.classList.toggle('expanded',open);bMore.setAttribute('aria-expanded',String(open));bMore.setAttribute('aria-label',open?'추가 조작 닫기':'추가 조작 열기');}

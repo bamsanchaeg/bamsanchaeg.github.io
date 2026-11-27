@@ -161,7 +161,9 @@ function ghostNews(all){ const n=newsState(); if(!n||!(all?n.total:n.fresh))retu
   if(L.length>7)L.splice(7); L.push('한눈에 보이게 정리해 둘게.');
   return {lines:L, done:()=>openNews(n)}; }
 function openNews(n){ if(!cloud.member){openAccount();return;} n=n||newsState(); markNews(); hudAcct();
-  const row=(t,s,b)=>el('div',{cls:'row'},el('div',{cls:'grow'},el('div',{textContent:t}),s?sub(s):null),b), part=(t,l)=>l.length?[h2(t),...l]:[];
+  /* 새 소식에서 연 창 맨 위에 '새 소식으로' 버튼을 붙여, 둘러본 뒤 돌아올 수 있게 */
+  const back=()=>{ const b=acts(btn('← 새 소식으로',()=>openNews(n))); b.classList.add('back'); const t=body.querySelector('.tabs'); t?t.after(b):body.prepend(b); };   // 탭 줄 아래에 두어 탭 위치가 흔들리지 않게
+  const row=(t,s,b)=>{ if(b){ const f=b.onclick; b.onclick=()=>{ f(); if(panel.classList.contains('on')&&!body.querySelector('.back'))back(); }; } return el('div',{cls:'row'},el('div',{cls:'grow'},el('div',{textContent:t}),s?sub(s):null),b); }, part=(t,l)=>l.length?[h2(t),...l]:[];
   const items=[...part('Cabinet 업데이트',n.updates.map(u=>row(u.title,`${updDate(u.id)} · ${u.lines[0]}`,btn('보기',()=>openPlaza('update'))))),...part('공지',n.notices.map(x=>row(x.title,`${nm(x.by)} · ${fmtAt(x.at)}`,btn('보기',()=>openPlaza('notice'))))),
     ...part('받은 잼 초대',n.inv.map(inviteRow)),
     ...part('새 잼',n.jams.map(j=>row(j.title,`${j.when||'시간 미정'} · 주최 ${nm(j.host)}`,btn('보기',()=>openJam(j))))),
