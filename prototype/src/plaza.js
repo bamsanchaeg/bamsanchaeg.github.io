@@ -16,9 +16,11 @@ function plazaEvents(){ const l=cloud.member&&db.shows?db.shows.map(s=>({name:s.
   return l.filter(e=>e.name&&/^\d{4}-\d{2}-\d{2}$/.test(e.date)); }
 
 /* ---------- 광장 ---------- */
+const tabs_=T_=>el('div',{cls:'tabs',role:'tablist'},...T_.map(([k,t])=>el('button',{cls:'tab'+(plaza.tab===k?' on':''),type:'button',role:'tab',textContent:t,onclick:()=>openPlaza(k)})));
 const plaza={tab:'notice'};
-function openPlaza(tab){ if(tab)plaza.tab=tab; const T_=[['notice','공지'],['show','공연'],['past','지난 공연']];
-  const tabs=el('div',{cls:'tabs',role:'tablist'},...T_.map(([k,t])=>el('button',{cls:'tab'+(plaza.tab===k?' on':''),type:'button',role:'tab',textContent:t,onclick:()=>openPlaza(k)})));
+function openPlaza(tab){ if(tab)plaza.tab=tab; const T_=[['notice','공지'],['update','업데이트'],['show','공연'],['past','지난 공연']];
+  if(plaza.tab==='update'){ show('Groov 광장',tabs_(T_),sub('Cabinet에 새로 생긴 것들이에요. 배포할 때마다 여기에 올라와요.'),...updateCards()); return; }
+  const tabs=tabs_(T_);
   if(!cloud.member){ const pubs=cloud.pubShows||[];
     show('Groov 광장',tabs,el('div',{cls:'gate'},el('span',{textContent:plaza.tab==='show'?'둘러보기: 초대장이 있는 공연만 이름 없이 보여요.':'공지와 지난 공연은 승인받은 부원만 볼 수 있어요.'}),btn('로그인',()=>needLogin(()=>openPlaza()))),
       ...(plaza.tab==='show'?(pubs.length?pubs.map(s=>el('article',{cls:'card'},el('div',{cls:'grow'},el('div',{cls:'ttl',textContent:String(s.title||'')}),sub(`${fmtDate(s.date)} ${String(s.time||'')} · ${String(s.place||'')}`)),el('span',{cls:'stamp',textContent:'공연'}))):[empty('지금 밖에 알린 공연이 없어요.')]):[]));
@@ -136,16 +138,18 @@ const NEWS_KEY=()=>`groov.news.${cloud.uid}`;
 function newsSeen(){ try{ const v=localStorage.getItem(NEWS_KEY()); if(v)return v; }catch(e){} return new Date(Date.now()-7*864e5).toISOString(); }
 function markNews(){ const all=[...Object.values(cloud.newest||{}),...(db.letters||[]).map(l=>l.at),...((cloud.room&&cloud.room.guest)||[]).map(n=>n.at)].filter(Boolean), top=all.reduce((m,x)=>x>m?x:m,'');
   if(top&&top>newsSeen())try{ localStorage.setItem(NEWS_KEY(),top); }catch(e){}
+  markUpdates();
   const told=cloud.toldInv||(cloud.toldInv=new Set()); invites().forEach(i=>told.add(i.x.id)); }
 function newsState(){ if(!cloud.member||!db.jams)return null; const seen=newsSeen(), after=x=>!!x.at&&x.at>seen, told=cloud.toldInv||new Set();
   const n={ notices:(db.notices||[]).filter(after), jams:db.jams.filter(j=>after(j)&&j.host!==ME&&!j.closed), shows:(db.shows||[]).filter(s=>after(s)&&!s.mine),
     recs:(db.recs||[]).filter(r=>after(r)&&r.by!==ME), notes:((cloud.room&&cloud.room.guest)||[]).filter(x=>after(x)&&!x.own),
-    letters:(db.letters||[]).filter(l=>l.inbox&&!l.read), inv:invites(), pending:cloud.leader?cloud.people.filter(p=>p.status==='pending'):[] };
-  n.fresh=n.notices.length+n.jams.length+n.shows.length+n.recs.length+n.notes.length+n.letters.filter(after).length+n.inv.filter(i=>!told.has(i.x.id)).length;
-  n.total=n.notices.length+n.jams.length+n.shows.length+n.recs.length+n.notes.length+n.letters.length+n.inv.length+n.pending.length; return n; }
+    letters:(db.letters||[]).filter(l=>l.inbox&&!l.read), inv:invites(), updates:freshUpdates(), pending:cloud.leader?cloud.people.filter(p=>p.status==='pending'):[] };
+  n.fresh=n.updates.length+n.notices.length+n.jams.length+n.shows.length+n.recs.length+n.notes.length+n.letters.filter(after).length+n.inv.filter(i=>!told.has(i.x.id)).length;
+  n.total=n.updates.length+n.notices.length+n.jams.length+n.shows.length+n.recs.length+n.notes.length+n.letters.length+n.inv.length+n.pending.length; return n; }
 const newsCount=freshOnly=>{ const n=newsState(); return n?(freshOnly?n.fresh:n.total):0; };
 /* 유령의 말. all 이면 쌓인 것을 모두(말을 걸었을 때), 아니면 새로 생긴 게 있을 때만(푸른방에 들어올 때) */
 function ghostNews(all){ const n=newsState(); if(!n||!(all?n.total:n.fresh))return null; const more=(k,t)=>k>1?` 말고도 ${k-1}${t} 더`:'', L=[`…${cloud.profile.nick}, 새 소식이 있어.`];
+  if(n.updates.length) L.push(`Cabinet 업데이트가 있어. ‘${n.updates[0].title}’${more(n.updates.length,'개')}.`);
   if(n.notices.length) L.push(`공지가 올라왔어. ‘${n.notices[0].title}’${more(n.notices.length,'개')}.`);
   if(n.jams.length){ const j=n.jams[0], open=[...new Set(j.songs.flatMap(s=>s.slots.filter(x=>!x.who&&!x.invited).map(x=>x.part)))]; L.push(`새 잼이 열렸어. ${j.title}${j.when?`(${j.when})`:''}${open.length?`, 빈자리는 ${open.slice(0,3).join('·')}`:''}${more(n.jams.length,'개')}.`); }
   if(n.inv.length){ const {s,x}=n.inv[0]; L.push(`잼 초대가 ${n.inv.length}개 와 있어. ${s.title} ${x.part} 자리야.`); }
@@ -158,7 +162,7 @@ function ghostNews(all){ const n=newsState(); if(!n||!(all?n.total:n.fresh))retu
   return {lines:L, done:()=>openNews(n)}; }
 function openNews(n){ if(!cloud.member){openAccount();return;} n=n||newsState(); markNews(); hudAcct();
   const row=(t,s,b)=>el('div',{cls:'row'},el('div',{cls:'grow'},el('div',{textContent:t}),s?sub(s):null),b), part=(t,l)=>l.length?[h2(t),...l]:[];
-  const items=[...part('공지',n.notices.map(x=>row(x.title,`${nm(x.by)} · ${fmtAt(x.at)}`,btn('보기',()=>openPlaza('notice'))))),
+  const items=[...part('Cabinet 업데이트',n.updates.map(u=>row(u.title,`${updDate(u.id)} · ${u.lines[0]}`,btn('보기',()=>openPlaza('update'))))),...part('공지',n.notices.map(x=>row(x.title,`${nm(x.by)} · ${fmtAt(x.at)}`,btn('보기',()=>openPlaza('notice'))))),
     ...part('받은 잼 초대',n.inv.map(inviteRow)),
     ...part('새 잼',n.jams.map(j=>row(j.title,`${j.when||'시간 미정'} · 주최 ${nm(j.host)}`,btn('보기',()=>openJam(j))))),
     ...part('편지',n.letters.map(l=>row(`${nm(l.from)}의 편지`,l.body.length>30?l.body.slice(0,30)+'…':l.body,btn('열기',()=>openLetter(l))))),

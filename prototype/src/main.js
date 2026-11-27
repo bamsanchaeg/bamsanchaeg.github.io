@@ -134,7 +134,7 @@ const title=document.getElementById('title'); const startGame=()=>{ if(title.hid
 /* 첫 화면 메뉴: 로그인 상태에 따라 버튼이 바뀐다. 둘러보기는 언제나 할 수 있다 */
 let titleKey=''; const goBox=document.getElementById('go');
 const browse=()=>{ startGame(); tellUpdates(()=>{ if(scene===hub&&!cloud.member&&!uiOpen())say('익명의 유령',['둘러보는 중이구나. 천천히 걸어 봐.',...(cloud.pub?['게시판에서는 어떤 잼이 열리는지 이름 없이 볼 수 있어.']:[]),'추천곡과 사람들의 방은 로그인하고 승인받으면 열려. 오른쪽 위에서 언제든 할 수 있어.']); }); };
-const enterMember=()=>{ startGame(); tellUpdates(()=>{ if(!uiOpen())tellNews(); }); };
+const enterMember=()=>{ startGame(); tellNews(); };   // 부원은 업데이트도 유령의 새 소식에 함께 나온다
 /* 푸른방에 있을 때 새로 생긴 소식이 있으면 익명의 유령이 먼저 말을 건다 */
 function tellNews(){ if(scene!==hub||!cloud.member)return; const g=ghostNews(false); if(g)say('익명의 유령',g.lines,g.done); }
 function titleMenu(){ if(title.hidden)return; const st=cloud.state, shared=/room=GROOV1\./.test(location.hash||''), key=[st,cloud.note,cloud.profile&&cloud.profile.nick,shared,Date.now()-(cloud.connectedAt||0)<5000].join('|'); if(key===titleKey)return; titleKey=key;
