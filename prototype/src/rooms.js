@@ -36,10 +36,10 @@ const ART={
   rack:pic(40,34,g=>{R(g,'#2a2c34',2,0,36,34);for(let i=0;i<4;i++){R(g,'#4a4e5a',4,3+i*8,32,6);R(g,'#7ad0ff',7,5+i*8,2,2);R(g,'#ff9a5a',11,5+i*8,2,2);R(g,'#9aa0aa',20,5+i*8,12,1);}}),
 };
 function makeRoom(name,w,h,wallH,o){ const solidR=new Uint8Array(w*h), c=mk(w*T,h*T), g=c.getContext('2d'); c.floorY=wallH*T; for(let y=0;y<h;y++)for(let x=0;x<w;x++) if(y<wallH||x===0||x===w-1||y===h-1) solidR[y*w+x]=1;
-  const ov=mk(w*T,h*T); ov.lift=.62; const r={name,W:w,H:h,solid:solidR,bg:c,g,over:ov,og:ov.getContext('2d'),walls:[],lines:[],things:[],spots:{},npcs:[],lamps:[],ambient:o.ambient,title:o.title,
+  const ov=mk(w*T,h*T); ov.lift=.62; const r={name,W:w,H:h,wallH,solid:solidR,bg:c,g,over:ov,og:ov.getContext('2d'),walls:[],lines:[],things:[],spots:{},npcs:[],lamps:[],ambient:o.ambient,title:o.title,
     spot(x,y,tw,th,s){for(let j=0;j<th;j++)for(let i=0;i<tw;i++)r.spots[(x+i)+','+(y+j)]=s;},
     prop(img,tx,ty,tw,th,s,dx=0,dy=0){ for(let j=0;j<th;j++)for(let i=0;i<tw;i++)solidR[(ty+j)*w+tx+i]=1; r.things.push({x:tx*T+(tw*T-img.width)/2+dx|0,y:(ty+th)*T-img.height+dy,img,base:(ty+th)*T-1}); if(s)r.spot(tx,ty,tw,th,s); },
-    wall(img,x,y,s,tx,tw){ r.walls.push([img,x,y]); if(s)r.spot(tx,wallH-1,tw,1,s); } };
+    wall(img,x,y,s,tx,tw){ r.walls.push([img,x,y]); if(s){ const a=Math.floor(x/T),b=Math.ceil((x+img.width)/T); r.spot(tx,wallH-1,tw,1,s); for(let j=Math.floor(y/T);j<wallH-1;j++)for(let i=a;i<b;i++)r.spots[i+','+j]=s; for(let i=a;i<b;i++)if(!r.spots[i+','+(wallH-1)])r.spots[i+','+(wallH-1)]=s; } } };
   return r; }
 const inkAmb={hub:'#dfe5f8',cafe:'#fdfaf0',bakery:'#fdfaf0'};
 function planks(g,x0,y0,x1,y1,c,seed){ for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){ const row=(y-y0)/8|0,o=(row*37)%64,b=((x+o)/64)|0; let k=.9+hash(b,row,seed)*.2+(nz(N8,x,y*5)-.5)*.16; if((y-y0)%8===0)k*=.66; if((x+o)%64===0)k*=.72; if((y-y0)%8===1)k*=1.08; if(y-y0<6)k*=.72+(y-y0)*.04; g.fillStyle=lit(c,k);g.fillRect(x,y,1,1);} }

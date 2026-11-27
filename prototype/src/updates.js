@@ -1,0 +1,26 @@
+/* ===== Cabinet 업데이트 소식 =====
+   배포하거나 기능을 추가하면 UPDATES 맨 위에 한 항목을 더한다.
+   - id: 배포한 날짜 'YYYY-MM-DD' (같은 날 두 번이면 'YYYY-MM-DD-2'). 새 항목일수록 큰 값이어야 한다.
+   - title: 한 줄 제목, lines: 유령이 읽어 줄 짧은 문장 1~3개 (존댓말)
+   게임을 시작할 때 이 기기에서 아직 안 본 소식이 있으면 익명의 유령이 먼저 읽어 주고,
+   지도 메뉴의 '업데이트 소식'에서 언제든 다시 볼 수 있다. 본 기록은 기기마다(localStorage) 남는다. */
+const UPDATES=[
+  { id:'2026-11-27', title:'정문 앞에 건강한 빵집이 생겼어요', lines:[
+    '곰 제빵사, 다람쥐 단골, 빵 봉투 든 강아지를 만나 보세요.',
+    '바게트앙, 소프트앙, 무화과 타르트가 메뉴에 올랐어요.',
+    '휴대폰에서도 벽에 걸린 메뉴판과 게시판을 눌러 볼 수 있어요.'] },
+];
+const UPD_KEY='cabinet.updates.seen';
+/* 처음 온 기기는 최근 2주 소식만 알려 준다 */
+function updSeen(){ try{ const v=localStorage.getItem(UPD_KEY); if(v)return v; }catch(e){} return new Date(Date.now()-14*864e5).toISOString().slice(0,10); }
+const freshUpdates=()=>{ const s=updSeen(); return UPDATES.filter(u=>u.id>s); };
+function markUpdates(){ try{ if(UPDATES[0])localStorage.setItem(UPD_KEY,UPDATES[0].id); }catch(e){} }
+const updDate=id=>{ const [,m,d]=id.split('-').map(Number); return `${m}월 ${d}일`; };
+function openUpdates(){ const s=updSeen(); markUpdates();
+  show('업데이트 소식',sub('Cabinet에 새로 생긴 것들이에요. 새 소식은 게임을 시작할 때 익명의 유령이 먼저 알려 줘요.'),
+    ...(UPDATES.length?UPDATES.map(u=>el('div',{cls:'row'},el('div',{cls:'grow'},el('div',{textContent:(u.id>s?'NEW · ':'')+u.title}),sub(`${updDate(u.id)} · ${u.lines.join(' ')}`)))):[empty('아직 소식이 없어요.')])); }
+/* 안 본 소식이 있으면 유령이 읽어 주고, 다 들으면 next 로 이어 간다 */
+function tellUpdates(next){ const f=freshUpdates(); if(!f.length){ next&&next(); return; }
+  const L=[`…Cabinet에 새 소식이 있어. ‘${f[0].title}’.`,...f[0].lines];
+  if(f.length>1)L.push(`그 밖에 ${f.length-1}개 더 있어. 지도 메뉴의 ‘업데이트 소식’에서 볼 수 있어.`);
+  markUpdates(); say('익명의 유령',L,()=>{ next&&setTimeout(next,0); }); }

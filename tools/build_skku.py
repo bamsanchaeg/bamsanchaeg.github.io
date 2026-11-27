@@ -20,7 +20,7 @@ def bundle():
     rd = lambda f: open(os.path.join(SRC, f), encoding='utf-8').read()
     sha = lambda t: "'sha256-" + base64.b64encode(hashlib.sha256(t.encode()).digest()).decode() + "'"
     css, html = rd('style.css'), rd('index.html')
-    js = '\n'.join(rd(f) for f in ('map.js', 'title.js', 'art.js', 'world.js', 'rooms.js', 'jam.js', 'config.js', 'ui.js', 'cloud.js', 'plaza.js', 'talk.js', 'main.js'))
+    js = '\n'.join(rd(f) for f in ('map.js', 'title.js', 'art.js', 'world.js', 'rooms.js', 'jam.js', 'config.js', 'ui.js', 'cloud.js', 'plaza.js', 'updates.js', 'talk.js', 'main.js'))
     html = html.replace('/*STYLE*/', css).replace('/*SCRIPT*/', js)
     # 비밀 키가 들어 있으면 묶지 않는다
     key = re.search(r"key:\s*['\"`]([^'\"`]*)", rd('config.js'))

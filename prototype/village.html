@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Jb2kgCBvRPyOStBx66tB5xW2tcQusWKIUlLPk+W4a9E=' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js; style-src 'sha256-boRyM4SBHkXMtfZbcgvXu/Q17rf65Vq+ambADNBZfWk=' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; connect-src 'self' https://cncshhbsfkugqwgvkgwk.supabase.co; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-MBYxqU3M9gcFGz6WKlBS8wGJBm6fy9d3wZAZM0dRylI=' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js; style-src 'sha256-boRyM4SBHkXMtfZbcgvXu/Q17rf65Vq+ambADNBZfWk=' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; connect-src 'self' https://cncshhbsfkugqwgvkgwk.supabase.co; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Cabinet</title>
@@ -713,10 +713,10 @@ const ART={
   rack:pic(40,34,g=>{R(g,'#2a2c34',2,0,36,34);for(let i=0;i<4;i++){R(g,'#4a4e5a',4,3+i*8,32,6);R(g,'#7ad0ff',7,5+i*8,2,2);R(g,'#ff9a5a',11,5+i*8,2,2);R(g,'#9aa0aa',20,5+i*8,12,1);}}),
 };
 function makeRoom(name,w,h,wallH,o){ const solidR=new Uint8Array(w*h), c=mk(w*T,h*T), g=c.getContext('2d'); c.floorY=wallH*T; for(let y=0;y<h;y++)for(let x=0;x<w;x++) if(y<wallH||x===0||x===w-1||y===h-1) solidR[y*w+x]=1;
-  const ov=mk(w*T,h*T); ov.lift=.62; const r={name,W:w,H:h,solid:solidR,bg:c,g,over:ov,og:ov.getContext('2d'),walls:[],lines:[],things:[],spots:{},npcs:[],lamps:[],ambient:o.ambient,title:o.title,
+  const ov=mk(w*T,h*T); ov.lift=.62; const r={name,W:w,H:h,wallH,solid:solidR,bg:c,g,over:ov,og:ov.getContext('2d'),walls:[],lines:[],things:[],spots:{},npcs:[],lamps:[],ambient:o.ambient,title:o.title,
     spot(x,y,tw,th,s){for(let j=0;j<th;j++)for(let i=0;i<tw;i++)r.spots[(x+i)+','+(y+j)]=s;},
     prop(img,tx,ty,tw,th,s,dx=0,dy=0){ for(let j=0;j<th;j++)for(let i=0;i<tw;i++)solidR[(ty+j)*w+tx+i]=1; r.things.push({x:tx*T+(tw*T-img.width)/2+dx|0,y:(ty+th)*T-img.height+dy,img,base:(ty+th)*T-1}); if(s)r.spot(tx,ty,tw,th,s); },
-    wall(img,x,y,s,tx,tw){ r.walls.push([img,x,y]); if(s)r.spot(tx,wallH-1,tw,1,s); } };
+    wall(img,x,y,s,tx,tw){ r.walls.push([img,x,y]); if(s){ const a=Math.floor(x/T),b=Math.ceil((x+img.width)/T); r.spot(tx,wallH-1,tw,1,s); for(let j=Math.floor(y/T);j<wallH-1;j++)for(let i=a;i<b;i++)r.spots[i+','+j]=s; for(let i=a;i<b;i++)if(!r.spots[i+','+(wallH-1)])r.spots[i+','+(wallH-1)]=s; } } };
   return r; }
 const inkAmb={hub:'#dfe5f8',cafe:'#fdfaf0',bakery:'#fdfaf0'};
 function planks(g,x0,y0,x1,y1,c,seed){ for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){ const row=(y-y0)/8|0,o=(row*37)%64,b=((x+o)/64)|0; let k=.9+hash(b,row,seed)*.2+(nz(N8,x,y*5)-.5)*.16; if((y-y0)%8===0)k*=.66; if((x+o)%64===0)k*=.72; if((y-y0)%8===1)k*=1.08; if(y-y0<6)k*=.72+(y-y0)*.04; g.fillStyle=lit(c,k);g.fillRect(x,y,1,1);} }
@@ -1049,7 +1049,7 @@ const dot=(x,y,c)=>el('i',{css:`left:${(x+.5)/W*100}%;top:${(y+.5)/H*100}%;backg
 function openMenu(){ const c=mk(W,H); c.getContext('2d').drawImage(Q(miniImg),0,0); c.onclick=e=>{const b=c.getBoundingClientRect();warp(world,...near(Math.floor((e.clientX-b.left)/b.width*W),Math.floor((e.clientY-b.top)/b.height*H)));hide();};
   const spot=scene===world?[me.tx,me.ty]:scene===cafe?MAP.doors.nc.door:scene===bakery?MAP.doors.bk.door:MAP.doors.hub.door;
   show('성균관 · 대명거리 지도',el('div',{cls:'mapwrap'},el('div',{cls:'miniwrap'},el('div',{cls:'mini'},c,dot(...MAP.doors.hub.door,'#4658a3'),dot(...MAP.doors.nc.door,'#f0c53c'),dot(...MAP.doors.bk.door,'#8d9acb'),dot(...spot,'#e0483c')),sub('빨강 나 · 파랑 푸른방 · 노랑 낫컴플리트 · 연보라 빵집. 지도를 누르면 그곳으로 가요.')),
-    el('div',{cls:'menu'},btn('푸른방으로 돌아가기',()=>goHub()),btn('낫컴플리트 — 잼',()=>{hide();warp(cafe,...cafe.start,3);}),btn('건강한 빵집',()=>{hide();warp(bakery,...bakery.start,3);}),btn('Groov 광장 — 공지·공연',()=>openPlaza()),cloud.member?btn(`우편함${unread()?` (${unread()})`:''}`,()=>openMailbox()):null,btn('내 방',()=>enterRoom(myRoom())),btn('사람들의 방',openRooms),btn('Groov 아카이브',()=>openArchive('rec')),h2('동네'),...['명륜당 은행나무','대성전','금잔디광장','정문 앞','대명사거리','대명거리','혜화역 앞'].map(n=>btn(n,()=>{warp(world,...near(...placeAt(n)));hide();}))))); }
+    el('div',{cls:'menu'},btn('푸른방으로 돌아가기',()=>goHub()),btn('낫컴플리트 — 잼',()=>{hide();warp(cafe,...cafe.start,3);}),btn('건강한 빵집',()=>{hide();warp(bakery,...bakery.start,3);}),btn('Groov 광장 — 공지·공연',()=>openPlaza()),cloud.member?btn(`우편함${unread()?` (${unread()})`:''}`,()=>openMailbox()):null,btn('내 방',()=>enterRoom(myRoom())),btn('사람들의 방',openRooms),btn('Groov 아카이브',()=>openArchive('rec')),btn('업데이트 소식',()=>openUpdates()),h2('동네'),...['명륜당 은행나무','대성전','금잔디광장','정문 앞','대명사거리','대명거리','혜화역 앞'].map(n=>btn(n,()=>{warp(world,...near(...placeAt(n)));hide();}))))); }
 let queue=[],full='',timer=0,talkFromWorld=false,talkDone=null; const fast=matchMedia('(prefers-reduced-motion: reduce)').matches;
 /* 대화창 닫기. 장소를 옮기거나, 걷다가 나온 대화 위로 창을 열면 닫는다 (창 안에서 띄운 안내는 남긴다) */
 function endTalk(){ clearInterval(timer); queue=[]; full=''; talkFromWorld=false; talkDone=null; talk.classList.remove('on'); document.getElementById('line').textContent=''; }
@@ -1339,6 +1339,33 @@ function openNews(n){ if(!cloud.member){openAccount();return;} n=n||newsState();
     ...part('승인 대기',n.pending.map(p=>row(p.nick,'리더의 승인을 기다려요',btn('부원 관리',openAccount))))];
   show('새 소식',sub('익명의 유령이 지난번 이후 소식을 모아 뒀어요. 푸른방의 유령에게 말을 걸면 다시 들을 수 있어요.'),...(items.length?items:[empty('새 소식이 없어요.')])); }
 
+/* ===== Cabinet 업데이트 소식 =====
+   배포하거나 기능을 추가하면 UPDATES 맨 위에 한 항목을 더한다.
+   - id: 배포한 날짜 'YYYY-MM-DD' (같은 날 두 번이면 'YYYY-MM-DD-2'). 새 항목일수록 큰 값이어야 한다.
+   - title: 한 줄 제목, lines: 유령이 읽어 줄 짧은 문장 1~3개 (존댓말)
+   게임을 시작할 때 이 기기에서 아직 안 본 소식이 있으면 익명의 유령이 먼저 읽어 주고,
+   지도 메뉴의 '업데이트 소식'에서 언제든 다시 볼 수 있다. 본 기록은 기기마다(localStorage) 남는다. */
+const UPDATES=[
+  { id:'2026-11-27', title:'정문 앞에 건강한 빵집이 생겼어요', lines:[
+    '곰 제빵사, 다람쥐 단골, 빵 봉투 든 강아지를 만나 보세요.',
+    '바게트앙, 소프트앙, 무화과 타르트가 메뉴에 올랐어요.',
+    '휴대폰에서도 벽에 걸린 메뉴판과 게시판을 눌러 볼 수 있어요.'] },
+];
+const UPD_KEY='cabinet.updates.seen';
+/* 처음 온 기기는 최근 2주 소식만 알려 준다 */
+function updSeen(){ try{ const v=localStorage.getItem(UPD_KEY); if(v)return v; }catch(e){} return new Date(Date.now()-14*864e5).toISOString().slice(0,10); }
+const freshUpdates=()=>{ const s=updSeen(); return UPDATES.filter(u=>u.id>s); };
+function markUpdates(){ try{ if(UPDATES[0])localStorage.setItem(UPD_KEY,UPDATES[0].id); }catch(e){} }
+const updDate=id=>{ const [,m,d]=id.split('-').map(Number); return `${m}월 ${d}일`; };
+function openUpdates(){ const s=updSeen(); markUpdates();
+  show('업데이트 소식',sub('Cabinet에 새로 생긴 것들이에요. 새 소식은 게임을 시작할 때 익명의 유령이 먼저 알려 줘요.'),
+    ...(UPDATES.length?UPDATES.map(u=>el('div',{cls:'row'},el('div',{cls:'grow'},el('div',{textContent:(u.id>s?'NEW · ':'')+u.title}),sub(`${updDate(u.id)} · ${u.lines.join(' ')}`)))):[empty('아직 소식이 없어요.')])); }
+/* 안 본 소식이 있으면 유령이 읽어 주고, 다 들으면 next 로 이어 간다 */
+function tellUpdates(next){ const f=freshUpdates(); if(!f.length){ next&&next(); return; }
+  const L=[`…Cabinet에 새 소식이 있어. ‘${f[0].title}’.`,...f[0].lines];
+  if(f.length>1)L.push(`그 밖에 ${f.length-1}개 더 있어. 지도 메뉴의 ‘업데이트 소식’에서 볼 수 있어.`);
+  markUpdates(); say('익명의 유령',L,()=>{ next&&setTimeout(next,0); }); }
+
 /* ===== NPC 대사 =====
    말을 걸 때마다 대사를 새로 고른다.
    1) 그 인물다운 재즈 이야기 한 줄
@@ -1608,7 +1635,7 @@ function interact(x,y){ const n=scene.npcs.find(n=>n.tx===x&&n.ty===y); if(n){ i
   const s=scene.spots[x+','+y]; if(s){s.run();return;} if(scene!==world)return; const b=bid(x,y)&&MAP.B[bid(x,y)-1]; if(b&&b[2]){say(b[2],INFO[b[2]]||['지금은 들어갈 수 없다.']);return;}
   if(giants.some(q=>Math.abs(q.cx/16-x)<3&&Math.abs(q.by/16-y)<3)) say('명륜당 은행나무',['수백 년을 살아온 천연기념물 은행나무.','굵은 가지 밑으로 유주가 고드름처럼 자라 있고, 발밑은 온통 노랗다.']); }
 function find(gx,gy){ const s=scene, w=s.W, ix=(x,y)=>y*w+x; if(gx<0||gy<0||gx>=s.W||gy>=s.H)return null; const goal=new Map(), around=(x,y,hit)=>Object.values(DIR).forEach(([a,b])=>{if(x+a>=0&&y+b>=0&&x+a<s.W&&y+b<s.H)goal.set(ix(x+a,y+b),hit);});
-  const id=s===world?bid(gx,gy):0, door=doorOf[id]; if(door)around(...door,door); else if(id&&MAP.B[id-1][2]){ for(let i=0;i<W*H;i++)if(BID[i]===id)around(i%W,i/W|0,[i%W,i/W|0]); } else if(s.spots[gx+','+gy]&&!solidAt(s,gx,gy))goal.set(ix(gx,gy),null); else if(s.spots[gx+','+gy]||s.npcs.some(n=>n.tx===gx&&n.ty===gy)||solidAt(s,gx,gy))around(gx,gy,[gx,gy]); else goal.set(ix(gx,gy),null);
+  const id=s===world?bid(gx,gy):0, door=doorOf[id]; if(door)around(...door,door); else if(id&&MAP.B[id-1][2]){ for(let i=0;i<W*H;i++)if(BID[i]===id)around(i%W,i/W|0,[i%W,i/W|0]); } else if(s.spots[gx+','+gy]&&!solidAt(s,gx,gy))goal.set(ix(gx,gy),null); else if(s.spots[gx+','+gy]&&solidAt(s,gx,gy)){ const sp=s.spots[gx+','+gy]; for(const k in s.spots) if(s.spots[k]===sp){ const [x,y]=k.split(',').map(Number); around(x,y,[x,y]); } } else if(s.npcs.some(n=>n.tx===gx&&n.ty===gy)||solidAt(s,gx,gy))around(gx,gy,[gx,gy]); else goal.set(ix(gx,gy),null);
   const prev=new Int32Array(s.W*s.H).fill(-1), st=ix(me.tx,me.ty), q=[st]; prev[st]=st;
   for(let h=0;h<q.length&&h<24000;h++){ const i=q[h],x=i%w,y=i/w|0; if(goal.has(i)){ const r=[]; let c=i; while(c!==st){const p=prev[c];r.unshift(Object.keys(DIR).find(k=>DIR[k][0]===c%w-p%w&&DIR[k][1]===(c/w|0)-(p/w|0)));c=p;} return {r,hit:goal.get(i)}; }
     for(const [a,b] of Object.values(DIR)) if(!solidAt(s,x+a,y+b)){const j=ix(x+a,y+b); if(prev[j]<0&&!busy(x+a,y+b,me)){prev[j]=i;q.push(j);}} } return null; }
@@ -1698,8 +1725,8 @@ document.addEventListener('visibilitychange',()=>bgmSync());
 const title=document.getElementById('title'); const startGame=()=>{ if(title.hidden)return; title.hidden=true; bgmSync(); document.activeElement?.blur(); const r=/room=(GROOV1\.[\w-]+)/.exec(location.hash||''), o=r&&readCode(r[1]); if(o){addFriend(o);enterRoom(o);} }; 
 /* 첫 화면 메뉴: 로그인 상태에 따라 버튼이 바뀐다. 둘러보기는 언제나 할 수 있다 */
 let titleKey=''; const goBox=document.getElementById('go');
-const browse=()=>{ startGame(); if(scene===hub&&!cloud.member)say('익명의 유령',['둘러보는 중이구나. 천천히 걸어 봐.',...(cloud.pub?['게시판에서는 어떤 잼이 열리는지 이름 없이 볼 수 있어.']:[]),'추천곡과 사람들의 방은 로그인하고 승인받으면 열려. 오른쪽 위에서 언제든 할 수 있어.']); };
-const enterMember=()=>{ startGame(); tellNews(); };
+const browse=()=>{ startGame(); tellUpdates(()=>{ if(scene===hub&&!cloud.member&&!uiOpen())say('익명의 유령',['둘러보는 중이구나. 천천히 걸어 봐.',...(cloud.pub?['게시판에서는 어떤 잼이 열리는지 이름 없이 볼 수 있어.']:[]),'추천곡과 사람들의 방은 로그인하고 승인받으면 열려. 오른쪽 위에서 언제든 할 수 있어.']); }); };
+const enterMember=()=>{ startGame(); tellUpdates(()=>{ if(!uiOpen())tellNews(); }); };
 /* 푸른방에 있을 때 새로 생긴 소식이 있으면 익명의 유령이 먼저 말을 건다 */
 function tellNews(){ if(scene!==hub||!cloud.member)return; const g=ghostNews(false); if(g)say('익명의 유령',g.lines,g.done); }
 function titleMenu(){ if(title.hidden)return; const st=cloud.state, shared=/room=GROOV1\./.test(location.hash||''), key=[st,cloud.note,cloud.profile&&cloud.profile.nick,shared,Date.now()-(cloud.connectedAt||0)<5000].join('|'); if(key===titleKey)return; titleKey=key;
